@@ -1,0 +1,53 @@
+name: Daily Greeting Generation
+
+on:
+  schedule:
+    - cron: '15 17 * * *'      # 00:15 เวลาไทย (17:15 UTC) — เผื่อ buffer ถึงตี 4
+  workflow_dispatch: {}         # กดรันเองได้จากหน้า Actions
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-greeting
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout (main)
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch previous blessings pool
+        run: |
+          mkdir -p prev
+          if curl -fsSL "https://raw.githubusercontent.com/${{ github.repository }}/daily-images/blessings.json" -o prev/blessings.json; then
+            echo "โหลด pool เดิมจาก branch daily-images"
+          elif [ -f blessings.seed.json ]; then
+            cp blessings.seed.json prev/blessings.json
+            echo "ใช้ seed pool เริ่มต้น"
+          else
+            echo '{"pool":[]}' > prev/blessings.json
+            echo "เริ่ม pool ว่าง"
+          fi
+
+      - name: Generate images + blessings
+        run: node scripts/generate.mjs
+
+      - name: Publish to daily-images branch (single commit, no history bloat)
+        run: |
+          cd output
+          git init -q
+          git config user.name "greeting-bot"
+          git config user.email "greeting-bot@users.noreply.github.com"
+          git checkout -q -b daily-images
+          git add -A
+          git commit -q -m "daily greetings $(date -u +%F_%H:%M)"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" daily-images
