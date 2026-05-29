@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — สวัสดีวันนี้</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{--bg:#0f1320;--card:#1a2032;--ink:#e8ecf6;--mut:#8b93a7;--gold:#e7c46a;--line:#283047}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:20px 16px 50px}
+  .wrap{max-width:900px;margin:0 auto}
+  h1{font-family:'Kanit';font-size:22px;font-weight:600}
+  .sub{color:var(--mut);font-size:13px;margin-bottom:18px}
+  .gate{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:360px;margin:40px auto;text-align:center}
+  .gate input{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:#0c0f18;color:var(--ink);font-size:15px;margin:12px 0}
+  .gate button,.rangebtn{font-family:'Kanit';cursor:pointer;border:none;border-radius:10px;padding:10px 16px;background:linear-gradient(135deg,#caa23f,#e7c46a);color:#241a06;font-weight:600}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+  .rangebtn{background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:400;padding:8px 14px}
+  .rangebtn.on{background:var(--gold);color:#241a06;font-weight:600}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .kpi .v{font-family:'Kanit';font-size:26px;font-weight:600}
+  .kpi .l{color:var(--mut);font-size:12px;margin-top:2px}
+  .kpi .v.gold{color:var(--gold)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .panel h3{font-family:'Kanit';font-size:14px;font-weight:500;margin-bottom:12px;color:#cfd6e8}
+  canvas{max-height:240px}
+  .err{color:#ff8080;text-align:center;margin-top:10px;font-size:13px;min-height:18px}
+  .note{color:var(--mut);font-size:11px;margin-top:18px;text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📊 Dashboard — สวัสดีวันนี้</h1>
+  <div class="sub">สถิติการใช้งานจริง เพื่อวางแผนพัฒนาต่อ</div>
+
+  <div id="gate" class="gate">
+    <div style="font-family:'Kanit';font-size:15px">🔒 ใส่รหัสผ่าน Dashboard</div>
+    <input id="pass" type="password" placeholder="รหัสผ่าน" autocomplete="off">
+    <button onclick="enter()">เข้าดู</button>
+    <div class="err" id="gateErr"></div>
+  </div>
+
+  <div id="board" style="display:none">
+    <div class="controls">
+      <span style="color:var(--mut);font-size:13px">ช่วงเวลา:</span>
+      <button class="rangebtn on" data-d="7">7 วัน</button>
+      <button class="rangebtn" data-d="30">30 วัน</button>
+      <button class="rangebtn" data-d="90">90 วัน</button>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid">
+      <div class="panel"><h3>เปิดใช้รายวัน (traffic)</h3><canvas id="cDay"></canvas></div>
+      <div class="panel"><h3>เปิดใช้ตามชั่วโมง (เวลาไทย)</h3><canvas id="cHour"></canvas></div>
+      <div class="panel"><h3>พฤติกรรม (event)</h3><canvas id="cType"></canvas></div>
+      <div class="panel"><h3>มาจากโซนเวลา/ประเทศ (คร่าวๆ)</h3><canvas id="cTz"></canvas></div>
+    </div>
+    <div class="err" id="err"></div>
+    <div class="note">visitor_id เป็นรหัสสุ่มใน localStorage ไม่ใช่ข้อมูลส่วนตัว • ประเทศประมาณจาก timezone</div>
+  </div>
+</div>
+
+<script>
+const SB_URL  = "https://bbtmcwydwscjjoxydbfp.supabase.co";   // ⬅️ แก้ให้ตรงกับ index.html
+const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJidG1jd3lkd3NjampveHlkYmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzUyNDIsImV4cCI6MjA5NTY1MTI0Mn0.q_rVvMWenYI_dkc1JhSiXWgwWBqtGtgLYEVMqwBSZX0";                      // ⬅️ แก้
+let PASS="", DAYS=7, charts={};
+const $=id=>document.getElementById(id);
+
+function enter(){ PASS=$('pass').value.trim(); if(!PASS){$('gateErr').textContent='ใส่รหัสก่อน';return;} load(); }
+
+async function rpc(days){
+  const res=await fetch(`${SB_URL}/rest/v1/rpc/dashboard_stats`,{ method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON},
+    body:JSON.stringify({pass:PASS, days})});
+  if(!res.ok) throw new Error('http '+res.status);
+  return await res.json();
+}
+
+async function load(){
+  $('gateErr').textContent='กำลังโหลด…';
+  try{
+    if(SB_URL.includes('YOURPROJECT')) throw new Error('ยังไม่ได้ตั้งค่า SB_URL/SB_ANON');
+    const d=await rpc(DAYS);
+    if(d && d.error==='unauthorized'){ $('gateErr').textContent='รหัสผ่านไม่ถูกต้อง'; return; }
+    $('gate').style.display='none'; $('board').style.display='block'; $('err').textContent='';
+    render(d);
+  }catch(e){ $('gateErr').textContent='โหลดไม่สำเร็จ: '+e.message; }
+}
+
+function kpi(v,l,gold){ return `<div class="kpi"><div class="v ${gold?'gold':''}">${v}</div><div class="l">${l}</div></div>`; }
+
+function render(d){
+  const t=d.totals||{};
+  $('kpis').innerHTML =
+      kpi((t.opens||0).toLocaleString(),'เปิดใช้ทั้งหมด',true)
+    + kpi((t.unique_visitors||0).toLocaleString(),'ผู้ใช้ไม่ซ้ำ')
+    + kpi((d.returning_visitors||0).toLocaleString(),'คนที่กลับมาใช้ซ้ำ',true)
+    + kpi(d.avg_events_per_visitor||0,'กดเฉลี่ย/คน')
+    + kpi((t.downloads||0).toLocaleString(),'ดาวน์โหลด',true)
+    + kpi((t.copies||0).toLocaleString(),'คัดลอก');
+
+  const C=(id,cfg)=>{ if(charts[id])charts[id].destroy(); charts[id]=new Chart($(id),cfg); };
+  const gold='#e7c46a', grid='#283047', tick='#8b93a7';
+  const axis=(stacked)=>({x:{ticks:{color:tick},grid:{color:grid}},y:{ticks:{color:tick},grid:{color:grid},beginAtZero:true}});
+  const noLeg={plugins:{legend:{display:false}},scales:axis(),maintainAspectRatio:false};
+
+  const day=d.by_day||[];
+  C('cDay',{type:'line',data:{labels:day.map(x=>x.day.slice(5)),datasets:[{data:day.map(x=>x.n),borderColor:gold,backgroundColor:'rgba(231,196,106,.15)',fill:true,tension:.3,pointRadius:2}]},options:noLeg});
+
+  const hours=Array.from({length:24},(_,h)=>{const f=(d.by_hour||[]).find(x=>x.hour===h);return f?f.n:0;});
+  C('cHour',{type:'bar',data:{labels:Array.from({length:24},(_,h)=>h),datasets:[{data:hours,backgroundColor:gold}]},options:noLeg});
+
+  const ty=d.by_type||[];
+  C('cType',{type:'bar',data:{labels:ty.map(x=>x.type),datasets:[{data:ty.map(x=>x.n),backgroundColor:['#e7c46a','#6ea8e7','#7fd1a0','#e78f6e','#b98fe7','#e76e9c']}]},options:{indexAxis:'y',...noLeg}});
+
+  const tz=d.by_tz||[];
+  C('cTz',{type:'bar',data:{labels:tz.map(x=>x.tz.replace('Asia/','')),datasets:[{data:tz.map(x=>x.n),backgroundColor:'#6ea8e7'}]},options:{indexAxis:'y',...noLeg}});
+}
+
+document.querySelectorAll('.rangebtn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.rangebtn').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); DAYS=+b.dataset.d; load();
+});
+$('pass').addEventListener('keydown',e=>{if(e.key==='Enter')enter();});
+</script>
+</body>
+</html>
