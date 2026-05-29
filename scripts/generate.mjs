@@ -12,7 +12,7 @@ const IMG_SIZE = 800;
 const MIN_GAP_MS = 15500;      // เว้นขั้นต่ำระหว่าง request Pollinations (โควต้า ~1/15วิ)
 const DAILY_BLESSINGS = 10;
 const REUSE_AFTER_DAYS = 30;
-const VISION = false;           // กรองรูปอัตโนมัติ
+const VISION = true;           // กรองรูปอัตโนมัติ
 const TIME_BUDGET_MS = 45 * 60 * 1000;  // เกินเท่านี้ → เลิกกรอง เติมให้ครบ
 const IMG_TIMEOUT_MS = 120000; // timeout ต่อการ gen รูป
 const TXT_TIMEOUT_MS = 45000;  // timeout ต่อ vision/text
@@ -21,14 +21,29 @@ const OUT = path.resolve('output');
 const IMG_DIR = path.join(OUT, 'img');
 
 const DAYS = [
-  { th:'อาทิตย์',   en:'Sunday',    color:'#C0392B', c2:'#7d1f17', flower:'red roses and red hibiscus blossoms' },
-  { th:'จันทร์',    en:'Monday',    color:'#E1A100', c2:'#8a5d00', flower:'yellow marigold and golden chrysanthemum' },
-  { th:'อังคาร',    en:'Tuesday',   color:'#D6336C', c2:'#8a1d44', flower:'pink lotus and soft pink peony' },
-  { th:'พุธ',       en:'Wednesday', color:'#1E9E55', c2:'#0f5e31', flower:'white jasmine on lush green foliage' },
-  { th:'พฤหัสบดี',  en:'Thursday',  color:'#E8730C', c2:'#9c4a05', flower:'orange marigold garland' },
-  { th:'ศุกร์',     en:'Friday',    color:'#1F73C4', c2:'#0f4677', flower:'blue morning glory and forget-me-nots' },
-  { th:'เสาร์',     en:'Saturday',  color:'#7E3FAE', c2:'#4a2069', flower:'purple orchids and lavender' },
+  { th:'อาทิตย์',   en:'Sunday',    color:'#C0392B', c2:'#7d1f17', tone:'warm red',     flower:'red roses and red hibiscus blossoms' },
+  { th:'จันทร์',    en:'Monday',    color:'#E1A100', c2:'#8a5d00', tone:'golden yellow', flower:'yellow marigold and golden chrysanthemum' },
+  { th:'อังคาร',    en:'Tuesday',   color:'#D6336C', c2:'#8a1d44', tone:'soft pink',     flower:'pink lotus and soft pink peony' },
+  { th:'พุธ',       en:'Wednesday', color:'#1E9E55', c2:'#0f5e31', tone:'fresh green',   flower:'white jasmine on lush green foliage' },
+  { th:'พฤหัสบดี',  en:'Thursday',  color:'#E8730C', c2:'#9c4a05', tone:'warm orange',   flower:'orange marigold garland' },
+  { th:'ศุกร์',     en:'Friday',    color:'#1F73C4', c2:'#0f4677', tone:'serene blue',   flower:'blue morning glory and forget-me-nots' },
+  { th:'เสาร์',     en:'Saturday',  color:'#7E3FAE', c2:'#4a2069', tone:'royal purple',  flower:'purple orchids and lavender' },
 ];
+
+// หัวข้อหลากหลาย — สุ่มต่อรูป ให้ไม่ได้ดอกไม้ล้วน
+const SUBJECTS = [
+  t => `a beautiful arrangement of ${t.flower}`,
+  t => `a beautiful arrangement of ${t.flower}`,            // ใส่ซ้ำให้ดอกไม้ออกบ่อยขึ้นหน่อย
+  t => `serene sunrise over misty mountains`,
+  t => `a cozy cup of hot coffee on a table by a sunny window`,
+  t => `a cute fluffy kitten resting in a sunlit garden`,
+  t => `colorful little birds on a blossoming branch`,
+  t => `a peaceful garden with dewy green leaves and morning mist`,
+  t => `golden rice fields glowing softly at dawn`,
+  t => `a calm lake reflecting the gentle morning sky`,
+  t => `delicate butterflies over a blooming flower meadow`,
+];
+const pickSubject = t => SUBJECTS[Math.floor(Math.random()*SUBJECTS.length)](t);
 const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -145,10 +160,6 @@ async function main() {
   const theme = DAYS[d.getUTCDay()];
   const todayISO = isoDate(d);
   const version = String(Date.now());
-  const prompt =
-    `${theme.flower}, soft golden morning sunlight, gentle dewdrops, dreamy blurred bokeh background, `
-  + `serene auspicious mood, elegant, highly detailed, photographic, vertical composition, `
-  + `no text, no letters, no numbers, no watermark, no people`;
 
   console.log(`=== วัน${theme.th} (${todayISO}) | เป้าหมาย ${TARGET} รูป ===`);
 
@@ -158,6 +169,10 @@ async function main() {
     attempt++;
     const overBudget = (Date.now() - T0) > TIME_BUDGET_MS;
     const seed = Math.floor(Math.random() * 1e9);
+    const prompt =
+      `${pickSubject(theme)}, ${theme.tone} color palette, soft golden morning sunlight, `
+    + `gentle dewdrops, dreamy blurred bokeh, serene auspicious mood, elegant, highly detailed, `
+    + `photographic, no text, no letters, no numbers, no watermark, no people`;
     try {
       console.log(`[${attempt}] gen seed=${seed} (ได้แล้ว ${images.length}/${TARGET})${overBudget?' [เกินงบ-ไม่กรอง]':''}`);
       const buf = await genImage(prompt, seed);
