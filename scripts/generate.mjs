@@ -30,18 +30,26 @@ const DAYS = [
   { th:'เสาร์',     en:'Saturday',  color:'#7E3FAE', c2:'#4a2069', tone:'royal purple',  flower:'purple orchids and lavender' },
 ];
 
-// หัวข้อหลากหลาย — สุ่มต่อรูป ให้ไม่ได้ดอกไม้ล้วน
+// หัวข้อหลากหลาย — สุ่มต่อรูป (สไตล์ฝังในแต่ละหัวข้อ: ของจริง/3D/การ์ตูน)
 const SUBJECTS = [
-  t => `a beautiful arrangement of ${t.flower}`,
-  t => `a beautiful arrangement of ${t.flower}`,            // ใส่ซ้ำให้ดอกไม้ออกบ่อยขึ้นหน่อย
-  t => `serene sunrise over misty mountains`,
-  t => `a cozy cup of hot coffee on a table by a sunny window`,
-  t => `a cute fluffy kitten resting in a sunlit garden`,
-  t => `colorful little birds on a blossoming branch`,
-  t => `a peaceful garden with dewy green leaves and morning mist`,
-  t => `golden rice fields glowing softly at dawn`,
-  t => `a calm lake reflecting the gentle morning sky`,
-  t => `delicate butterflies over a blooming flower meadow`,
+  // ดอกไม้ & ธรรมชาติ (ภาพถ่าย) — ใส่ซ้ำให้ออกบ่อย
+  t => `a beautiful photographic arrangement of ${t.flower}, soft bokeh`,
+  t => `a beautiful photographic arrangement of ${t.flower}, soft bokeh`,
+  t => `a serene photographic sunrise over misty mountains`,
+  t => `a cozy photographic cup of hot coffee by a sunny window`,
+  t => `a peaceful photographic garden with dewy green leaves and morning mist`,
+  t => `golden photographic rice fields glowing softly at dawn`,
+  t => `a calm photographic lake reflecting the gentle morning sky`,
+  // ผลไม้มงคล สีตามวัน
+  t => `a beautiful arrangement of fresh auspicious fruits (oranges, pomegranate, pineapple, apples), glossy and vibrant, ${t.tone} tones, photographic`,
+  // สัตว์/ลูกสัตว์น่ารัก (3D และ การ์ตูน)
+  t => `an adorable cute baby animal in cheerful 3D Pixar render style, big sparkling eyes, chubby, wholesome, soft lighting`,
+  t => `a charming cute cartoon animal character waving good morning, kawaii illustration, cheerful`,
+  // เด็กน่ารัก (3D และ การ์ตูน) — wholesome
+  t => `an adorable cheerful 3D Pixar style toddler smiling and waving hello, wholesome children's animation, fully clothed, bright and happy`,
+  t => `a funny happy cartoon kid making a silly cheerful face, playful wholesome animated cartoon style, fully clothed`,
+  // ตุ๊กตาน่ารัก
+  t => `an adorable cute kawaii plush doll figurine, soft pastel colors, whimsical, soft studio lighting`,
 ];
 const pickSubject = t => SUBJECTS[Math.floor(Math.random()*SUBJECTS.length)](t);
 const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
@@ -90,10 +98,11 @@ async function checkImage(buf) {
       role: 'user',
       content: [
         { type: 'text', text:
-          'Rate this "good morning" greeting-card background. Reply EXACTLY one word: OK or BAD. '
+          'Rate this "good morning" greeting-card image. Reply EXACTLY one word: OK or BAD. '
+        + 'Cute cartoon/3D characters, animals, children, dolls, fruits, flowers, and nature are all OK. '
         + 'Reply BAD ONLY if it has LARGE prominent garbled text covering much of the image, '
-        + 'a distorted/creepy human face or hand, or anything disturbing/gory. '
-        + 'Small faint text, logos, or pure flowers/nature = OK. When unsure, reply OK.' },
+        + 'a truly distorted/melted/creepy face, deformed extra limbs, or anything disturbing/gory. '
+        + 'When unsure, reply OK.' },
         { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${b64}` } }
       ]
     }]
@@ -170,9 +179,9 @@ async function main() {
     const overBudget = (Date.now() - T0) > TIME_BUDGET_MS;
     const seed = Math.floor(Math.random() * 1e9);
     const prompt =
-      `${pickSubject(theme)}, ${theme.tone} color palette, soft golden morning sunlight, `
-    + `gentle dewdrops, dreamy blurred bokeh, serene auspicious mood, elegant, highly detailed, `
-    + `photographic, no text, no letters, no numbers, no watermark, no people`;
+      `${pickSubject(theme)}, ${theme.tone} color palette, soft golden morning light, `
+    + `dreamy, elegant, highly detailed, beautiful, `
+    + `no text, no letters, no numbers, no watermark, no signature`;
     try {
       console.log(`[${attempt}] gen seed=${seed} (ได้แล้ว ${images.length}/${TARGET})${overBudget?' [เกินงบ-ไม่กรอง]':''}`);
       const buf = await genImage(prompt, seed);
