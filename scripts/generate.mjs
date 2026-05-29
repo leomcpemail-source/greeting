@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 // ---------- ตั้งค่า ----------
-const TARGET = 30;             // จำนวนรูปที่ต้องการต่อวัน
+const TARGET = 100;             // จำนวนรูปที่ต้องการต่อวัน
 const MAX_ATTEMPTS = 60;       // เพดานความพยายาม
 const IMG_SIZE = 800;
 const MIN_GAP_MS = 15500;      // เว้นขั้นต่ำระหว่าง request Pollinations (โควต้า ~1/15วิ)
