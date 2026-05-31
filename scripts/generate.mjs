@@ -15,6 +15,7 @@ const MIN_GAP_MS = 15500;       // เว้นขั้นต่ำระหว
 const VISION = true;            // กรองรูปอัตโนมัติ
 const GEMINI_API_KEY    = process.env.GEMINI_API_KEY    || '';
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
+const GROQ_API_KEY       = process.env.GROQ_API_KEY       || '';
 // หยุด gen รูปเมื่อเหลือเวลาน้อยกว่า STOP_BEFORE_END_MS — เพื่อให้มีเวลา gen คำ + push
 const TIME_BUDGET_MS = 55 * 60 * 1000;  // 55 นาที
 const STOP_BEFORE_END_MS = 75 * 60 * 1000; // หยุดถ้าผ่านไป 75 นาที (เหลือ 15 นาที buffer)
@@ -298,7 +299,7 @@ async function genBlessingsGemini({ dayTh, headline, isFestival, n }) {
 
   // ── 1. Gemini 2.0 Flash ──
   if (GEMINI_API_KEY) {
-    for (const model of ['gemini-2.0-flash', 'gemini-1.5-flash']) {
+    for (const model of ['gemini-2.0-flash', 'gemini-1.5-flash-latest']) {
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
           if (attempt > 0) { console.log(`Gemini retry หลัง delay 8 วิ...`); await new Promise(r => setTimeout(r, 8000)); }
@@ -335,7 +336,7 @@ async function genBlessingsGemini({ dayTh, headline, isFestival, n }) {
         { method:'POST',
           headers:{'Content-Type':'application/json','Authorization':`Bearer ${OPENROUTER_API_KEY}`},
           body: JSON.stringify({
-            model: 'meta-llama/llama-3.3-70b-instruct:free',
+            model: 'google/gemma-3-27b-it:free',
             messages:[{ role:'user', content: prompt }]
           }) },
         90000);
@@ -349,7 +350,30 @@ async function genBlessingsGemini({ dayTh, headline, isFestival, n }) {
     } catch (e) { console.log(`OpenRouter error: ${e.message} — fallback Pollinations`); }
   }
 
-  // ── 3. Pollinations (last resort) ──
+  // ── 3. Groq (Llama 3.3 70B — เร็วมาก free tier ใจกว้าง) ──
+  if (GROQ_API_KEY) {
+    try {
+      console.log(`gen คำอวยพร ${n} คำ ด้วย Groq...`);
+      const res = await fetchT('https://api.groq.com/openai/v1/chat/completions',
+        { method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_API_KEY}`},
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages:[{ role:'user', content: prompt }],
+            temperature: 0.9
+          }) },
+        60000);
+      if (!res.ok) throw new Error(`Groq http ${res.status}`);
+      const data = await res.json();
+      const text = data?.choices?.[0]?.message?.content || '';
+      const arr = parseArr(text);
+      if (arr.length < Math.floor(n * 0.5)) throw new Error(`ได้คำน้อยเกินไป (${arr.length})`);
+      console.log(`✓ Groq ได้ ${arr.length} คำ`);
+      return arr;
+    } catch (e) { console.log(`Groq error: ${e.message} — fallback Pollinations`); }
+  }
+
+  // ── 4. Pollinations (last resort) ──
   try {
     console.log(`gen คำอวยพร ${n} คำ ด้วย Pollinations (last resort)...`);
     await gate();
