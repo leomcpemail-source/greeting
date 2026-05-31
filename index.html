@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>สวัสดีวันนี้ ☀️</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Charm:wght@400;700&family=Mitr:wght@500;600&family=Kanit:wght@400;600&family=Itim&family=Mali:wght@600&family=Sriracha&family=Pattaya&family=Bai+Jamjuree:wght@600&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script data-goatcounter="https://leomcpemail.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--ink:#2b2118;--gold:#b8893b;--gold2:#e7c46a}
+html,body{
+  height:100%;overflow:hidden;
+  font-family:'Sarabun',sans-serif;color:var(--ink);
+  background:radial-gradient(1200px 600px at 50% -10%,#fff8ec 0%,transparent 60%),
+             linear-gradient(160deg,#f3e9d6 0%,#ece0c8 100%);
+  overscroll-behavior:none;
+}
+.app{
+  display:flex;flex-direction:column;align-items:center;
+  height:100%;max-width:480px;margin:0 auto;
+  padding:18px 0 20px;gap:12px;
+}
+
+/* HEADER */
+.header{text-align:center;flex-shrink:0;padding:0 20px;width:100%}
+.header .mark{font-family:'Kanit';font-size:10px;letter-spacing:.22em;color:var(--gold);text-transform:uppercase}
+.header h1{font-family:'Chonburi';font-size:22px;color:var(--ink);margin:2px 0 0}
+.header .dl{font-size:12px;color:#8a7560;margin-top:2px}
+
+/* STAGE */
+.stage{
+  position:relative;width:100%;flex:1;min-height:0;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+
+/* card wrapper — absolute centred, moved by JS */
+.cw{
+  position:absolute;left:50%;top:50%;
+  transform-origin:center center;
+  transition:transform .44s cubic-bezier(.34,1.1,.64,1),
+             opacity   .38s ease,
+             filter    .38s ease;
+  cursor:grab;user-select:none;touch-action:pan-y;
+}
+.cw.no-anim{transition:none!important}
+
+.card{
+  position:relative;border-radius:20px;overflow:hidden;background:#1a1208;
+  transition:box-shadow .44s ease;
+}
+.card img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:opacity .25s}
+.scrim{position:absolute;inset:0;z-index:1}
+.frame-el{display:none}
+.frame-before{position:absolute;pointer-events:none;transition:all .4s ease}
+.corner{position:absolute;width:44px;height:44px;z-index:5;transition:opacity .3s}
+.corner.tl{top:6px;left:6px}.corner.tr{top:6px;right:6px;transform:scaleX(-1)}
+.corner.bl{bottom:6px;left:6px;transform:scaleY(-1)}.corner.br{bottom:6px;right:6px;transform:scale(-1,-1)}
+.content{position:absolute;inset:0;display:flex;flex-direction:column;z-index:3;color:#fff}
+.hello{font-family:'Chonburi';line-height:1.15;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+.bless{font-family:'Charm';font-weight:700;line-height:1.45;text-shadow:0 1px 8px rgba(0,0,0,.55)}
+.date{font-family:'Sarabun';font-size:12px;opacity:.92;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.sparkle{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;
+  box-shadow:0 0 8px 2px rgba(255,255,255,.8);z-index:2;pointer-events:none}
+
+/* DOTS */
+.dots{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--gold);opacity:.22;transition:all .32s ease}
+.dot.active{width:22px;border-radius:5px;opacity:1}
+
+/* ACTIONS */
+.actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 18px;flex-shrink:0}
+.btn{border:none;border-radius:14px;padding:15px;font-family:'Kanit';font-size:15px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:transform .12s}
+.btn:active{transform:scale(.95)}.btn:disabled{opacity:.5}
+.btn.copy{background:#fff;color:var(--ink);border:1.5px solid #ddd0bc;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.btn.save{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#3a2410;box-shadow:0 4px 16px rgba(180,130,40,.32)}
+
+/* error/loading msg */
+.msg{text-align:center;padding:40px 20px;color:#7a6a52;font-size:14px;line-height:1.7}
+.msg code{background:#fff;padding:2px 6px;border-radius:6px;border:1px solid #e0d0b0;font-size:12px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:11px 20px;border-radius:24px;font-family:'Kanit';font-size:13px;z-index:99;
+  opacity:0;transition:.25s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="mark">Daily Greeting</div>
+    <h1 id="topTitle">สวัสดีวันนี้</h1>
+    <div class="dl" id="dateLine">กำลังโหลด…</div>
+  </div>
+  <div class="stage" id="stage"></div>
+  <div class="dots"  id="dotsEl"></div>
+  <div class="actions" id="actions" style="display:none">
+    <button class="btn copy" id="btnCopy">📋 คัดลอก</button>
+    <button class="btn save" id="btnSave">⬇ บันทึก</button>
+  </div>
+</div>
+<div class="toast" id="toastEl"></div>
+
+<script>
+/* ── CONFIG ─────────────────────────────────────────────────────────── */
+const REPO   = "leomcpemail-source/greeting";
+const BRANCH = "daily-images";
+const BASE   = `https://raw.githubusercontent.com/${REPO}/${BRANCH}`;
+const SB_URL = "https://bbtmcwydwscjjoxydbfp.supabase.co";
+const SB_ANON= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJidG1jd3lkd3NjampveHlkYmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzUyNDIsImV4cCI6MjA5NTY1MTI0Mn0.q_rVvMWenYI_dkc1JhSiXWgwWBqtGtgLYEVMqwBSZX0";
+const SID    = 's_'+Math.random().toString(36).slice(2);
+
+/* ── ANALYTICS ──────────────────────────────────────────────────────── */
+function visitorId(){
+  try{
+    let v=localStorage.getItem('gv_id'),isNew=false;
+    if(!v){v='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('gv_id',v);isNew=true;}
+    return{v,isNew};
+  }catch{return{v:'v_anon',isNew:false};}
+}
+async function track2(type){
+  if(SB_URL.includes('YOURPROJECT'))return;
+  try{
+    const{v,isNew}=visitorId();
+    await fetch(`${SB_URL}/rest/v1/events`,{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'return=minimal'},
+      body:JSON.stringify({visitor_id:v,session_id:SID,type,
+        tz:Intl.DateTimeFormat().resolvedOptions().timeZone,lang:navigator.language,
+        ua:navigator.userAgent.slice(0,200),ref:document.referrer.slice(0,200),
+        is_returning:type==='open'?!isNew:false})});
+  }catch{}
+}
+function trackGC(name){try{if(window.goatcounter?.count)window.goatcounter.count({path:name,title:name,event:true});}catch{}}
+function toast(t){const el=document.getElementById('toastEl');el.textContent=t;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),2000);}
+
+/* ── CORNER SVG ─────────────────────────────────────────────────────── */
+const C_GOLD  =`<svg viewBox="0 0 46 46" fill="none"><path d="M2 44L2 8Q2 2 8 2L44 2" stroke="#ffd700" stroke-width="2.2" stroke-linecap="round"/><path d="M2 22L10 14" stroke="#ffd700" stroke-width="1.2" opacity=".55"/><circle cx="2" cy="2" r="2.5" fill="#ffd700"/><circle cx="14" cy="2" r="1.2" fill="#ffd70088"/><circle cx="2" cy="14" r="1.2" fill="#ffd70088"/></svg>`;
+const C_FLORAL=`<svg viewBox="0 0 46 46" fill="none"><circle cx="5" cy="5" r="4" fill="#ffb6c1" opacity=".85"/><circle cx="14" cy="3" r="2.5" fill="#ffc0cb" opacity=".7"/><circle cx="3" cy="14" r="2.5" fill="#ffc0cb" opacity=".7"/><path d="M8 8Q18 8 18 18" stroke="#90c070" stroke-width="1.5" fill="none"/><circle cx="18" cy="18" r="1.8" fill="#90c070" opacity=".6"/></svg>`;
+const C_LOTUS =`<svg viewBox="0 0 46 46" fill="none"><path d="M4 42C4 22 22 4 42 4" stroke="#e8c060" stroke-width="2"/><path d="M4 24C8 14 14 8 24 4" stroke="#e8c060" stroke-width="1.2" opacity=".5"/><circle cx="4" cy="4" r="3" fill="#e8c060"/></svg>`;
+const C_NONE  =``;
+
+/* ── 40 FRAMES ──────────────────────────────────────────────────────── */
+const FRAMES=[
+  // ทอง/มงคล/ไทย
+  {n:'ทองคลาสสิก',  ins:'14px',brd:'2.5px solid #ffd700',br:'10px',bs:'0 0 20px #ffd70055,inset 0 0 8px #00000033',bi:'5px', bb:'1px solid #ffd70066',  bbr:'7px', co:C_GOLD},
+  {n:'ทองเส้นคู่',  ins:'10px',brd:'3px double #d4a800', br:'0px', bs:'0 0 0 1.5px #d4a800',                        bi:'8px', bb:'1px solid #d4a80044',  bbr:'0',   co:C_GOLD},
+  {n:'ทองโค้งใหญ่', ins:'12px',brd:'3px solid #f0c020',  br:'22px',bs:'0 0 24px #f0c02055',                         bi:'5px', bb:'1px solid #f0c02055',  bbr:'18px',co:C_NONE},
+  {n:'ทองประแจ',    ins:'10px',brd:'4px solid #e8a000',  br:'0px', bs:'inset 0 0 0 8px #e8a00011',                  bi:'12px',bb:'1px solid #e8a00066',  bbr:'0',   co:C_LOTUS},
+  {n:'ทองเงา Glow', ins:'12px',brd:'3px solid #ffe066',  br:'8px', bs:'0 0 28px #ffe06688,0 0 8px #ffe066aa',       bi:'5px', bb:'1px solid #ffe06633',  bbr:'5px', co:C_GOLD},
+  {n:'แดงมงคล',     ins:'10px',brd:'5px solid #c0392b',  br:'4px', bs:'0 0 16px #c0392b55',                         bi:'8px', bb:'1px solid #ffd70066',  bbr:'2px', co:C_LOTUS},
+  {n:'แดงทองไทย',   ins:'12px',brd:'3px solid #ffd700',  br:'0px', bs:'0 0 12px #c0392b55',                         bi:'6px', bb:'1px solid #c0392b88',  bbr:'0',   co:C_LOTUS},
+  {n:'ทองสามเส้น',  ins:'8px', brd:'2px solid #ffd700',  br:'6px', bs:'0 0 0 5px #8B691488,0 0 0 8px #ffd70066',   bi:'0',   bb:'none',                 bbr:'0',   co:C_GOLD},
+  {n:'ทองเงา Drop', ins:'12px',brd:'3px solid #ffd700',  br:'0px', bs:'5px 5px 0 #b8860b,0 0 18px #ffd70033',       bi:'6px', bb:'1px solid #ffd70044',  bbr:'0',   co:C_GOLD},
+  {n:'ทองโบราณ',    ins:'12px',brd:'4px solid #c8a020',  br:'2px', bs:'inset 0 0 18px #00000055,0 0 0 1px #c8a020',bi:'10px',bb:'1px solid #c8a02055',  bbr:'0',   co:C_LOTUS},
+  {n:'ทองหนา',      ins:'8px', brd:'8px solid #e8b800',  br:'16px',bs:'inset 0 2px 4px #fff5,0 0 20px #e8b80044',  bi:'0',   bb:'none',                 bbr:'0',   co:C_NONE},
+  {n:'ทองใส Soft',  ins:'14px',brd:'2px solid #fde68a',  br:'14px',bs:'0 0 0 6px #fde68a22',                        bi:'5px', bb:'1px dashed #fde68a66', bbr:'11px',co:C_GOLD},
+  {n:'ลายกนก',      ins:'8px', brd:'3px solid #d4a800',  br:'0px', bs:'0 0 0 3px #12091f,0 0 0 5px #d4a800',       bi:'9px', bb:'1px solid #d4a80055',  bbr:'0',   co:C_LOTUS},
+  {n:'ทองมุมตัด',   ins:'10px',brd:'3px solid #ffd700',  br:'0px', bs:'0 0 20px #ffd70044',                         bi:'6px', bb:'1px solid #ffd70088',  bbr:'0',   co:C_GOLD},
+  // ธรรมชาติ/ดอกไม้
+  {n:'ชมพูดอกไม้',  ins:'12px',brd:'3px solid #ffb6c1',  br:'16px',bs:'0 0 18px #ffb6c155',                         bi:'5px', bb:'1px solid #ffb6c155',  bbr:'13px',co:C_FLORAL},
+  {n:'เขียวใบไม้',  ins:'12px',brd:'3px solid #6ab04c',  br:'8px', bs:'0 0 14px #6ab04c44',                         bi:'5px', bb:'1px solid #6ab04c55',  bbr:'5px', co:C_FLORAL},
+  {n:'ม่วงลาเวนเดอร์',ins:'12px',brd:'3px solid #b48de0',br:'20px',bs:'0 0 20px #b48de055',                        bi:'5px', bb:'1px solid #b48de055',  bbr:'17px',co:C_FLORAL},
+  {n:'ส้มดาวเรือง',  ins:'12px',brd:'4px solid #f39c12',  br:'4px', bs:'0 0 18px #f39c1255',                        bi:'6px', bb:'1px solid #f39c1255',  bbr:'2px', co:C_FLORAL},
+  {n:'ฟ้าทะเล',     ins:'12px',brd:'3px solid #5dade2',  br:'12px',bs:'0 0 16px #5dade255',                         bi:'5px', bb:'1px solid #5dade244',  bbr:'9px', co:C_FLORAL},
+  {n:'ชมพูเส้นประ', ins:'14px',brd:'2px dashed #f48fb1', br:'18px',bs:'none',                                       bi:'7px', bb:'1px solid #f48fb133',  bbr:'14px',co:C_FLORAL},
+  {n:'เขียวโค้งมน', ins:'10px',brd:'4px solid #81c784',  br:'20px',bs:'0 0 16px #81c78444',                         bi:'6px', bb:'1px solid #81c78466',  bbr:'16px',co:C_FLORAL},
+  {n:'ครีมอ่อน',    ins:'12px',brd:'5px solid #f5deb3',  br:'10px',bs:'0 4px 20px #00000044',                       bi:'6px', bb:'1px solid #f5deb355',  bbr:'7px', co:C_FLORAL},
+  {n:'ชมพูทอง',     ins:'12px',brd:'3px solid #ffb6c1',  br:'6px', bs:'0 0 12px #ffb6c144',                         bi:'8px', bb:'1px solid #ffd70055',  bbr:'4px', co:C_FLORAL},
+  {n:'เขียวเข้มป่า',ins:'10px',brd:'5px solid #2e7d32',  br:'2px', bs:'inset 0 0 10px #00000044,0 0 0 2px #2e7d32',bi:'8px', bb:'1px solid #2e7d3266',  bbr:'0',   co:C_FLORAL},
+  {n:'น้ำตาลไม้',   ins:'10px',brd:'6px solid #8d6e63',  br:'4px', bs:'inset 0 0 6px #00000033,3px 3px 0 #5d4037', bi:'0',   bb:'none',                 bbr:'0',   co:C_FLORAL},
+  {n:'ซันเซ็ต',     ins:'10px',brd:'4px solid #ff7043',  br:'14px',bs:'0 0 20px #ff704355',                         bi:'6px', bb:'1px solid #ff704444',  bbr:'11px',co:C_FLORAL},
+  {n:'ฟ้าขาวเมฆ',   ins:'12px',brd:'3px solid #e3f2fd',  br:'20px',bs:'0 0 20px #90caf955',                         bi:'5px', bb:'1px solid #e3f2fd44',  bbr:'17px',co:C_FLORAL},
+  // มินิมอล/เรียบ
+  {n:'ขาวเรียบ',    ins:'12px',brd:'4px solid #fff',     br:'6px', bs:'0 4px 24px #00000066',                       bi:'0',   bb:'none',                 bbr:'0',   co:C_NONE},
+  {n:'ดำเรียบ',     ins:'10px',brd:'4px solid #111',     br:'0px', bs:'5px 5px 0 #000',                             bi:'0',   bb:'none',                 bbr:'0',   co:C_NONE},
+  {n:'เทาโมเดิร์น', ins:'14px',brd:'2px solid #888',     br:'12px',bs:'0 0 0 1px #44444488',                        bi:'5px', bb:'1px solid #66666644',  bbr:'9px', co:C_NONE},
+  {n:'ขาวโค้งใหญ่', ins:'8px', brd:'5px solid #fff',     br:'24px',bs:'0 8px 32px #00000055',                       bi:'0',   bb:'none',                 bbr:'0',   co:C_NONE},
+  {n:'เส้นบางดำ',   ins:'14px',brd:'1.5px solid #fff',   br:'0px', bs:'none',                                       bi:'8px', bb:'1px solid #ffffff44',  bbr:'0',   co:C_NONE},
+  {n:'Shadow Drop', ins:'12px',brd:'none',                br:'8px', bs:'8px 8px 0 #000000cc',                        bi:'0',   bb:'none',                 bbr:'0',   co:C_NONE},
+  {n:'ขาว Glow',    ins:'12px',brd:'2px solid #fff8',    br:'16px',bs:'0 0 30px #ffffff33',                         bi:'5px', bb:'1px solid #ffffff33',  bbr:'13px',co:C_NONE},
+  {n:'เส้นประขาว',  ins:'14px',brd:'2.5px dashed #fff9', br:'8px', bs:'none',                                       bi:'0',   bb:'none',                 bbr:'0',   co:C_NONE},
+  {n:'ดำขาวตัดกัน', ins:'8px', brd:'5px solid #fff',     br:'0px', bs:'0 0 0 6px #000',                             bi:'0',   bb:'none',                 bbr:'0',   co:C_NONE},
+  {n:'Inset Shadow',ins:'0',   brd:'none',                br:'18px',bs:'inset 0 0 0 5px #ffffff88,0 4px 20px #00000055',bi:'0',bb:'none',                bbr:'0',   co:C_NONE},
+  {n:'ขาวโค้งอ่อน', ins:'10px',brd:'4px solid #fff',     br:'32px',bs:'0 0 24px #ffffff22',                         bi:'6px', bb:'1px solid #ffffff55',  bbr:'27px',co:C_NONE},
+  {n:'เทาโค้งใหญ่', ins:'12px',brd:'3px solid #aaa',     br:'28px',bs:'0 2px 12px #00000055',                       bi:'5px', bb:'1px solid #aaa5',      bbr:'24px',co:C_NONE},
+  {n:'ดำเส้นคู่',   ins:'10px',brd:'2px double #fff',    br:'4px', bs:'0 0 0 1px #fff4',                            bi:'7px', bb:'1px solid #ffffff22',  bbr:'2px', co:C_NONE},
+  // ── ชุดใหม่ 20 แบบ ──────────────────────────────────────────────
+  // ทอง/มงคล เพิ่มเติม
+  {n:'ทองหยดน้ำ',   ins:'10px',brd:'3px solid #ffd700',  br:'50px',bs:'0 0 28px #ffd70066,inset 0 0 12px #00000022',bi:'6px', bb:'1px solid #ffd70044',  bbr:'46px',co:C_GOLD},
+  {n:'ทองเส้นสาม',  ins:'6px', brd:'6px solid #e8b800',  br:'0px', bs:'0 0 0 3px #3a2a00,0 0 0 9px #ffd70044',     bi:'14px',bb:'1px solid #ffd70066',  bbr:'0',   co:C_LOTUS},
+  {n:'ทองกรอบดาว',  ins:'10px',brd:'2px solid #ffe082',  br:'0px', bs:'0 0 20px #ffe08266,inset 0 0 0 14px #00000011',bi:'8px',bb:'1px dashed #ffe08288',bbr:'0',  co:C_GOLD},
+  {n:'ม่วงมงคล',    ins:'12px',brd:'3px solid #9c27b0',  br:'8px', bs:'0 0 22px #9c27b055,0 0 0 1px #9c27b066',    bi:'6px', bb:'1px solid #e040fb44',  bbr:'5px', co:C_LOTUS},
+  {n:'เงินแพลทินัม',ins:'12px',brd:'3px solid #e0e0e0',  br:'14px',bs:'0 0 20px #e0e0e055,0 0 0 1px #ffffffff',    bi:'5px', bb:'1px solid #bdbdbd44',  bbr:'11px',co:C_NONE},
+  // ธรรมชาติ เพิ่มเติม
+  {n:'เขียวมิ้นต์',  ins:'12px',brd:'3px solid #80cbc4',  br:'18px',bs:'0 0 18px #80cbc455',                        bi:'5px', bb:'1px solid #80cbc444',  bbr:'14px',co:C_FLORAL},
+  {n:'ชมพูพีช',     ins:'10px',brd:'4px solid #ffab91',  br:'10px',bs:'0 0 16px #ffab9155',                         bi:'7px', bb:'1px solid #ffab9144',  bbr:'7px', co:C_FLORAL},
+  {n:'น้ำเงินคราม', ins:'10px',brd:'4px solid #3f51b5',  br:'6px', bs:'0 0 20px #3f51b555,inset 0 0 8px #00000033',bi:'8px', bb:'1px solid #7986cb55',  bbr:'3px', co:C_NONE},
+  {n:'เขียวมรกต',   ins:'10px',brd:'4px solid #00897b',  br:'12px',bs:'0 0 18px #00897b66',                         bi:'7px', bb:'1px solid #00897b44',  bbr:'9px', co:C_FLORAL},
+  {n:'ส้มพระอาทิตย์',ins:'10px',brd:'3px solid #ff8f00', br:'8px', bs:'0 0 24px #ff8f0055',                         bi:'6px', bb:'1px solid #ff8f0044',  bbr:'5px', co:C_FLORAL},
+  {n:'ชมพูดอกซากุระ',ins:'12px',brd:'2.5px solid #f06292',br:'22px',bs:'0 0 18px #f0629255',                        bi:'6px', bb:'1px solid #f0629244',  bbr:'18px',co:C_FLORAL},
+  // มินิมอล เพิ่มเติม
+  {n:'ขาว Blur',    ins:'0',   brd:'none',                br:'20px',bs:'inset 0 0 0 12px rgba(255,255,255,.18),0 4px 28px #00000044',bi:'0',bb:'none',bbr:'0',co:C_NONE},
+  {n:'ดำ Neon',     ins:'10px',brd:'2px solid #00e5ff',   br:'6px', bs:'0 0 12px #00e5ff66,inset 0 0 8px #00e5ff22',bi:'6px', bb:'1px solid #00e5ff33',  bbr:'3px', co:C_NONE},
+  {n:'ดำทองโบราณ',  ins:'8px', brd:'5px solid #ffd700',   br:'0px', bs:'0 0 0 2px #4a3500,0 0 0 10px #ffd70022',    bi:'0',   bb:'none',                 bbr:'0',   co:C_GOLD},
+  {n:'เทาเข้ม',     ins:'10px',brd:'3px solid #616161',   br:'10px',bs:'inset 0 0 12px #00000044,0 2px 10px #00000055',bi:'6px',bb:'1px solid #75757555',bbr:'7px',co:C_NONE},
+  {n:'เส้นบาง Rose', ins:'14px',brd:'1.5px solid #f48fb1', br:'24px',bs:'0 0 16px #f48fb122',                       bi:'7px', bb:'1px solid #f48fb133',  bbr:'20px',co:C_FLORAL},
+  {n:'ขาวสามชั้น',  ins:'6px', brd:'2px solid #fff',      br:'18px',bs:'0 0 0 4px #ffffff44,0 0 0 9px rgba(255,255,255,.14)',bi:'0',bb:'none',bbr:'0',co:C_NONE},
+  {n:'ทองเงา Duo',  ins:'10px',brd:'2px solid #ffe082',   br:'4px', bs:'4px 4px 0 #c8960a,-4px -4px 0 #c8960a',    bi:'6px', bb:'1px solid #ffe08244',  bbr:'2px', co:C_GOLD},
+  {n:'Rainbow',     ins:'10px',brd:'3px solid transparent',br:'16px',bs:'0 0 22px #ff80ab55',                        bi:'6px', bb:'1px solid #ffffff22',  bbr:'12px',co:C_NONE, rainbow:true},
+  {n:'ขาวเงา Soft', ins:'12px',brd:'3px solid rgba(255,255,255,.72)',br:'18px',bs:'0 6px 30px rgba(0,0,0,.36)',      bi:'5px', bb:'1px solid rgba(255,255,255,.35)',bbr:'14px',co:C_NONE},
+];
+
+/* ── LAYOUTS ────────────────────────────────────────────────────────── */
+const LAYOUTS=[
+  // ชุดเดิม 10 แบบ
+  {font:'Chonburi',     j:'flex-end',  a:'center',    ta:'center',rot:0, scrim:'bottom',panel:false,narrow:false,hs:38,bs:21,pad:'22px 26px 30px'},
+  {font:'Mitr',         j:'flex-end',  a:'flex-start',ta:'left',  rot:0, scrim:'bottom',panel:false,narrow:false,hs:34,bs:20,pad:'22px 26px 34px'},
+  {font:'Kanit',        j:'flex-start',a:'center',    ta:'center',rot:0, scrim:'top',   panel:false,narrow:false,hs:34,bs:19,pad:'30px 26px'},
+  {font:'Charm',        j:'center',    a:'center',    ta:'center',rot:-8,scrim:'center',panel:true, narrow:false,hs:36,bs:22,pad:'22px'},
+  {font:'Itim',         j:'flex-start',a:'flex-end',  ta:'right', rot:0, scrim:'top',   panel:false,narrow:false,hs:32,bs:19,pad:'30px 28px'},
+  {font:'Sriracha',     j:'flex-end',  a:'center',    ta:'center',rot:0, scrim:'bottom',panel:true, narrow:false,hs:31,bs:20,pad:'22px 24px 30px'},
+  {font:'Mali',         j:'center',    a:'flex-end',  ta:'right', rot:0, scrim:'right', panel:false,narrow:true, hs:34,bs:20,pad:'22px 28px'},
+  {font:'Bai Jamjuree', j:'center',    a:'center',    ta:'center',rot:0, scrim:'center',panel:true, narrow:false,hs:34,bs:20,pad:'22px'},
+  {font:'Pattaya',      j:'flex-end',  a:'flex-start',ta:'left',  rot:6, scrim:'bottom',panel:false,narrow:false,hs:34,bs:20,pad:'22px 26px 40px'},
+  {font:'Chonburi',     j:'flex-start',a:'flex-start',ta:'left',  rot:0, scrim:'left',  panel:false,narrow:true, hs:36,bs:20,pad:'28px 26px'},
+  // ชุดใหม่ 12 แบบ
+  {font:'Sarabun',      j:'flex-end',  a:'center',    ta:'center',rot:0, scrim:'bottom',panel:true, narrow:false,hs:30,bs:18,pad:'18px 22px 28px'},
+  {font:'Mitr',         j:'center',    a:'flex-start',ta:'left',  rot:5, scrim:'left',  panel:false,narrow:false,hs:36,bs:21,pad:'28px 22px'},
+  {font:'Kanit',        j:'flex-end',  a:'center',    ta:'center',rot:0, scrim:'top',   panel:true, narrow:false,hs:42,bs:22,pad:'20px 24px 26px'},
+  {font:'Charm',        j:'flex-start',a:'flex-start',ta:'left',  rot:0, scrim:'bottom',panel:true, narrow:false,hs:30,bs:18,pad:'26px 24px'},
+  {font:'Itim',         j:'center',    a:'center',    ta:'center',rot:12,scrim:'center',panel:false,narrow:false,hs:34,bs:20,pad:'22px'},
+  {font:'Sriracha',     j:'flex-start',a:'flex-end',  ta:'right', rot:0, scrim:'right', panel:true, narrow:true, hs:32,bs:19,pad:'24px 26px'},
+  {font:'Pattaya',      j:'center',    a:'flex-start',ta:'center',rot:0, scrim:'top',   panel:false,narrow:false,hs:38,bs:22,pad:'26px 20px'},
+  {font:'Mali',         j:'flex-end',  a:'center',    ta:'center',rot:-5,scrim:'bottom',panel:true, narrow:false,hs:33,bs:20,pad:'20px 24px 32px'},
+  {font:'Bai Jamjuree', j:'flex-start',a:'flex-end',  ta:'right', rot:0, scrim:'right', panel:false,narrow:true, hs:30,bs:18,pad:'24px 28px'},
+  {font:'Chonburi',     j:'flex-end',  a:'center',    ta:'center',rot:0, scrim:'bottom',panel:false,narrow:false,hs:46,bs:24,pad:'18px 22px 36px'},
+  {font:'Sarabun',      j:'center',    a:'flex-end',  ta:'center',rot:0, scrim:'center',panel:true, narrow:false,hs:28,bs:17,pad:'20px'},
+  {font:'Kanit',        j:'flex-end',  a:'flex-end',  ta:'right', rot:8, scrim:'bottom',panel:true, narrow:true, hs:34,bs:20,pad:'18px 26px 30px'},
+];
+
+/* ── TEXT_SIZES — 5 preset ขนาด/สัดส่วนข้อความ ─────────────────────── */
+const TEXT_SIZES=[
+  {id:'normal',  hs_mul:1.00, bs_mul:1.00, gap:8 },
+  {id:'hero',    hs_mul:1.28, bs_mul:0.90, gap:6 },
+  {id:'compact', hs_mul:0.82, bs_mul:0.85, gap:5 },
+  {id:'wide',    hs_mul:1.08, bs_mul:1.12, gap:10},
+  {id:'mini',    hs_mul:0.68, bs_mul:0.78, gap:4 },
+];
+
+/* ── OVERLAYS — 6 effect โทนสี/กรอง ────────────────────────────────── */
+const OVERLAYS=[
+  {id:'none',    cssFilter:'',
+    canvasFn:null},
+  {id:'warm',    cssFilter:'sepia(0.22) saturate(1.18) hue-rotate(-8deg)',
+    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(180,90,0,0.08)';ctx.fillRect(0,0,w,h);ctx.restore();}},
+  {id:'cool',    cssFilter:'saturate(0.88) hue-rotate(18deg) brightness(1.04)',
+    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(0,60,160,0.07)';ctx.fillRect(0,0,w,h);ctx.restore();}},
+  {id:'pastel',  cssFilter:'saturate(0.72) brightness(1.08) contrast(0.92)',
+    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(255,230,230,0.10)';ctx.fillRect(0,0,w,h);ctx.restore();}},
+  {id:'vignette',cssFilter:'',
+    canvasFn:(ctx,w,h)=>{
+      ctx.save();
+      const g=ctx.createRadialGradient(w/2,h/2,w*.28,w/2,h/2,w*.72);
+      g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.38)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,w,h); ctx.restore();
+    }},
+  {id:'dreamy',  cssFilter:'brightness(1.06) saturate(1.12) contrast(0.95)',
+    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(200,180,255,0.08)';ctx.fillRect(0,0,w,h);ctx.restore();}},
+];
+
+/* ── MANIFEST / STATE ───────────────────────────────────────────────── */
+let M=null;
+// pool trackers
+let uImg=[],uFr=[],uLay=[],uBl=[],uTx=[],uOv=[];
+let lastBlIdx=-1;
+
+function hexA(hex,a){try{const n=parseInt(hex.replace('#',''),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}catch{return`rgba(0,0,0,${a})`;}}
+function scrimCSS(p,color,c2){
+  color=color||'#b8893b';c2=c2||'#6b4c1e';
+  const tint=`radial-gradient(120% 90% at 50% 42%,${hexA(color,.04)} 0%,${hexA(c2,.28)} 100%)`;
+  const m={
+    bottom:`linear-gradient(180deg,rgba(0,0,0,.10) 0%,rgba(0,0,0,0) 38%,rgba(0,0,0,.22) 62%,rgba(0,0,0,.68) 100%)`,
+    top:   `linear-gradient(0deg,rgba(0,0,0,.06) 0%,rgba(0,0,0,0) 40%,rgba(0,0,0,.20) 62%,rgba(0,0,0,.64) 100%)`,
+    left:  `linear-gradient(90deg,rgba(0,0,0,.66) 0%,rgba(0,0,0,.18) 48%,rgba(0,0,0,0) 72%)`,
+    right: `linear-gradient(270deg,rgba(0,0,0,.66) 0%,rgba(0,0,0,.18) 48%,rgba(0,0,0,0) 72%)`,
+    center:`radial-gradient(closest-side,rgba(0,0,0,.52) 0%,rgba(0,0,0,.16) 62%,rgba(0,0,0,0) 100%)`,
+  };
+  return`${m[p]||m.bottom}, ${tint}`;
+}
+
+function pickPool(arr,used,max){
+  if(used.length>=arr.length)used.length=0;
+  let idx,t=0;
+  do{idx=Math.floor(Math.random()*arr.length);t++;}while(used.includes(idx)&&t<20);
+  used.push(idx);if(used.length>max)used.shift();
+  return{item:arr[idx],idx};
+}
+function pickBless(){
+  const FALLBACK=['ขอให้มีความสุขตลอดวัน','สุขภาพแข็งแรง คิดสิ่งใดสมหวัง','ขอให้โชคดีมีแต่สิ่งดีๆ','วันนี้ขอให้สดใส เบาสบายใจ','ขอให้ทุกก้าวพบเจอสิ่งมงคล','รอยยิ้มสดใส รับวันใหม่'];
+  const pool=(M?.blessings?.length>=2)?M.blessings:(M?.blessings||[]).concat(FALLBACK);
+  const{item,idx}=pickPool(pool,uBl,Math.max(3,Math.floor(pool.length/2)));
+  lastBlIdx=idx; return item;
+}
+function mkCombo(){
+  const imgRes = pickPool(M.images,   uImg, Math.max(4,Math.floor(M.images.length/2)));
+  const frRes  = pickPool(FRAMES,     uFr,  6);
+  const layRes = pickPool(LAYOUTS,    uLay, 4);
+  const txRes  = pickPool(TEXT_SIZES, uTx,  3);
+  const ovRes  = pickPool(OVERLAYS,   uOv,  3);
+  return{imgSrc:`${BASE}/${imgRes.item}?v=${M.version}`, fr:frRes.item, lay:layRes.item, bl:pickBless(), tx:txRes.item, ov:ovRes.item};
+}
+
+/* ── BUILD CARD DOM ─────────────────────────────────────────────────── */
+function buildCard(cb,CW){
+  const{imgSrc,fr,lay,bl,tx,ov}=cb;
+  const cw=document.createElement('div'); cw.className='cw';
+  cw.style.width=CW+'px'; cw.style.height=CW+'px';
+  cw.style.marginLeft=(-CW/2)+'px'; cw.style.marginTop=(-CW/2)+'px';
+
+  const card=document.createElement('div'); card.className='card';
+  card.style.width=CW+'px'; card.style.height=CW+'px';
+
+  // bg
+  const bg=document.createElement('img'); bg.className='bg'; bg.crossOrigin='anonymous';
+  bg.style.opacity='0'; bg.onload=()=>bg.style.opacity='1'; bg.src=imgSrc;
+  // overlay effect บน bg image
+  if(ov&&ov.cssFilter) bg.style.filter=ov.cssFilter;
+  card.appendChild(bg);
+
+  // scrim
+  const sc=document.createElement('div'); sc.className='scrim';
+  sc.style.background=scrimCSS(lay.scrim,M.color,M.color2);
+  card.appendChild(sc);
+
+  // กรอบ: ใช้ box-shadow inset บน card โดยตรง — ไม่โดน overflow:hidden ตัด
+  applyFrameToCard(card, fr);
+
+  // text content — ใช้ tx multiplier
+  const L=lay;
+  const hs = Math.round((tx?tx.hs_mul:1) * L.hs);
+  const bsz= Math.round((tx?tx.bs_mul:1) * L.bs);
+  const gap= tx ? tx.gap : 8;
+  const content=document.createElement('div'); content.className='content';
+  content.style.cssText=`padding:${L.pad};justify-content:${L.j};align-items:${L.a};text-align:${L.ta}`;
+  const tb=document.createElement('div');
+  tb.style.cssText=`display:flex;flex-direction:column;gap:${gap}px;max-width:${L.narrow?'56%':'92%'};align-items:${L.ta==='left'?'flex-start':L.ta==='right'?'flex-end':'center'}`;
+  if(L.rot)tb.style.transform=`rotate(${L.rot}deg)`;
+  if(L.panel)tb.style.cssText+=`;background:rgba(0,0,0,.34);padding:16px 20px;border-radius:16px;border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(3px)`;
+
+  const h=document.createElement('div'); h.className='hello';
+  h.style.cssText=`font-family:'${L.font}',sans-serif;font-size:${hs}px`;
+  h.textContent=M.headline||('สวัสดีวัน'+M.dayTh);
+  const blEl=document.createElement('div'); blEl.className='bless'; blEl.style.fontSize=bsz+'px'; blEl.textContent=bl;
+  const dt=document.createElement('div'); dt.className='date'; dt.textContent=M.dateThai;
+  tb.append(h,blEl,dt); content.appendChild(tb); card.appendChild(content);
+
+  // sparkles
+  for(let i=0;i<7;i++){
+    const s=document.createElement('div'); s.className='sparkle';
+    s.style.cssText=`left:${8+Math.random()*84}%;top:${8+Math.random()*84}%;opacity:${.4+Math.random()*.6};transform:scale(${.6+Math.random()})`;
+    card.appendChild(s);
+  }
+  cw.appendChild(card);
+  return cw;
+}
+
+/* ── APPLY FRAME TO CARD (DOM display) ──────────────────────────────── */
+// ใช้ box-shadow inset ซ้อนกัน — ไม่โดน overflow:hidden ตัด
+// layer 1 (ด้านนอก): สีพื้นหลังซ่อนส่วนก่อนถึงเส้นกรอบ
+// layer 2: เส้นกรอบหลัก
+// layer 3: เส้นใน (before)
+// layer 4: outer glow
+function applyFrameToCard(card, fr){
+  const ins = parseFloat(fr.ins)||0;
+  const brdPts = fr.brd && fr.brd!=='none' ? fr.brd.trim().split(/\s+/) : null;
+  const shadows = [];
+
+  // corner SVG — เพิ่มลงใน card
+  card.querySelectorAll('.corner').forEach(c=>c.remove());
+  if(fr.co){
+    ['tl','tr','bl','br'].forEach(cls=>{
+      const co=document.createElement('div'); co.className='corner '+cls;
+      co.innerHTML=fr.co; co.style.zIndex='6'; card.appendChild(co);
+    });
+  }
+
+  // rainbow border — ใช้ pseudo overlay div แทน box-shadow
+  card.querySelectorAll('.rainbow-border').forEach(r=>r.remove());
+  if(fr.rainbow){
+    const rb=document.createElement('div'); rb.className='rainbow-border';
+    rb.style.cssText=`position:absolute;inset:${ins}px;border-radius:${parseFloat(fr.br)||0}px;`+
+      `border:3px solid transparent;background:linear-gradient(var(--card-bg,#0000),var(--card-bg,#0000)) padding-box,`+
+      `linear-gradient(135deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#ff6b6b) border-box;`+
+      `pointer-events:none;z-index:5;`;
+    card.appendChild(rb);
+  }
+
+  if(brdPts && !fr.rainbow){
+    const bw  = parseFloat(brdPts[0])||2;
+    const bc  = brdPts[brdPts.length-1];
+    const type= brdPts[1]||'solid';
+
+    // เส้นกรอบหลัก: inset spread = ins+bw (วาดจากขอบเข้ามา ins px แล้วหนา bw)
+    // ใช้คู่ — spread ใหญ่สีกรอบ + spread เล็กกว่า bw สีดำโปร่งใส ซ่อนส่วนใน
+    // วิธีที่ได้ผลชัดสุด: paint border ด้วย 2 inset shadows
+    shadows.push(`inset 0 0 0 ${ins+bw}px ${bc}`);       // เส้นนอก
+    shadows.push(`inset 0 0 0 ${ins}px rgba(0,0,0,0)`);  // placeholder (ไม่มีผลจริง แต่ทำให้อ่านชัด)
+
+    if(type==='double'){
+      const gap=bw*1.5;
+      shadows.push(`inset 0 0 0 ${ins+bw+gap}px ${bc}`);
+    }
+
+    // before line
+    if(fr.bb && fr.bb!=='none'){
+      const bp  = fr.bb.trim().split(/\s+/);
+      const bw2 = parseFloat(bp[0])||1;
+      const bc2 = bp[bp.length-1];
+      const bi  = parseFloat(fr.bi)||0;
+      const pos = ins+bw+bi;
+      shadows.push(`inset 0 0 0 ${pos+bw2}px ${bc2}`);
+    }
+  }
+
+  // outer glow/shadow จาก fr.bs
+  if(fr.bs && fr.bs!=='none'){
+    fr.bs.split(',').forEach(s=>{
+      if(!s.trim().startsWith('inset')) shadows.push(s.trim());
+    });
+  }
+
+  card.style.boxShadow = shadows.filter(Boolean).join(', ');
+}
+
+/* ── SIZING ─────────────────────────────────────────────────────────── */
+const stage=document.getElementById('stage');
+let CW=0, SIDE_SCALE=0.78, SIDE_OFFSET=0, SIDE_Y=0;
+function computeSizes(){
+  const sw=stage.offsetWidth, sh=stage.offsetHeight;
+  CW          = Math.min(Math.round(sw*.78), sh-16);
+  SIDE_SCALE  = 0.78;
+  SIDE_OFFSET = Math.round(sw*.62);
+  SIDE_Y      = Math.round(CW*.06);
+}
+
+/* ── CAROUSEL STATE ─────────────────────────────────────────────────── */
+const POOL=7, DOT_N=8;
+let combos=[],cwEls=[],globalIdx=0;
+function curSlot(){return((globalIdx%POOL)+POOL)%POOL;}
+
+function circDist(i,c){
+  let d=i-c;
+  if(d> POOL/2)d-=POOL;
+  if(d<-POOL/2)d+=POOL;
+  return d;
+}
+function posFor(i){
+  const d=circDist(i,curSlot());
+  if(d===0) return{tx:0,           ty:0,        sc:1,          op:1,  br:1,  z:10,sh:'0 28px 60px rgba(50,28,5,.42),0 8px 20px rgba(50,28,5,.24)'};
+  if(d===1) return{tx: SIDE_OFFSET,ty:SIDE_Y,   sc:SIDE_SCALE, op:.78,br:.82,z:5, sh:'0 8px 20px rgba(50,28,5,.14)'};
+  if(d===-1)return{tx:-SIDE_OFFSET,ty:SIDE_Y,   sc:SIDE_SCALE, op:.78,br:.82,z:5, sh:'0 8px 20px rgba(50,28,5,.14)'};
+  const fx=SIDE_OFFSET+Math.abs(d)*CW*.08;
+  return{tx:d>0?fx:-fx, ty:SIDE_Y+12, sc:SIDE_SCALE*.84, op:.22,br:.55,z:0, sh:'none'};
+}
+function applyPos(cw,p,anim){
+  const card=cw.querySelector('.card');
+  if(!anim)cw.classList.add('no-anim'); else cw.classList.remove('no-anim');
+  if(!anim)cw.offsetHeight;
+  cw.style.transform=`translate(${p.tx}px,${p.ty}px) scale(${p.sc})`;
+  cw.style.opacity=p.op; cw.style.zIndex=p.z;
+  cw.style.filter=p.br>=1?'none':`brightness(${p.br})`;
+  if(card)card.style.boxShadow=p.sh;
+  if(!anim)requestAnimationFrame(()=>cw.classList.remove('no-anim'));
+}
+function layoutAll(anim=true){cwEls.forEach((cw,i)=>applyPos(cw,posFor(i),anim));updateDots();}
+
+function refreshSlot(slot){
+  combos[slot]=mkCombo();
+  const cw=cwEls[slot];
+  const old=cw.querySelector('.card');
+  const fresh=buildCard(combos[slot],CW).querySelector('.card');
+  cw.replaceChild(fresh,old);
+  // sync size in case resize happened
+  cw.style.width=CW+'px'; cw.style.height=CW+'px';
+  cw.style.marginLeft=(-CW/2)+'px'; cw.style.marginTop=(-CW/2)+'px';
+  fresh.style.width=CW+'px'; fresh.style.height=CW+'px';
+}
+
+/* ── DOTS ───────────────────────────────────────────────────────────── */
+const dotsEl=document.getElementById('dotsEl');
+function buildDots(){
+  dotsEl.innerHTML='';
+  for(let i=0;i<DOT_N;i++){const d=document.createElement('div');d.className='dot'+(i===0?' active':'');dotsEl.appendChild(d);}
+}
+function updateDots(){
+  const pos=((globalIdx%DOT_N)+DOT_N)%DOT_N;
+  [...dotsEl.querySelectorAll('.dot')].forEach((d,i)=>d.classList.toggle('active',i===pos));
+}
+
+/* ── SWIPE ──────────────────────────────────────────────────────────── */
+function attachSwipe(){
+  let sx=0,sy=0,dx=0,dragging=false,horiz=null;
+  const THRESH=50;
+  const lerp=(a,b,t)=>a+(b-a)*t;
+
+  function liveLayout(rawDx){
+    const frac=Math.min(Math.abs(rawDx)/(CW*.55),1);
+    const dir=rawDx<0?1:-1;
+    cwEls.forEach((cw,i)=>{
+      const fromP=posFor(i);
+      const nc=((( curSlot()+dir)%POOL)+POOL)%POOL;
+      const d2=circDist(i,nc);
+      const fx2=SIDE_OFFSET+Math.abs(d2)*CW*.08;
+      const toP={
+        tx:d2===0?0:d2===1?SIDE_OFFSET:d2===-1?-SIDE_OFFSET:d2>0?fx2:-fx2,
+        ty:d2===0?0:Math.abs(d2)===1?SIDE_Y:SIDE_Y+12,
+        sc:d2===0?1:Math.abs(d2)===1?SIDE_SCALE:SIDE_SCALE*.84,
+        op:d2===0?1:Math.abs(d2)===1?.78:.22,
+        br:d2===0?1:Math.abs(d2)===1?.82:.55,
+        sh:d2===0?'0 28px 60px rgba(50,28,5,.42)':Math.abs(d2)===1?'0 8px 20px rgba(50,28,5,.14)':'none',
+      };
+      const card=cw.querySelector('.card');
+      const liveX=lerp(fromP.tx,toP.tx,frac)+(i===curSlot()?rawDx:0);
+      cw.style.transform=`translate(${liveX}px,${lerp(fromP.ty,toP.ty,frac)}px) scale(${lerp(fromP.sc,toP.sc,frac)})`;
+      cw.style.opacity=lerp(fromP.op,toP.op,frac)+'';
+      cw.style.filter=`brightness(${lerp(fromP.br,toP.br,frac)})`;
+      if(card)card.style.boxShadow=frac>.5?toP.sh:fromP.sh;
+    });
+  }
+
+  function onStart(x,y){sx=x;sy=y;dx=0;dragging=true;horiz=null;cwEls.forEach(cw=>cw.classList.add('no-anim'));}
+  function onMove(x,y){
+    if(!dragging)return; dx=x-sx;
+    const dy=y-sy;
+    if(horiz===null&&(Math.abs(dx)>6||Math.abs(dy)>6))horiz=Math.abs(dx)>=Math.abs(dy);
+    if(!horiz)return;
+    liveLayout(dx);
+  }
+  function onEnd(){
+    if(!dragging)return; dragging=false;
+    cwEls.forEach(cw=>cw.classList.remove('no-anim'));
+    if(horiz&&Math.abs(dx)>=THRESH){
+      if(dx<0){globalIdx++;refreshSlot(((globalIdx+2)%POOL+POOL)%POOL);}
+      else    {globalIdx--;refreshSlot(((globalIdx-2)%POOL+POOL)%POOL);}
+      track2('next');
+    }
+    layoutAll(true);
+  }
+  stage.addEventListener('mousedown',e=>{e.preventDefault();onStart(e.clientX,e.clientY);});
+  window.addEventListener('mousemove',e=>{if(dragging)onMove(e.clientX,e.clientY);});
+  window.addEventListener('mouseup',()=>{if(dragging)onEnd();});
+  stage.addEventListener('touchstart',e=>onStart(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+  stage.addEventListener('touchmove',e=>{onMove(e.touches[0].clientX,e.touches[0].clientY);if(horiz)e.preventDefault();},{passive:false});
+  stage.addEventListener('touchend',()=>onEnd());
+}
+
+/* ── DRAW FRAME ONTO CANVAS ─────────────────────────────────────────── */
+// logic เดียวกับ applyFrameToCard แต่วาดลง canvas แทน DOM
+// canvas scale=2 → 1px CSS = 2px canvas
+function drawFrameOnCanvas(ctx,w,h,fr){
+  if(!fr)return;
+  const S=2;
+  const ins=(parseFloat(fr.ins)||0)*S;
+  const br =(parseFloat(fr.br) ||0)*S;
+  const brdPts=fr.brd&&fr.brd!=='none'?fr.brd.trim().split(/\s+/):null;
+
+  function roundRect(x,y,rw,rh,rad){
+    rad=Math.max(0,Math.min(rad,rw/2,rh/2));
+    ctx.beginPath();
+    if(rad===0){ctx.rect(x,y,rw,rh);return;}
+    ctx.moveTo(x+rad,y); ctx.lineTo(x+rw-rad,y); ctx.quadraticCurveTo(x+rw,y,x+rw,y+rad);
+    ctx.lineTo(x+rw,y+rh-rad); ctx.quadraticCurveTo(x+rw,y+rh,x+rw-rad,y+rh);
+    ctx.lineTo(x+rad,y+rh); ctx.quadraticCurveTo(x,y+rh,x,y+rh-rad);
+    ctx.lineTo(x,y+rad); ctx.quadraticCurveTo(x,y,x+rad,y);
+    ctx.closePath();
+  }
+
+  function drawLine(offset, lw, color, dash){
+    if(!color||color==='none')return;
+    const half=lw/2;
+    const x=offset+half, y=offset+half;
+    const rw=w-offset*2-lw, rh=h-offset*2-lw;
+    const r=Math.max(br-offset,0);
+    ctx.save();
+    ctx.strokeStyle=color; ctx.lineWidth=lw;
+    ctx.setLineDash(dash||[]);
+    roundRect(x,y,rw,rh,r);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  if(brdPts){
+    const bw  =(parseFloat(brdPts[0])||2)*S;
+    const type= brdPts[1]||'solid';
+    const bc  = brdPts[brdPts.length-1];
+    // เส้นหลัก: วาดที่ offset = ins, หนา bw
+    drawLine(ins, bw, bc, type==='dashed'?[8*S,5*S]:null);
+    if(type==='double'){
+      const gap=bw*1.5;
+      drawLine(ins+gap, bw*0.5, bc, null);
+    }
+    // before line
+    if(fr.bb&&fr.bb!=='none'){
+      const bp  =fr.bb.trim().split(/\s+/);
+      const bw2 =(parseFloat(bp[0])||1)*S;
+      const bc2 =bp[bp.length-1];
+      const type2=bp[1]||'solid';
+      const bi  =(parseFloat(fr.bi)||0)*S;
+      drawLine(ins+bw+bi, bw2, bc2, type2==='dashed'?[6*S,4*S]:null);
+    }
+  }
+}
+
+/* ── SNAPSHOT ───────────────────────────────────────────────────────── */
+async function snapshot(){
+  const card=cwEls[curSlot()].querySelector('.card');
+  const combo=combos[curSlot()];
+  const fr=combo?.fr;
+  const ov=combo?.ov;
+  // clone card ก่อน snapshot — ลบ filter บน img เพราะ html2canvas ไม่รองรับ css filter
+  // แทนที่ด้วย canvasFn หลัง render
+  const bgImg=card.querySelector('img.bg');
+  const savedFilter=bgImg?bgImg.style.filter:'';
+  if(bgImg)bgImg.style.filter='';
+  const canvas=await html2canvas(card,{useCORS:true,scale:2,backgroundColor:null,logging:false});
+  if(bgImg)bgImg.style.filter=savedFilter;
+  const ctx=canvas.getContext('2d');
+  // apply overlay effect
+  if(ov&&ov.canvasFn) ov.canvasFn(ctx,canvas.width,canvas.height);
+  drawFrameOnCanvas(ctx,canvas.width,canvas.height,fr);
+  return canvas;
+}
+
+/* ── ACTIONS ────────────────────────────────────────────────────────── */
+document.getElementById('btnCopy').onclick=async()=>{
+  const btn=document.getElementById('btnCopy');
+  const orig=btn.textContent; btn.textContent='กำลังเตรียม…'; btn.disabled=true;
+  try{
+    const c=await snapshot();
+    // ตรวจว่า clipboard API ใช้ได้ไหม (LINE WebView ไม่ support)
+    const canClip=!!(window.ClipboardItem&&navigator.clipboard?.write);
+    if(canClip){
+      c.toBlob(async b=>{
+        try{
+          await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);
+          toast('คัดลอกแล้ว พร้อมแปะใน LINE ✓');trackGC('copy');track2('copy');
+        }catch{
+          // clipboard ล้มเหลว → fallback download
+          triggerDownload(c);
+          toast('คัดลอกไม่ได้ — บันทึกรูปแล้วแทน แล้วแนบใน LINE');
+        }
+        btn.textContent=orig; btn.disabled=false;
+      },'image/png');
+    } else {
+      // LINE / WebView — ไม่มี clipboard API → download แทนทันที
+      triggerDownload(c);
+      toast('เปิดใน LINE: กดค้างที่รูปเพื่อแชร์ได้เลย');trackGC('copy');track2('copy');
+      btn.textContent=orig; btn.disabled=false;
+    }
+  }catch{toast('ไม่สำเร็จ ลองกดบันทึกแทน');btn.textContent=orig;btn.disabled=false;}
+};
+function triggerDownload(canvas){
+  const a=document.createElement('a');
+  a.download=`${M.headline||'สวัสดีวันนี้'}.png`;
+  a.href=canvas.toDataURL('image/png'); a.click();
+  trackGC('download'); track2('download');
+}
+document.getElementById('btnSave').onclick=async()=>{
+  const btn=document.getElementById('btnSave');const t=btn.textContent;btn.textContent='กำลังบันทึก…';btn.disabled=true;
+  try{
+    const c=await snapshot();const a=document.createElement('a');
+    a.download=`${M.headline||'สวัสดีวันนี้'}.png`;a.href=c.toDataURL('image/png');a.click();
+    toast('บันทึกแล้ว ✓');trackGC('download');track2('download');
+  }catch{toast('บันทึกไม่สำเร็จ ลองแคปหน้าจอแทน');}
+  finally{btn.textContent=t;btn.disabled=false;}
+};
+
+/* ── INIT CAROUSEL ──────────────────────────────────────────────────── */
+function initCarousel(){
+  computeSizes();
+  globalIdx=0; uImg=[];uFr=[];uLay=[];uBl=[];uTx=[];uOv=[];
+  combos=Array.from({length:POOL},()=>mkCombo());
+  cwEls=combos.map(c=>buildCard(c,CW));
+  stage.innerHTML='';
+  cwEls.forEach(cw=>stage.appendChild(cw));
+  layoutAll(false);
+  buildDots();
+  attachSwipe();
+  document.getElementById('actions').style.display='';
+  // preload รูปที่เหลือ
+  M.images.forEach(src=>{const im=new Image();im.crossOrigin='anonymous';im.src=`${BASE}/${src}?v=${M.version}`;});
+}
+
+/* ── BOOT ───────────────────────────────────────────────────────────── */
+async function boot(){
+  track2('open');
+  if(REPO.includes('REPO_NAME')){
+    stage.innerHTML=`<div class="msg">⚠️ ยังไม่ได้ตั้งค่า — แก้ <code>const REPO</code> ให้เป็นรีโปจริงก่อน</div>`;
+    document.getElementById('dateLine').textContent=''; return;
+  }
+  try{
+    const res=await fetch(`${BASE}/manifest.json?v=${Date.now()}`,{cache:'no-store'});
+    if(!res.ok)throw new Error('manifest '+res.status);
+    M=await res.json();
+  }catch{
+    stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen ตอนดึก หรือไปที่ <b>Actions → Run workflow</b></div>`;
+    document.getElementById('dateLine').textContent=''; return;
+  }
+  document.getElementById('dateLine').textContent=M.dateThai||'';
+  if(M.isFestival)document.getElementById('topTitle').textContent=M.headline||'สวัสดีวันนี้';
+  initCarousel();
+}
+
+window.addEventListener('resize',()=>{
+  computeSizes();
+  cwEls.forEach((cw,i)=>{
+    cw.style.width=CW+'px'; cw.style.height=CW+'px';
+    cw.style.marginLeft=(-CW/2)+'px'; cw.style.marginTop=(-CW/2)+'px';
+    const card=cw.querySelector('.card');
+    if(card){card.style.width=CW+'px';card.style.height=CW+'px';}
+  });
+  layoutAll(false);
+});
+
+boot();
+</script>
+</body>
+</html>
