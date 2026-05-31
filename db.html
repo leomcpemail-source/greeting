@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — สวัสดีวันนี้</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0f1320;--card:#1a2032;--ink:#e8ecf6;--mut:#8b93a7;--gold:#e7c46a;--line:#283047;--accent:#6ea8e7;--red:#e76e6e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:16px 14px 60px}
+.wrap{max-width:860px;margin:0 auto}
+
+/* gate */
+.gate{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 22px;max-width:340px;margin:60px auto;text-align:center}
+.gate h2{font-family:'Kanit';font-size:17px;margin-bottom:14px}
+.gate input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0c0f18;color:var(--ink);font-size:15px;margin-bottom:10px;outline:none}
+.gate input:focus{border-color:var(--gold)}
+.btn-gold{font-family:'Kanit';cursor:pointer;border:none;border-radius:10px;padding:11px 20px;background:linear-gradient(135deg,#caa23f,#e7c46a);color:#241a06;font-weight:600;font-size:15px;width:100%}
+.err-text{color:var(--red);font-size:13px;margin-top:8px;min-height:18px}
+
+/* header */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.hdr h1{font-family:'Kanit';font-size:20px;font-weight:600}
+.updated{color:var(--mut);font-size:11px}
+
+/* filter bar */
+.filter-bar{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-label{color:var(--mut);font-size:12px;white-space:nowrap}
+.chip-group{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-family:'Kanit';cursor:pointer;border:1px solid var(--line);border-radius:20px;
+  padding:5px 14px;background:transparent;color:var(--ink);font-size:13px;transition:all .15s}
+.chip:hover{border-color:var(--gold);color:var(--gold)}
+.chip.on{background:var(--gold);color:#241a06;border-color:var(--gold);font-weight:600}
+.chip.danger.on{background:var(--red);color:#fff;border-color:var(--red)}
+.divider{width:1px;height:24px;background:var(--line);margin:0 4px}
+.date-input{background:#0c0f18;border:1px solid var(--line);border-radius:10px;color:var(--ink);
+  font-family:'Sarabun';font-size:13px;padding:6px 10px;outline:none;cursor:pointer}
+.date-input:focus{border-color:var(--gold)}
+.date-input::-webkit-calendar-picker-indicator{filter:invert(.6)}
+
+/* kpis */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:480px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 12px}
+.kpi-v{font-family:'Kanit';font-size:24px;font-weight:600;line-height:1}
+.kpi-v.gold{color:var(--gold)}
+.kpi-l{color:var(--mut);font-size:11px;margin-top:4px}
+
+/* panels */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.panel h3{font-family:'Kanit';font-size:13px;font-weight:500;color:#cfd6e8;margin-bottom:10px}
+.panel.full{grid-column:1/-1}
+.cbox{position:relative;height:200px}
+
+/* treemap */
+.treemap{display:flex;flex-wrap:wrap;gap:4px;width:100%;min-height:100px}
+.tm-cell{display:flex;flex-direction:column;justify-content:center;align-items:center;
+  border-radius:8px;padding:6px;cursor:default;transition:opacity .15s;overflow:hidden;min-width:52px;min-height:48px}
+.tm-cell:hover{opacity:.82}
+.tm-lbl{font-family:'Kanit';font-size:12px;font-weight:600;color:#1a2032;text-align:center;
+  line-height:1.2;white-space:normal;word-break:keep-all;max-width:100%}
+.tm-val{font-size:11px;color:rgba(26,32,50,.7);margin-top:2px;text-align:center}
+
+/* geo summary */
+.geo-sum{font-family:'Kanit';font-size:14px;margin-bottom:10px}
+
+/* loading spinner */
+.loading{display:flex;align-items:center;justify-content:center;gap:8px;padding:30px;color:var(--mut);font-size:14px}
+.spin{width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--gold);
+  border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.note{color:var(--mut);font-size:11px;margin-top:20px;text-align:center;line-height:1.8}
+.err-bar{color:var(--red);font-size:13px;text-align:center;min-height:18px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- gate -->
+  <div id="gate" class="gate">
+    <h2>🔒 Dashboard — สวัสดีวันนี้</h2>
+    <input id="pass" type="password" placeholder="รหัสผ่าน" autocomplete="off">
+    <button class="btn-gold" onclick="enter()">เข้าดู</button>
+    <div class="err-text" id="gateErr"></div>
+  </div>
+
+  <!-- board -->
+  <div id="board" style="display:none">
+    <div class="hdr">
+      <h1>📊 สวัสดีวันนี้</h1>
+      <div class="updated" id="updated"></div>
+    </div>
+
+    <!-- filter bar -->
+    <div class="filter-bar">
+      <div class="filter-row">
+        <span class="filter-label">ช่วงเวลา</span>
+        <div class="chip-group">
+          <button class="chip" data-d="1">วันนี้</button>
+          <button class="chip" data-d="7">7 วัน</button>
+          <button class="chip" data-d="30">30 วัน</button>
+          <button class="chip" data-d="90">90 วัน</button>
+          <button class="chip on" data-d="36500">ทั้งหมด</button>
+        </div>
+        <div class="divider"></div>
+        <span class="filter-label">หรือเลือกวันที่</span>
+        <input type="date" id="datePicker" class="date-input">
+      </div>
+    </div>
+
+    <div class="err-bar" id="errBar"></div>
+
+    <!-- content -->
+    <div id="content">
+      <div class="loading"><div class="spin"></div>กำลังโหลด…</div>
+    </div>
+
+    <div class="note">
+      visitor_id เป็นรหัสสุ่มใน localStorage • ประเทศประมาณจาก timezone<br>
+      <span id="updated2"></span>
+    </div>
+  </div>
+
+</div>
+<script>
+const SB_URL  = "https://bbtmcwydwscjjoxydbfp.supabase.co";
+const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJidG1jd3lkd3NjampveHlkYmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzUyNDIsImV4cCI6MjA5NTY1MTI0Mn0.q_rVvMWenYI_dkc1JhSiXWgwWBqtGtgLYEVMqwBSZX0";
+
+const todayISO = new Date().toLocaleDateString('sv-SE');
+let PASS='', DAYS=36500, DATE_FILTER=null, charts={}, _timer=null;
+const $=id=>document.getElementById(id);
+
+// init date picker
+$('datePicker').max = todayISO;
+
+/* ── auth ── */
+function enter(){
+  PASS = $('pass').value.trim();
+  if(!PASS){ $('gateErr').textContent='ใส่รหัสก่อน'; return; }
+  $('gate').style.display='none';
+  $('board').style.display='block';
+  startAutoRefresh();
+  load();
+}
+
+/* ── filter logic ── */
+// chip click
+document.querySelectorAll('.chip[data-d]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.chip[data-d]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  DAYS = +b.dataset.d;
+  // chip "วันนี้" ต้องส่ง target_date ด้วย ไม่งั้น SQL ดึง 24h ย้อนหลังซึ่งครอบคลุมเมื่อวานด้วย
+  DATE_FILTER = (+b.dataset.d === 1) ? todayISO : null;
+  $('datePicker').value = DATE_FILTER || '';
+  load();
+});
+
+// date picker change → load ทันที
+$('datePicker').addEventListener('change', () => {
+  const v = $('datePicker').value;
+  if(!v){ DATE_FILTER=null; return; }
+  DATE_FILTER = v;
+  // ยกเลิก chip selection
+  document.querySelectorAll('.chip[data-d]').forEach(x=>x.classList.remove('on'));
+  load();
+});
+
+/* ── fetch ── */
+async function rpc(){
+  // day mode: ส่ง days=1 เพื่อให้ SQL filter เฉพาะวันนั้นจริงๆ
+  const body = { pass: PASS, days: DATE_FILTER ? 1 : DAYS };
+  if(DATE_FILTER) body.target_date = DATE_FILTER;
+  const res = await fetch(`${SB_URL}/rest/v1/rpc/dashboard_stats`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON},
+    body: JSON.stringify(body)
+  });
+  if(!res.ok) throw new Error('http '+res.status);
+  return res.json();
+}
+
+async function load(){
+  $('errBar').textContent = '';
+  showLoading();
+  try {
+    const d = await rpc();
+    if(d?.error === 'unauthorized'){
+      $('gate').style.display='block'; $('board').style.display='none';
+      $('gateErr').textContent='รหัสผ่านไม่ถูกต้อง'; return;
+    }
+    render(d);
+    const now = new Date().toLocaleTimeString('th-TH');
+    $('updated').textContent = '🔄 ' + now;
+    $('updated2').textContent = 'อัปเดตล่าสุด: ' + now + ' • auto-refresh ทุก 30 วิ';
+  } catch(e) {
+    $('errBar').textContent = 'โหลดไม่สำเร็จ: ' + e.message;
+    hideLoading();
+  }
+}
+
+function startAutoRefresh(){
+  if(_timer) clearInterval(_timer);
+  _timer = setInterval(load, 30000);
+}
+
+function showLoading(){
+  $('content').innerHTML = '<div class="loading"><div class="spin"></div>กำลังโหลด…</div>';
+}
+function hideLoading(){ /* content จะถูก render แทน */ }
+
+/* ── render ── */
+const N = v => Number(v)||0;
+const GOLD='#e7c46a', GRIDC='#283047', TICK='#8b93a7';
+
+function chartOpts(){
+  return { responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{ticks:{color:TICK,maxRotation:0},grid:{color:GRIDC}},
+      y:{ticks:{color:TICK},grid:{color:GRIDC},beginAtZero:true}
+    }
+  };
+}
+
+function mkChart(id, cfg){
+  if(charts[id]) charts[id].destroy();
+  charts[id] = new Chart($(id), cfg);
+}
+
+function kpi(v, l, gold=false){
+  return `<div class="kpi"><div class="kpi-v ${gold?'gold':''}">${v}</div><div class="kpi-l">${l}</div></div>`;
+}
+
+function render(d){
+  const t = d.totals||{};
+  const isDay = !!d.is_day_mode;
+  const title = isDay ? `📆 ${d.target_date}` : `ช่วง ${d.range_days === 36500 ? 'ทั้งหมด' : d.range_days+' วัน'}`;
+
+  let html = `
+    <div style="font-family:'Kanit';font-size:15px;color:var(--accent);margin-bottom:12px">${title}</div>
+    <div class="kpis">
+      ${kpi(N(t.opens).toLocaleString(), 'เปิดใช้', true)}
+      ${kpi(N(t.unique_visitors).toLocaleString(), 'ผู้ใช้ไม่ซ้ำ')}
+      ${kpi(N(d.returning_visitors).toLocaleString(), 'กลับมาซ้ำ', true)}
+      ${kpi(d.avg_events_per_visitor||0, 'กดเฉลี่ย/คน')}
+      ${kpi(N(t.downloads).toLocaleString(), 'ดาวน์โหลด', true)}
+      ${kpi(N(t.copies).toLocaleString(), 'คัดลอก')}
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <h3>${isDay ? '⏰ รายชั่วโมง (เวลาไทย)' : '📈 เปิดใช้รายวัน'}</h3>
+        <div class="cbox"><canvas id="cMain"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>${isDay ? '👆 พฤติกรรมวันนี้' : '⏰ ชั่วโมง (เวลาไทย)'}</h3>
+        <div id="cRightWrap" class="cbox" style="${isDay ? 'height:auto;min-height:120px' : ''}">
+          ${isDay ? '<div id="tmTypeDay" class="treemap" style="margin-top:4px"></div>' : '<canvas id="cHour"></canvas>'}
+        </div>
+      </div>
+      <div class="panel full" ${isDay ? 'style="display:none"' : ''}>
+        <h3>👆 พฤติกรรม</h3>
+        <div id="tmType" class="treemap"></div>
+      </div>
+      <div class="panel full">
+        <h3>🌏 ประเทศ (ประมาณจาก timezone)</h3>
+        <div class="geo-sum" id="geoSum"></div>
+        <div id="tmGeo" class="treemap"></div>
+      </div>
+    </div>`;
+
+  $('content').innerHTML = html;
+
+  // กราฟซ้าย
+  if(isDay){
+    // day mode: แสดง by_hour เป็น bar chart
+    const hrs = Array.from({length:24},(_,h)=>{
+      const f=(d.by_hour||[]).find(x=>N(x.hour)===h); return f?N(f.n):0;
+    });
+    mkChart('cMain',{type:'bar',data:{
+      labels:Array.from({length:24},(_,h)=>h+':00'),
+      datasets:[{data:hrs,backgroundColor:GOLD,borderRadius:4}]
+    },options:chartOpts()});
+  } else {
+    // range mode: line chart รายวัน
+    const days = d.by_day||[];
+    mkChart('cMain',{type:'line',data:{
+      labels:days.map(x=>x.day.slice(5)),
+      datasets:[{data:days.map(x=>N(x.n)),borderColor:GOLD,
+        backgroundColor:'rgba(231,196,106,.12)',fill:true,tension:.35,pointRadius:2}]
+    },options:chartOpts()});
+  }
+
+  const TYPE_TH={open:'เปิดใช้',download:'ดาวน์โหลด',copy:'คัดลอก',next:'เปลี่ยนรูป',reword:'สุ่มคำ',reject:'ไม่เอารูป'};
+  const TYPE_C={open:'#e7c46a',next:'#6ea8e7',reword:'#7fd1a0',download:'#e78f6e',copy:'#b98fe7',reject:'#e76e9c'};
+  const typeItems = (d.by_type||[]).map(x=>({label:TYPE_TH[x.type]||x.type,value:N(x.n),color:TYPE_C[x.type]||'#8b93a7'}));
+
+  if(isDay){
+    // กราฟขวา day mode = treemap พฤติกรรมเฉพาะวันนั้น (ไม่มี cHour)
+    drawTreemap('tmTypeDay', typeItems);
+  } else {
+    // กราฟขวา range mode = by_hour
+    const hours = Array.from({length:24},(_,h)=>{
+      const f=(d.by_hour||[]).find(x=>N(x.hour)===h); return f?N(f.n):0;
+    });
+    mkChart('cHour',{type:'bar',data:{
+      labels:Array.from({length:24},(_,h)=>h),
+      datasets:[{data:hours,backgroundColor:'rgba(231,196,106,.5)',borderRadius:3}]
+    },options:chartOpts()});
+    // treemap พฤติกรรม (full row)
+    drawTreemap('tmType', typeItems);
+  }
+
+  // geo
+  renderGeo(d.by_tz||[]);
+}
+
+/* ── treemap ── */
+function drawTreemap(id, items){
+  const el=$(id);
+  if(!items.length){el.innerHTML='<div style="color:var(--mut);padding:10px">ยังไม่มีข้อมูล</div>';return;}
+  const sorted=[...items].sort((a,b)=>b.value-a.value);
+  const total=sorted.reduce((s,x)=>s+x.value,0);
+  const cell=(x,big)=>`<div class="tm-cell" style="background:${x.color};flex:${Math.max(x.value/total*20,1)} 1 0;min-height:${big?68:50}px"
+    title="${x.label}: ${x.value.toLocaleString()}">
+    <div class="tm-lbl" style="font-size:${big?14:11}px">${x.label}</div>
+    <div class="tm-val">${x.value.toLocaleString()}</div>
+  </div>`;
+  const top=sorted.slice(0,2),rest=sorted.slice(2);
+  let h=`<div style="display:flex;gap:4px;width:100%;margin-bottom:4px">${top.map(x=>cell(x,true)).join('')}</div>`;
+  if(rest.length) h+=`<div style="display:flex;flex-wrap:wrap;gap:4px;width:100%">${rest.map(x=>cell(x,false)).join('')}</div>`;
+  el.innerHTML=h;
+}
+
+/* ── geo ── */
+const TZ_MAP={
+  'Asia/Bangkok':'ไทย','Asia/Vientiane':'ลาว','Asia/Phnom_Penh':'กัมพูชา','Asia/Yangon':'เมียนมา',
+  'Asia/Ho_Chi_Minh':'เวียดนาม','Asia/Saigon':'เวียดนาม','Asia/Singapore':'สิงคโปร์','Asia/Kuala_Lumpur':'มาเลเซีย',
+  'Asia/Jakarta':'อินโดนีเซีย','Asia/Manila':'ฟิลิปปินส์','Asia/Tokyo':'ญี่ปุ่น','Asia/Seoul':'เกาหลีใต้',
+  'Asia/Shanghai':'จีน','Asia/Hong_Kong':'ฮ่องกง','Asia/Taipei':'ไต้หวัน','Asia/Kolkata':'อินเดีย',
+  'Asia/Dubai':'UAE','Asia/Dhaka':'บังกลาเทศ','Asia/Karachi':'ปากีสถาน','Asia/Riyadh':'ซาอุฯ',
+  'Australia/Sydney':'ออสเตรเลีย','Australia/Melbourne':'ออสเตรเลีย','Pacific/Auckland':'นิวซีแลนด์',
+  'Europe/London':'อังกฤษ','Europe/Paris':'ฝรั่งเศส','Europe/Berlin':'เยอรมนี','Europe/Moscow':'รัสเซีย',
+  'America/New_York':'สหรัฐฯ','America/Los_Angeles':'สหรัฐฯ','America/Chicago':'สหรัฐฯ',
+  'America/Toronto':'แคนาดา','America/Sao_Paulo':'บราซิล'
+};
+const GEO_PAL=['#6ea8e7','#7fd1a0','#b98fe7','#e78f6e','#e76e9c','#5bc4d4','#a0d96e','#e7b96e','#9e6ee7','#d96e7f'];
+const cOf=tz=>TZ_MAP[tz]||(tz?tz.split('/').pop().replace(/_/g,' '):'ไม่ทราบ');
+
+function renderGeo(rows){
+  const byC={};let total=0,thai=0;
+  rows.forEach(x=>{const c=cOf(x.tz),n=N(x.n);byC[c]=(byC[c]||0)+n;total+=n;if(c==='ไทย')thai+=n;});
+  const pct=total?Math.round(thai/total*100):0;
+  $('geoSum').innerHTML=`🇹🇭 ไทย <b style="color:${GOLD}">${thai.toLocaleString()}</b> (${pct}%) &nbsp;•&nbsp; 🌍 ต่างชาติ <b style="color:var(--accent)">${(total-thai).toLocaleString()}</b> (${100-pct}%)`;
+  let pi=0;
+  drawTreemap('tmGeo',Object.entries(byC).sort((a,b)=>b[1]-a[1]).slice(0,14).map(([c,n])=>({
+    label:c,value:n,color:c==='ไทย'?GOLD:GEO_PAL[pi++%GEO_PAL.length]
+  })));
+}
+
+$('pass').addEventListener('keydown',e=>{if(e.key==='Enter')enter();});
+</script>
+</body>
+</html>
