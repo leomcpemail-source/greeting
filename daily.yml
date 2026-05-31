@@ -1,0 +1,43 @@
+name: Daily Greeting Generation
+
+on:
+  schedule:
+    - cron: '15 17 * * *'      # 00:15 เวลาไทย (17:15 UTC)
+  workflow_dispatch: {}         # กดรันเองได้จากหน้า Actions
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-greeting
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout (main)
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate images + blessings
+        run: node scripts/generate.mjs
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+      - name: Publish to daily-images branch (single commit, no history bloat)
+        run: |
+          cd output
+          git init -q
+          git config user.name "greeting-bot"
+          git config user.email "greeting-bot@users.noreply.github.com"
+          git checkout -q -b daily-images
+          git add -A
+          git commit -q -m "daily greetings $(date -u +%F_%H:%M)"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" daily-images
