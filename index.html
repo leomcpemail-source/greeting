@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>สวัสดีวันนี้ ☀️</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Charm:wght@400;700&family=Mitr:wght@500;600&family=Kanit:wght@400;600&family=Itim&family=Mali:wght@600&family=Sriracha&family=Pattaya&family=Bai+Jamjuree:wght@600&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script data-goatcounter="https://leomcpemail.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--ink:#2b2118;--gold:#b8893b;--gold2:#e7c46a}
+html,body{
+  /* dvh = dynamic viewport height รองรับ browser chrome bar ของ LINE/Safari */
+  height: 100%; height: 100dvh;
+  overflow:hidden;
+  font-family:'Sarabun',sans-serif;color:var(--ink);
+  background:radial-gradient(1200px 600px at 50% -10%,#fff8ec 0%,transparent 60%),
+  linear-gradient(160deg,#f3e9d6 0%,#ece0c8 100%);
+  overscroll-behavior:none;
+}
+.app{
+  display:flex;flex-direction:column;align-items:center;
+  height:100%;height:100dvh;
+  max-width:480px;margin:0 auto;
+  /* safe-area-inset รองรับ notch + home bar บน iOS/Android */
+  padding: max(8px, env(safe-area-inset-top)) 0 max(8px, env(safe-area-inset-bottom));
+  gap:5px;
+}
+
+/* ── HEADER ── */
+.header{text-align:center;flex-shrink:0;padding:0 20px;width:100%}
+/* [แก้ข้อ 5] เปลี่ยน DAILY GREETING → สวัสดีวันนี้ / ซ่อน .mark เดิม */
+.header .mark{display:none}
+.header .brand{
+  font-family:'Kanit';font-size:11px;letter-spacing:.18em;
+  color:var(--gold);opacity:.75;text-transform:none;margin-bottom:1px
+}
+/* [แก้ข้อ 6] ขนาดหัวใหญ่ขึ้นอ่านง่าย */
+.header h1{font-family:'Chonburi';font-size:21px;color:var(--ink);margin:1px 0 0;line-height:1.1}
+.header .dl{font-size:13px;color:#8a7560;margin-top:1px}
+
+/* [แก้ข้อ 2] กล่องคำแนะนำด้านบน */
+.usage-tip{
+  width:100%;padding:0 18px;flex-shrink:0;
+}
+.usage-tip-inner{
+  background:linear-gradient(135deg,#fffbf0,#fff8ec);
+  border:1.5px solid #e8d8b0;border-radius:14px;
+  padding:8px 14px;
+  display:flex;align-items:center;gap:9px;
+}
+.usage-tip-icon{font-size:20px;flex-shrink:0}
+/* [แก้ข้อ 6] ข้อความคำแนะนำใหญ่ขึ้น */
+.usage-tip-text{
+  font-family:'Sarabun';font-size:15px;font-weight:600;
+  color:#5a3e1e;line-height:1.35;
+}
+.usage-tip-text span{color:var(--gold);font-weight:700}
+
+/* [แก้ข้อ 9] แถบแจ้งเตือน LINE Browser */
+.line-notice{
+  display:none; /* แสดงเฉพาะเมื่อตรวจพบ LINE Browser */
+  width:100%;padding:0 18px;flex-shrink:0;
+}
+.line-notice.show{display:block}
+/* ใน LINE Browser ซ่อนแถบเขียว — ปุ่ม copy ถูกซ่อนแล้ว ไม่ต้องแจ้งซ้ำ ประหยัด space */
+.line-browser .line-notice{display:none!important}
+.line-notice-inner{
+  background:#06c755;border-radius:12px;
+  padding:10px 14px;
+  display:flex;align-items:flex-start;gap:8px;
+}
+.line-notice-inner .li{font-size:16px;flex-shrink:0;margin-top:1px}
+.line-notice-text{
+  font-family:'Sarabun';font-size:14px;font-weight:600;
+  color:#fff;line-height:1.5;
+}
+
+/* STAGE */
+.stage{
+  position:relative;width:100%;flex:1;min-height:0;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  /* ให้ stage กิน space ที่เหลือทั้งหมด */
+  flex-grow:1;
+}
+
+/* card wrapper */
+.cw{
+  position:absolute;left:50%;top:50%;
+  transform-origin:center center;
+  transition:transform .44s cubic-bezier(.34,1.1,.64,1),
+    opacity .38s ease,
+    filter .38s ease;
+  cursor:grab;user-select:none;touch-action:pan-y;
+}
+.cw.no-anim{transition:none!important}
+.card{
+  position:relative;border-radius:20px;overflow:hidden;background:#1a1208;
+  transition:box-shadow .44s ease;
+}
+.card img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:opacity .25s}
+.scrim{position:absolute;inset:0;z-index:1}
+.frame-el{display:none}
+.frame-before{position:absolute;pointer-events:none;transition:all .4s ease}
+.corner{position:absolute;width:44px;height:44px;z-index:5;transition:opacity .3s}
+.corner.tl{top:6px;left:6px}.corner.tr{top:6px;right:6px;transform:scaleX(-1)}
+.corner.bl{bottom:6px;left:6px;transform:scaleY(-1)}.corner.br{bottom:6px;right:6px;transform:scale(-1,-1)}
+.content{position:absolute;inset:0;display:flex;flex-direction:column;z-index:3;color:#fff}
+.hello{font-family:'Chonburi';line-height:1.15;text-shadow:0 2px 12px rgba(0,0,0,.5);word-break:keep-all;overflow-wrap:break-word}
+.bless{font-family:'Charm';font-weight:700;line-height:1.45;text-shadow:0 1px 8px rgba(0,0,0,.55);word-break:keep-all;overflow-wrap:break-word}
+.date{font-family:'Sarabun';font-size:12px;opacity:.92;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.sparkle{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;
+  box-shadow:0 0 8px 2px rgba(255,255,255,.8);z-index:2;pointer-events:none}
+
+/* [แก้ข้อ 4] เปลี่ยน dots → ข้อความ "รูป X จาก Y" */
+.img-counter{
+  flex-shrink:0;
+  /* [แก้ข้อ 6] ขนาดใหญ่ขึ้น */
+  font-family:'Sarabun';font-size:14px;font-weight:700;
+  color:var(--ink);opacity:.65;
+  letter-spacing:.02em;
+}
+/* ซ่อน dots เดิม (ยังคงไว้ใน DOM แต่ซ่อน) */
+.dots{display:none}
+.dot{display:none}
+
+/* [แก้ข้อ 3] ลูกศรซ้าย-ขวา + ข้อความปัด */
+.swipe-hint{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  flex-shrink:0;
+}
+/* [แก้ข้อ 6] ขนาดข้อความ hint ใหญ่ขึ้น */
+.swipe-hint-text{
+  font-family:'Sarabun';font-size:14px;font-weight:600;
+  color:var(--ink);opacity:.55;
+  display:flex;align-items:center;gap:6px;
+}
+.swipe-arrow{
+  font-size:18px;opacity:.45;
+  animation:arrowPulse 2s ease-in-out infinite;
+}
+.swipe-arrow.left{animation-delay:0s}
+.swipe-arrow.right{animation-delay:.3s}
+@keyframes arrowPulse{
+  0%,100%{transform:translateX(0);opacity:.45}
+  50%{transform:translateX(4px);opacity:.75}
+}
+.swipe-arrow.left{animation-name:arrowPulseLeft}
+@keyframes arrowPulseLeft{
+  0%,100%{transform:translateX(0);opacity:.45}
+  50%{transform:translateX(-4px);opacity:.75}
+}
+
+/* ซ่อน hint เดิม */
+.hint{display:none}
+
+/* [แก้ข้อ 10] ปรับปุ่มใหญ่ขึ้น ≥ 52px */
+.actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 18px;flex-shrink:0}
+.btn{
+  border:none;border-radius:16px;
+  /* [แก้ข้อ 10] สูงขึ้น */
+  padding:13px 12px;
+  font-family:'Kanit';font-size:16px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;
+  transition:transform .12s;
+  min-height:50px;
+}
+.btn:active{transform:scale(.95)}.btn:disabled{opacity:.5}
+.btn.copy{background:#fff;color:var(--ink);border:1.5px solid #ddd0bc;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.btn.save{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#3a2410;box-shadow:0 4px 16px rgba(180,130,40,.32)}
+/* [แก้ข้อ 1] ซ่อนปุ่ม copy ใน LINE Browser */
+.line-browser .btn.copy{display:none}
+.line-browser .actions{grid-template-columns:1fr}
+/* LINE: ซ่อน usage-tip (ประหยัด space) */
+.line-browser .usage-tip{display:none}
+
+/* [แก้ข้อ 8] กล่องความน่าเชื่อถือ */
+.trust-badges{
+  display:flex;flex-direction:column;gap:2px;
+  align-items:center;flex-shrink:0;
+  padding:0 18px 0;
+}
+.trust-row{
+  display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center;
+}
+.trust-item{
+  font-family:'Sarabun';font-size:13px;font-weight:600;
+  color:#7a6040;display:flex;align-items:center;gap:4px;
+}
+.trust-item .ti{font-size:14px}
+
+/* error/loading msg */
+.msg{text-align:center;padding:40px 20px;color:#7a6a52;font-size:14px;line-height:1.7}
+.msg code{background:#fff;padding:2px 6px;border-radius:6px;border:1px solid #e0d0b0;font-size:12px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:11px 20px;border-radius:24px;font-family:'Kanit';font-size:14px;z-index:99;
+  opacity:0;transition:.25s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+/* image viewer overlay สำหรับ LINE */
+#imgViewer img{-webkit-touch-callout:default!important;touch-action:auto!important}
+</style>
+</head>
+<body>
+<div class="app" id="appEl">
+
+  <div class="header">
+    <div class="mark">Daily Greeting</div><!-- ซ่อนด้วย CSS -->
+    <!-- [แก้ข้อ 5] เปลี่ยนชื่อเป็นภาษาไทย -->
+    <div class="brand">รูปสวัสดีประจำวัน</div>
+    <h1 id="topTitle">สวัสดีวันนี้</h1>
+    <div class="dl" id="dateLine">กำลังโหลด…</div>
+  </div>
+
+  <!-- [แก้ข้อ 2] คำแนะนำการใช้งาน -->
+  <div class="usage-tip">
+    <div class="usage-tip-inner">
+      <div class="usage-tip-icon">🖼️</div>
+      <div class="usage-tip-text">
+        เลือกรูปที่ชอบ แล้วกด <span>⬇️ บันทึกรูป</span> เพื่อส่งใน LINE
+      </div>
+    </div>
+  </div>
+
+  <!-- [แก้ข้อ 9] แจ้งเตือน LINE Browser (แสดงเฉพาะเมื่อตรวจพบ) -->
+  <div class="line-notice" id="lineNoticeEl">
+    <div class="line-notice-inner">
+      <div class="li">💬</div>
+      <div class="line-notice-text">
+        การคัดลอกรูปอาจไม่รองรับใน LINE<br>กรุณาใช้ปุ่ม <strong>⬇️ บันทึกรูป</strong> แทน
+      </div>
+    </div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <!-- [แก้ข้อ 4] แสดง "รูป X จาก Y" แทน dots -->
+  <div class="img-counter" id="imgCounterEl">รูป 1 จาก …</div>
+  <!-- dots เดิมยังอยู่แต่ซ่อน -->
+  <div class="dots" id="dotsEl"></div>
+
+  <!-- [แก้ข้อ 3] ลูกศรปัดซ้าย-ขวา -->
+  <div class="swipe-hint">
+    <span class="swipe-arrow left">⬅️</span>
+    <span class="swipe-hint-text">ปัดซ้าย-ขวาเพื่อเปลี่ยนรูป</span>
+    <span class="swipe-arrow right">➡️</span>
+  </div>
+
+  <!-- ซ่อน hint เดิม -->
+  <div class="hint" id="hintEl">
+    <span class="hint-item">← เลื่อนซ้าย <em>เปลี่ยนรูป</em></span>
+    <span class="hint-sep">·</span>
+    <span class="hint-item">เลื่อนขวา <em>ย้อนกลับ</em> →</span>
+    <span class="hint-sep">·</span>
+    <span class="hint-item">📋 <em>คัดลอก</em> ส่ง LINE</span>
+    <span class="hint-sep">·</span>
+    <span class="hint-item">⬇ <em>บันทึก</em> ลงเครื่อง</span>
+  </div>
+
+  <div class="actions" id="actions" style="display:none">
+    <!-- [แก้ข้อ 1] ปุ่ม copy ซ่อนใน LINE ด้วย CSS class .line-browser -->
+    <!-- [แก้ข้อ 7] เปลี่ยนชื่อปุ่มให้ชัดเจน -->
+    <button class="btn copy" id="btnCopy">📋 คัดลอกรูป</button>
+    <button class="btn save" id="btnSave">⬇️ บันทึกรูป</button>
+  </div>
+
+  <!-- [แก้ข้อ 8] ป้ายความน่าเชื่อถือ -->
+  <div class="trust-badges" id="trustEl" style="display:none">
+    <div class="trust-row">
+      <span class="trust-item"><span class="ti">✅</span> ฟรี 100%</span>
+      <span class="trust-item"><span class="ti">✅</span> ไม่ต้องสมัครสมาชิก</span>
+      <span class="trust-item"><span class="ti">✅</span> ไม่ต้องติดตั้งแอป</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+/* ── LINE BROWSER DETECTION [แก้ข้อ 1 + 9] ─────────────────────────── */
+const IS_LINE = /\bLine\b/i.test(navigator.userAgent) || /FBAN|FBAV|Instagram|Twitter/i.test(navigator.userAgent);
+if(IS_LINE){
+  document.getElementById('appEl').classList.add('line-browser');
+  document.getElementById('lineNoticeEl').classList.add('show');
+}
+
+/* ── CONFIG ─────────────────────────────────────────────────────────── */
+const REPO   = "leomcpemail-source/greeting";
+const BRANCH = "daily-images";
+const BASE   = `https://raw.githubusercontent.com/${REPO}/${BRANCH}`;
+const SB_URL = "https://bbtmcwydwscjjoxydbfp.supabase.co";
+const SB_ANON= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJidG1jd3lkd3NjampveHlkYmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzUyNDIsImV4cCI6MjA5NTY1MTI0Mn0.q_rVvMWenYI_dkc1JhSiXWgwWBqtGtgLYEVMqwBSZX0";
+const SID    = 's_'+Math.random().toString(36).slice(2);
+
+/* ── ANALYTICS ──────────────────────────────────────────────────────── */
+function visitorId(){
+  try{
+    let v=localStorage.getItem('gv_id'),isNew=false;
+    if(!v){v='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('gv_id',v);isNew=true;}
+    return{v,isNew};
+  }catch{return{v:'v_anon',isNew:false};}
+}
+async function track2(type){
+  if(SB_URL.includes('YOURPROJECT'))return;
+  try{
+    const{v,isNew}=visitorId();
+    await fetch(`${SB_URL}/rest/v1/events`,{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'return=minimal'},
+      body:JSON.stringify({visitor_id:v,session_id:SID,type,
+        tz:Intl.DateTimeFormat().resolvedOptions().timeZone,lang:navigator.language,
+        ua:navigator.userAgent.slice(0,200),ref:document.referrer.slice(0,200),
+        is_returning:type==='open'?!isNew:false})});
+  }catch{}
+}
+function trackGC(name){try{if(window.goatcounter?.count)window.goatcounter.count({path:name,title:name,event:true});}catch{}}
+function toast(t){const el=document.getElementById('toastEl');el.textContent=t;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),2400);}
+
+/* ── FRAMES (กรอบภาพ) ──────────────────────────────────────────────────
+   หลักการสำคัญ: ทุกกรอบสร้างจาก <div> ล้วน ๆ (เส้น / แถบ / มุมประดับ / เงาขอบ)
+   ซึ่ง html2canvas render ออกมาได้ "ตรงกับที่เห็นบนเว็บ 100%"
+   → ภาพที่แสดงบนเว็บ = ภาพที่ copy = ภาพที่ save = ภาพใน LINE เหมือนกันเป๊ะ
+   จงหลีกเลี่ยง box-shadow เรืองแสง / filter / backdrop / clip-path / mask
+   เพราะ html2canvas จับไม่ได้ → จะทำให้ภาพ "ที่เห็น" กับ "ที่บันทึก" ไม่ตรงกัน
+
+   schema ของแต่ละกรอบ:
+     n:  ชื่อกรอบ
+     fi: ระยะ "ขอบในของกรอบ" (px) — ข้อความ/เนื้อหาจะถูกดันให้อยู่ในช่องกลาง
+         ไม่ให้ตัวหนังสือไปทับแถบกรอบ (สำคัญกับกรอบหนา เช่น โพลารอยด์/ฟิล์ม/ไม้)
+     layers: [
+       {line:1,  inset, w, color, style?, radius?}   เส้นกรอบ (solid/dashed/double)
+       {bevel:'out'|'in', inset, w, light, dark, radius?}  ขอบนูน/จม 3 มิติ
+       {shadow:1, inset, depth, color}               เงาขอบด้านในแบบ 3 มิติ (ภาพดูจมลง)
+       {band:1,  inset, w, bg}                        แถบทึบ (เช่น ขอบขาวโพลารอยด์/ฟิล์มดำ)
+     ]
+     corners: {t:'bracket'|'steps'|'dots'|'petals', inset, size, w, gap, r, color, color2}
+──────────────────────────────────────────────────────────────────────── */
+const FRAMES=[
+  // 1) ทองคลาสสิก 3 ชั้น
+  {n:'ทองคลาสสิก', fi:24, layers:[
+    {line:1,inset:8, w:3,  color:'#ffd700', radius:12},
+    {line:1,inset:14,w:1.5,color:'#ffe9a8', radius:7},
+    {line:1,inset:18,w:1,  color:'#b8860b', radius:4},
+  ]},
+  // 2) อาร์ตเดโคทอง (วินเทจ Gen-X) — มุมเหลี่ยมซ้อนชั้น
+  {n:'อาร์ตเดโคทอง', fi:24, layers:[
+    {line:1,inset:11,w:2,color:'#e8c25a',radius:0},
+  ], corners:{t:'steps',inset:11,size:32,w:3,gap:5,color:'#ffd700',color2:'#b8860b'}},
+  // 3) ทองเมทัลลิกนูน
+  {n:'ทองเมทัลลิก', fi:24, layers:[
+    {bevel:'out',inset:9,w:7,light:'#ffe9a8',dark:'#9a7b1e',radius:6},
+    {line:1,inset:18,w:1,color:'#fff3c4',radius:2},
+  ]},
+  // 4) 3D นูน (เงิน)
+  {n:'3D นูนเงิน', fi:25, layers:[
+    {bevel:'out',inset:9,w:8,light:'#ffffff',dark:'#6d6d6d',radius:8},
+    {line:1,inset:19,w:1,color:'rgba(255,255,255,.55)',radius:4},
+  ]},
+  // 5) 3D จม (ภาพดูถูกกดลงไป)
+  {n:'3D จม', fi:23, layers:[
+    {bevel:'in',inset:9,w:8,light:'#ffffff',dark:'#4d4d4d',radius:8},
+  ]},
+  // 6) เงาลึกสามมิติ — ภาพดูจมเข้าไปในกรอบหน้าต่าง
+  {n:'เงาลึก 3 มิติ', fi:22, layers:[
+    {shadow:1,inset:0,depth:30,color:'rgba(0,0,0,.55)'},
+    {line:1,inset:11,w:1.5,color:'rgba(255,255,255,.6)',radius:12},
+  ]},
+  // 7) โพลารอยด์ขาว (ขอบขาวหนาแบบรูปถ่าย)
+  {n:'โพลารอยด์ขาว', fi:32, layers:[
+    {band:1,inset:10,w:15,bg:'#ffffff'},
+    {line:1,inset:25,w:1,color:'#d8d0bf',radius:0},
+  ]},
+  // 8) ฟิล์มขอบดำ (ซีเนมา)
+  {n:'ฟิล์มขอบดำ', fi:26, layers:[
+    {band:1,inset:0,w:18,bg:'#121212'},
+    {line:1,inset:18,w:1.5,color:'#e8c25a',radius:0},
+  ]},
+  // 9) กรอบไม้ (นูน)
+  {n:'กรอบไม้', fi:28, layers:[
+    {bevel:'out',inset:9,w:12,light:'#a1887f',dark:'#5d4037',radius:3},
+    {line:1,inset:21,w:1,color:'#4e342e',radius:0},
+  ]},
+  // 10) แดงทองมงคล — มุมประดับหมุดทอง
+  {n:'แดงทองมงคล', fi:22, layers:[
+    {line:1,inset:8, w:5,  color:'#c0392b',radius:5},
+    {line:1,inset:15,w:1.5,color:'#ffd700',radius:2},
+  ], corners:{t:'dots',inset:9,r:4,color:'#ffd700'}},
+  // 11) นีออนฟ้า — halo แบบแถบทึบโปร่งแสง (ไม่ใช้ box-shadow)
+  {n:'นีออนฟ้า', fi:22, layers:[
+    {line:1,inset:9, w:5,color:'rgba(0,229,255,.22)',radius:14},
+    {line:1,inset:14,w:2,color:'#00e5ff',radius:9},
+  ]},
+  // 12) ชมพูดอกไม้ — มุมกลีบดอก
+  {n:'ชมพูดอกไม้', fi:20, layers:[
+    {line:1,inset:10,w:3,color:'#ffb6c1',radius:16},
+  ], corners:{t:'petals',inset:11,r:4,color:'#ff8fab',color2:'#ffd6e0'}},
+  // 13) ไทยกนกมุม — มุมลายไทยซ้อนชั้น
+  {n:'ไทยกนกมุม', fi:24, layers:[
+    {line:1,inset:10,w:2,color:'#e8c060',radius:0},
+  ], corners:{t:'steps',inset:10,size:34,w:3,gap:6,color:'#e8c060',color2:'#b8860b'}},
+  // 14) ขาวเรียบหรู (โมเดิร์น เส้นคู่บาง)
+  {n:'ขาวเรียบหรู', fi:24, layers:[
+    {line:1,inset:12,w:1.5,color:'#ffffff',radius:14},
+    {line:1,inset:18,w:1.5,color:'rgba(255,255,255,.45)',radius:10},
+  ]},
+];
+
+/* ── LAYOUTS ────────────────────────────────────────────────────────── */
+const LAYOUTS=[
+  {font:'Chonburi', j:'flex-end', a:'center', ta:'center',rot:0, scrim:'bottom',panel:false,narrow:false,hs:38,bs:21,pad:'22px 26px 30px'},
+  {font:'Mitr', j:'flex-end', a:'flex-start',ta:'left', rot:0, scrim:'bottom',panel:false,narrow:false,hs:34,bs:20,pad:'22px 26px 34px'},
+  {font:'Kanit', j:'flex-start',a:'center', ta:'center',rot:0, scrim:'top', panel:false,narrow:false,hs:34,bs:19,pad:'30px 26px'},
+  {font:'Charm', j:'center', a:'center', ta:'center',rot:-8,scrim:'center',panel:true, narrow:false,hs:36,bs:22,pad:'22px'},
+  {font:'Itim', j:'flex-start',a:'flex-end', ta:'right', rot:0, scrim:'top', panel:false,narrow:false,hs:32,bs:19,pad:'30px 28px'},
+  {font:'Sriracha', j:'flex-end', a:'center', ta:'center',rot:0, scrim:'bottom',panel:true, narrow:false,hs:31,bs:20,pad:'22px 24px 30px'},
+  {font:'Mali', j:'center', a:'flex-end', ta:'right', rot:0, scrim:'right', panel:false,narrow:true, hs:34,bs:20,pad:'22px 28px'},
+  {font:'Bai Jamjuree', j:'center', a:'center', ta:'center',rot:0, scrim:'center',panel:true, narrow:false,hs:34,bs:20,pad:'22px'},
+  {font:'Pattaya', j:'flex-end', a:'flex-start',ta:'left', rot:6, scrim:'bottom',panel:false,narrow:false,hs:34,bs:20,pad:'22px 26px 40px'},
+  {font:'Chonburi', j:'flex-start',a:'flex-start',ta:'left', rot:0, scrim:'left', panel:false,narrow:true, hs:36,bs:20,pad:'28px 26px'},
+  {font:'Sarabun', j:'flex-end', a:'center', ta:'center',rot:0, scrim:'bottom',panel:true, narrow:false,hs:30,bs:18,pad:'18px 22px 28px'},
+  {font:'Mitr', j:'center', a:'flex-start',ta:'left', rot:5, scrim:'left', panel:false,narrow:false,hs:36,bs:21,pad:'28px 22px'},
+  {font:'Kanit', j:'flex-end', a:'center', ta:'center',rot:0, scrim:'top', panel:true, narrow:false,hs:42,bs:22,pad:'20px 24px 26px'},
+  {font:'Charm', j:'flex-start',a:'flex-start',ta:'left', rot:0, scrim:'bottom',panel:true, narrow:false,hs:30,bs:18,pad:'26px 24px'},
+  {font:'Itim', j:'center', a:'center', ta:'center',rot:12,scrim:'center',panel:false,narrow:false,hs:34,bs:20,pad:'22px'},
+  {font:'Sriracha', j:'flex-start',a:'flex-end', ta:'right', rot:0, scrim:'right', panel:true, narrow:true, hs:32,bs:19,pad:'24px 26px'},
+  {font:'Pattaya', j:'center', a:'flex-start',ta:'center',rot:0, scrim:'top', panel:false,narrow:false,hs:38,bs:22,pad:'26px 20px'},
+  {font:'Mali', j:'flex-end', a:'center', ta:'center',rot:-5,scrim:'bottom',panel:true, narrow:false,hs:33,bs:20,pad:'20px 24px 32px'},
+  {font:'Bai Jamjuree', j:'flex-start',a:'flex-end', ta:'right', rot:0, scrim:'right', panel:false,narrow:true, hs:30,bs:18,pad:'24px 28px'},
+  {font:'Chonburi', j:'flex-end', a:'center', ta:'center',rot:0, scrim:'bottom',panel:false,narrow:false,hs:46,bs:24,pad:'18px 22px 36px'},
+  {font:'Sarabun', j:'center', a:'flex-end', ta:'center',rot:0, scrim:'center',panel:true, narrow:false,hs:28,bs:17,pad:'20px'},
+  {font:'Kanit', j:'flex-end', a:'flex-end', ta:'right', rot:8, scrim:'bottom',panel:true, narrow:true, hs:34,bs:20,pad:'18px 26px 30px'},
+];
+
+const TEXT_SIZES=[
+  {id:'normal', hs_mul:1.00, bs_mul:1.00, gap:8 },
+  {id:'hero',   hs_mul:1.28, bs_mul:0.90, gap:6 },
+  {id:'compact',hs_mul:0.82, bs_mul:0.85, gap:5 },
+  {id:'wide',   hs_mul:1.08, bs_mul:1.12, gap:10},
+  {id:'mini',   hs_mul:0.68, bs_mul:0.78, gap:4 },
+];
+
+const OVERLAYS=[
+  {id:'none',    cssFilter:'', canvasFn:null},
+  {id:'warm',    cssFilter:'sepia(0.22) saturate(1.18) hue-rotate(-8deg)',
+    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(180,90,0,0.08)';ctx.fillRect(0,0,w,h);ctx.restore();}},
+  {id:'cool',    cssFilter:'saturate(0.88) hue-rotate(18deg) brightness(1.04)',
+    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(0,60,160,0.07)';ctx.fillRect(0,0,w,h);ctx.restore();}},
+  {id:'pastel',  cssFilter:'saturate(0.72) brightness(1.08) contrast(0.92)',
+    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(255,230,230,0.10)';ctx.fillRect(0,0,w,h);ctx.restore();}},
+  {id:'vignette',cssFilter:'',
+    canvasFn:(ctx,w,h)=>{
+      ctx.save();
+      const g=ctx.createRadialGradient(w/2,h/2,w*.28,w/2,h/2,w*.72);
+      g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,0.38)');
+      ctx.fillStyle=g;ctx.fillRect(0,0,w,h);ctx.restore();
+    }},
+  {id:'dreamy',  cssFilter:'brightness(1.06) saturate(1.12) contrast(0.95)',
+    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(200,180,255,0.08)';ctx.fillRect(0,0,w,h);ctx.restore();}},
+];
+
+/* ── MANIFEST / STATE ───────────────────────────────────────────────── */
+let M=null;
+let uImg=[],uFr=[],uLay=[],uBl=[],uTx=[],uOv=[];
+let lastBlIdx=-1;
+// ── การ์ดที่ผ่านการตรวจแล้วตอนดึก (frozen vetted combos) — ถ้า manifest มี M.cards ──
+let cardOrder=[], cardPtr=0;   // ลำดับสุ่มของ index การ์ด + ตัวชี้
+
+function hexA(hex,a){try{const n=parseInt(hex.replace('#',''),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}catch{return`rgba(0,0,0,${a})`;}}
+
+function scrimCSS(p,color,c2){
+  color=color||'#b8893b';c2=c2||'#6b4c1e';
+  const tint=`radial-gradient(120% 90% at 50% 42%,${hexA(color,.04)} 0%,${hexA(c2,.28)} 100%)`;
+  const m={
+    bottom:`linear-gradient(180deg,rgba(0,0,0,.10) 0%,rgba(0,0,0,0) 38%,rgba(0,0,0,.22) 62%,rgba(0,0,0,.68) 100%)`,
+    top:   `linear-gradient(0deg,rgba(0,0,0,.06) 0%,rgba(0,0,0,0) 40%,rgba(0,0,0,.20) 62%,rgba(0,0,0,.64) 100%)`,
+    left:  `linear-gradient(90deg,rgba(0,0,0,.66) 0%,rgba(0,0,0,.18) 48%,rgba(0,0,0,0) 72%)`,
+    right: `linear-gradient(270deg,rgba(0,0,0,.66) 0%,rgba(0,0,0,.18) 48%,rgba(0,0,0,0) 72%)`,
+    center:`radial-gradient(closest-side,rgba(0,0,0,.52) 0%,rgba(0,0,0,.16) 62%,rgba(0,0,0,0) 100%)`,
+  };
+  return`${m[p]||m.bottom}, ${tint}`;
+}
+
+function pickPool(arr,used,max){
+  if(used.length>=arr.length)used.length=0;
+  let idx,t=0;
+  do{idx=Math.floor(Math.random()*arr.length);t++;}while(used.includes(idx)&&t<20);
+  used.push(idx);if(used.length>max)used.shift();
+  return{item:arr[idx],idx};
+}
+
+function pickBless(){
+  const FALLBACK=['ขอให้มีความสุขตลอดวัน','สุขภาพแข็งแรง คิดสิ่งใดสมหวัง','ขอให้โชคดีมีแต่สิ่งดีๆ','วันนี้ขอให้สดใส เบาสบายใจ','ขอให้ทุกก้าวพบเจอสิ่งมงคล','รอยยิ้มสดใส รับวันใหม่'];
+  const pool=(M?.blessings?.length>=2)?M.blessings:(M?.blessings||[]).concat(FALLBACK);
+  const{item,idx}=pickPool(pool,uBl,Math.max(3,Math.floor(pool.length/2)));
+  lastBlIdx=idx;return item;
+}
+
+function mkCombo(){
+  // ── โหมดใหม่: ถ้า manifest มี cards[] (ผ่านการตรวจภาพประกอบจริงตอนดึก) ใช้คู่ที่ตรึงไว้ ──
+  // แต่ละ card = { img, fr, lay, tx, ov, bl } โดย fr/lay/tx/ov เป็น index เข้า array เดียวกับฝั่งนี้
+  if(Array.isArray(M.cards) && M.cards.length){
+    if(cardOrder.length!==M.cards.length){            // เตรียมลำดับสุ่มครั้งแรก
+      cardOrder=M.cards.map((_,i)=>i);
+      for(let i=cardOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cardOrder[i],cardOrder[j]]=[cardOrder[j],cardOrder[i]];}
+      cardPtr=0;
+    }
+    const c=M.cards[cardOrder[cardPtr%cardOrder.length]];
+    cardPtr++;
+    const fr = FRAMES[c.fr]      || FRAMES[0];
+    const lay= LAYOUTS[c.lay]    || LAYOUTS[0];
+    const tx = TEXT_SIZES[c.tx]  || TEXT_SIZES[0];
+    const ov = OVERLAYS[c.ov]    || OVERLAYS[0];
+    const imgIdx = M.images ? M.images.indexOf(c.img) : -1;
+    return{ imgSrc:`${BASE}/${c.img}?v=${M.version}`, imgIdx, fr, lay, bl:c.bl, tx, ov };
+  }
+  // ── โหมดเดิม (fallback): สุ่ม รูป+กรอบ+เลย์เอาต์+คำ ทุกครั้ง ──
+  const imgRes=pickPool(M.images,uImg,Math.max(4,Math.floor(M.images.length/2)));
+  const frRes =pickPool(FRAMES,uFr,6);
+  const layRes=pickPool(LAYOUTS,uLay,4);
+  const txRes =pickPool(TEXT_SIZES,uTx,3);
+  const ovRes =pickPool(OVERLAYS,uOv,3);
+  return{imgSrc:`${BASE}/${imgRes.item}?v=${M.version}`,imgIdx:imgRes.idx,fr:frRes.item,lay:layRes.item,bl:pickBless(),tx:txRes.item,ov:ovRes.item};
+}
+
+/* ── BUILD CARD DOM ─────────────────────────────────────────────────── */
+function buildCard(cb,CW){
+  const{imgSrc,fr,lay,bl,tx,ov}=cb;
+  const cw=document.createElement('div');cw.className='cw';
+  cw.style.width=CW+'px';cw.style.height=CW+'px';
+  cw.style.marginLeft=(-CW/2)+'px';cw.style.marginTop=(-CW/2)+'px';
+  const card=document.createElement('div');card.className='card';
+  card.style.width=CW+'px';card.style.height=CW+'px';
+  const bg=document.createElement('img');bg.className='bg';bg.crossOrigin='anonymous';
+  bg.style.opacity='0';bg.onload=()=>bg.style.opacity='1';bg.src=imgSrc;
+  if(ov&&ov.cssFilter)bg.style.filter=ov.cssFilter;
+  card.appendChild(bg);
+  const sc=document.createElement('div');sc.className='scrim';
+  sc.style.background=scrimCSS(lay.scrim,M.color,M.color2);
+  card.appendChild(sc);
+  applyFrameToCard(card,fr);
+  const L=lay;
+  const hs=Math.round((tx?tx.hs_mul:1)*L.hs);
+  const bsz=Math.round((tx?tx.bs_mul:1)*L.bs);
+  const gap=tx?tx.gap:8;
+  const content=document.createElement('div');content.className='content';
+  // ── ดันเนื้อหาให้อยู่ในช่องกลางของกรอบ: บังคับ padding ทุกด้าน >= fi (กันตัวอักษรชนกรอบ) ──
+  const _fi=parseFloat(fr.fi)||18;
+  const _pp=String(L.pad||'22px').trim().split(/\s+/).map(v=>parseFloat(v)||0);
+  let _pt,_pr,_pb,_pl;
+  if(_pp.length<=1){_pt=_pr=_pb=_pl=_pp[0]||0;}
+  else if(_pp.length===2){_pt=_pb=_pp[0];_pr=_pl=_pp[1];}
+  else if(_pp.length===3){_pt=_pp[0];_pr=_pl=_pp[1];_pb=_pp[2];}
+  else{_pt=_pp[0];_pr=_pp[1];_pb=_pp[2];_pl=_pp[3];}
+  _pt=Math.max(_pt,_fi);_pr=Math.max(_pr,_fi);_pb=Math.max(_pb,_fi);_pl=Math.max(_pl,_fi);
+  // จัดข้อความให้อยู่กึ่งกลางการ์ดเสมอ (กลางทั้งแนวตั้งและแนวนอน)
+  // — สวยงามอยู่กลางกรอบ และ html2canvas เรนเดอร์ตำแหน่งตรงกับที่เห็นบนเว็บ (flex-end/แนวอื่นมักเพี้ยน)
+  content.style.cssText=`padding:${_pt}px ${_pr}px ${_pb}px ${_pl}px;justify-content:center;align-items:center;text-align:center`;
+  const tb=document.createElement('div');
+  tb.style.cssText=`display:flex;flex-direction:column;gap:${gap}px;max-width:${L.narrow?'72%':'92%'};align-items:center`;
+  if(L.panel)tb.style.cssText+=`;background:rgba(0,0,0,.34);padding:16px 20px;border-radius:16px;border:1px solid rgba(255,255,255,.22)`;
+  // ── ตัดบรรทัดภาษาไทยที่ "ขอบเขตคำ" เท่านั้น (ไม่ตัดกลางคำ เช่น "วันจันทร์") ──
+  // ห่อแต่ละคำด้วย <span nowrap> แล้วคั่นด้วย ZWSP (U+200B) → เบราว์เซอร์/LINE
+  // ตัดบรรทัดได้เฉพาะตรงรอยต่อคำ ไม่ตัดกลางคำ (กันแบบ "สวัสดีวัน / จันทร์")
+  const _esc=(s)=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const _wrap=(parts)=>parts.filter(x=>x!==''&&x!=null).map(p=>`<span style="white-space:nowrap">${_esc(p)}</span>`).join('\u200B');
+  const _segHTML=(text)=>String(text).split(/(\s+)/).map(tok=>{
+    if(tok===''||/^\s+$/.test(tok))return tok;            // ช่องว่างเดิม = จุดตัดบรรทัดตามธรรมชาติ
+    let words=[tok];
+    try{ if(typeof Intl!=='undefined'&&Intl.Segmenter){
+      words=Array.from(new Intl.Segmenter('th',{granularity:'word'}).segment(tok),s=>s.segment).filter(w=>w!=='');
+    }}catch(e){}
+    // กลึง "วัน" เข้ากับคำถัดไป เพื่อไม่ให้ชื่อวัน/ชื่อเทศกาลแตก (เช่น วัน+อังคาร, วัน+มาฆบูชา)
+    const merged=[];
+    for(let i=0;i<words.length;i++){
+      if(words[i]==='วัน'&&i+1<words.length){ merged.push('วัน'+words[i+1]); i++; }
+      else merged.push(words[i]);
+    }
+    return _wrap(merged);
+  }).join('');
+  const h=document.createElement('div');h.className='hello';
+  h.style.cssText=`font-family:'${L.font}',sans-serif;font-size:${hs}px`;
+  // ปกติ ("สวัสดีวัน<ชื่อวัน>"): ตัดเป็น "สวัสดี" | "วัน<ชื่อวัน>" (ชื่อวันไม่แตก)
+  // เทศกาล/อื่น ๆ: ตัดตามคำ (กลึง "วัน" กับคำถัดไปแล้ว)
+  const _hl = M.headline || ('สวัสดีวัน'+M.dayTh);
+  h.innerHTML = (M.dayTh && _hl === ('สวัสดีวัน'+M.dayTh))
+    ? _wrap(['สวัสดี','วัน'+M.dayTh])
+    : _segHTML(_hl);
+  const blEl=document.createElement('div');blEl.className='bless';blEl.style.fontSize=bsz+'px';
+  blEl.innerHTML=_segHTML(bl);
+  const dt=document.createElement('div');dt.className='date';dt.textContent=M.dateThai;
+  tb.append(h,blEl,dt);content.appendChild(tb);card.appendChild(content);
+  for(let i=0;i<7;i++){
+    const s=document.createElement('div');s.className='sparkle';
+    s.style.cssText=`left:${8+Math.random()*84}%;top:${8+Math.random()*84}%;opacity:${.4+Math.random()*.6};transform:scale(${.6+Math.random()})`;
+    card.appendChild(s);
+  }
+  cw.appendChild(card);
+  return cw;
+}
+
+/* ── helper: อ่านตัวเลข (รองรับ 0 และ default) ── */
+const fNum=(v,d)=>{const n=parseFloat(v);return isNaN(n)?(d||0):n;};
+
+/* ── สร้างมุมประดับจาก <div> ล้วน ๆ (html2canvas render ตรง) ── */
+function buildCorners(card, spec){
+  const t     = spec.t,
+        ins    = fNum(spec.inset, 8),
+        size   = fNum(spec.size, 30),
+        w      = fNum(spec.w, 3),
+        gap    = fNum(spec.gap, 5),
+        r      = fNum(spec.r, 5),
+        color  = spec.color  || '#ffd700',
+        color2 = spec.color2 || color;
+  const fc=(css)=>{
+    const d=document.createElement('div');
+    d.className='fcorner';
+    d.style.cssText='position:absolute;pointer-events:none;z-index:6;'+css;
+    card.appendChild(d);
+  };
+  // มุมทั้ง 4 — ยึดขอบด้วย top/bottom + left/right จึงไม่ต้องใช้ transform
+  const corners=[['top','left'],['top','right'],['bottom','left'],['bottom','right']];
+  corners.forEach(([vy,hx])=>{
+    if(t==='bracket' || t==='steps'){
+      const offs = (t==='steps') ? [0, gap+w] : [0];
+      offs.forEach((off,i)=>{
+        const sz = size - i*(gap+w);
+        if(sz<=w) return;
+        const col = i ? color2 : color;
+        fc(`${vy}:${ins+off}px;${hx}:${ins+off}px;width:${sz}px;height:${w}px;background:${col}`);
+        fc(`${vy}:${ins+off}px;${hx}:${ins+off}px;width:${w}px;height:${sz}px;background:${col}`);
+      });
+    } else if(t==='dots' || t==='petals'){
+      const cnt = (t==='petals') ? 4 : 3;
+      for(let i=0;i<cnt;i++){
+        const off = ins + i*(r*2+3);
+        const col = (t==='petals' && (i%2)) ? color2 : color;
+        fc(`${vy}:${off}px;${hx}:${ins}px;width:${r*2}px;height:${r*2}px;border-radius:50%;background:${col}`);
+        if(t==='petals' && i>0)
+          fc(`${vy}:${ins}px;${hx}:${off}px;width:${r*2}px;height:${r*2}px;border-radius:50%;background:${col}`);
+      }
+    }
+  });
+}
+
+/* ── ใส่กรอบลงการ์ด — ทุกชิ้นเป็น <div> ที่ html2canvas จับได้ตรง ──────────
+   จึงได้ภาพ "เหมือนที่เห็นบนเว็บ" ทั้งตอนแสดง / copy / save / ใน LINE ──────── */
+function applyFrameToCard(card, fr){
+  // ล้างกรอบเก่า (รองรับทั้ง schema เก่าและใหม่)
+  card.querySelectorAll('.frame-layer,.fcorner,.frame-border,.frame-inner,.corner')
+      .forEach(e=>e.remove());
+
+  // กรอบทั้งหมดอยู่ "ในกรอบสี่เหลี่ยม" → ไม่ใช้ outer glow บน .cw
+  // (outer glow จะถูก html2canvas ตัดทิ้ง ทำให้ภาพที่เห็น ≠ ภาพที่บันทึก)
+  const cw=card.parentElement;
+  if(cw && cw.classList.contains('cw')) cw.dataset.outerShadow='';
+  card.style.boxShadow='none';
+  if(!fr) return;
+
+  const add=(css)=>{
+    const d=document.createElement('div');
+    d.className='frame-layer';
+    d.style.cssText='position:absolute;pointer-events:none;z-index:4;'+css;
+    card.appendChild(d);
+  };
+  const sides=(ins)=>`top:${ins}px;right:${ins}px;bottom:${ins}px;left:${ins}px`;
+
+  (fr.layers||[]).forEach(L=>{
+    const ins=fNum(L.inset);
+    if(L.line){
+      // เส้นกรอบ (box-sizing:border-box → เส้นวาดด้านในของกล่อง = อยู่ที่ inset พอดี)
+      add(`${sides(ins)};border:${fNum(L.w,1)}px ${L.style||'solid'} ${L.color};border-radius:${fNum(L.radius)}px`);
+    } else if(L.bevel){
+      // ขอบ 3 มิติ: ด้านสว่าง (บน-ซ้าย) + ด้านมืด (ล่าง-ขวา) → นูน ; สลับกัน → จม
+      const lt = (L.bevel==='out') ? L.light : L.dark;
+      const dk = (L.bevel==='out') ? L.dark  : L.light;
+      add(`${sides(ins)};border-style:solid;border-width:${fNum(L.w,4)}px;`+
+          `border-top-color:${lt};border-left-color:${lt};`+
+          `border-right-color:${dk};border-bottom-color:${dk};`+
+          `border-radius:${fNum(L.radius)}px`);
+    } else if(L.shadow){
+      // เงาขอบด้านใน 4 ด้าน (gradient จากขอบเข้มจางเข้ากลาง) → ภาพดูจมเป็น 3 มิติ
+      const d=fNum(L.depth,24), c=L.color||'rgba(0,0,0,.5)';
+      add(`left:${ins}px;right:${ins}px;top:${ins}px;height:${d}px;background:linear-gradient(180deg,${c},rgba(0,0,0,0))`);
+      add(`left:${ins}px;right:${ins}px;bottom:${ins}px;height:${d}px;background:linear-gradient(0deg,${c},rgba(0,0,0,0))`);
+      add(`top:${ins}px;bottom:${ins}px;left:${ins}px;width:${d}px;background:linear-gradient(90deg,${c},rgba(0,0,0,0))`);
+      add(`top:${ins}px;bottom:${ins}px;right:${ins}px;width:${d}px;background:linear-gradient(270deg,${c},rgba(0,0,0,0))`);
+    } else if(L.band){
+      // แถบทึบเป็นวง (4 แท่งขอบ) — เช่น ขอบขาวโพลารอยด์ / ฟิล์มดำ
+      const t=fNum(L.w,12), bg=L.bg||'#ffffff';
+      add(`left:${ins}px;right:${ins}px;top:${ins}px;height:${t}px;background:${bg}`);
+      add(`left:${ins}px;right:${ins}px;bottom:${ins}px;height:${t}px;background:${bg}`);
+      add(`top:${ins}px;bottom:${ins}px;left:${ins}px;width:${t}px;background:${bg}`);
+      add(`top:${ins}px;bottom:${ins}px;right:${ins}px;width:${t}px;background:${bg}`);
+    }
+  });
+
+  if(fr.corners) buildCorners(card, fr.corners);
+}
+
+/* ── SIZING ─────────────────────────────────────────────────────────── */
+const stage=document.getElementById('stage');
+let CW=0,SIDE_SCALE=0.78,SIDE_OFFSET=0,SIDE_Y=0;
+
+// คำนวณความสูงของ fixed elements เพื่อหักออกจาก viewport
+function fixedH(){
+  // header + usage-tip + img-counter + swipe-hint + actions + trust + gaps + padding
+  // วัดจาก element จริง
+  const ids=['appEl'];
+  let h=0;
+  ['header','usage-tip-inner','imgCounterEl','swipe-hint','actions','trustEl'].forEach(id=>{
+    const el=document.getElementById(id)||document.querySelector('.'+id);
+    if(el&&el.offsetHeight)h+=el.offsetHeight;
+  });
+  return h+80; // buffer สำหรับ gaps + padding
+}
+
+function computeSizes(){
+  const sw = stage.offsetWidth;
+
+  // วัด stage height จริงหลัง layout — รอ 1 frame ถ้าจำเป็น
+  const sh = stage.offsetHeight;
+
+  // CW = min(92% ของ width, 98% ของ stage height จริง)
+  // ใช้ stage.offsetHeight เป็น source of truth เพราะมันคือ flex:1 ที่เหลือจริงๆ
+  // max(sh, 200) ป้องกัน edge case ตอน init
+  const availH = Math.max(sh, 200);
+  CW = Math.min(
+    Math.round(sw * 0.92),   // ไม่เกิน 92% ของ width
+    Math.round(availH * 0.97) // ไม่เกิน 97% ของ stage height
+  );
+  CW = Math.max(CW, 180);
+
+  SIDE_SCALE  = 0.78;
+  SIDE_OFFSET = Math.round(sw * 0.58);
+  SIDE_Y      = Math.round(CW * 0.04);
+}
+
+/* ── CAROUSEL STATE ─────────────────────────────────────────────────── */
+const POOL=7,DOT_N=7;
+let combos=[],cwEls=[],globalIdx=0;
+function curSlot(){return((globalIdx%POOL)+POOL)%POOL;}
+function circDist(i,c){let d=i-c;if(d>POOL/2)d-=POOL;if(d<-POOL/2)d+=POOL;return d;}
+
+function posFor(i){
+  const d=circDist(i,curSlot());
+  if(d===0) return{tx:0,ty:0,sc:1,op:1,br:1,z:10,sh:'0 28px 60px rgba(50,28,5,.42),0 8px 20px rgba(50,28,5,.24)'};
+  if(d===1) return{tx:SIDE_OFFSET,ty:SIDE_Y,sc:SIDE_SCALE,op:.78,br:.82,z:5,sh:'0 8px 20px rgba(50,28,5,.14)'};
+  if(d===-1)return{tx:-SIDE_OFFSET,ty:SIDE_Y,sc:SIDE_SCALE,op:.78,br:.82,z:5,sh:'0 8px 20px rgba(50,28,5,.14)'};
+  const fx=SIDE_OFFSET+Math.abs(d)*CW*.08;
+  return{tx:d>0?fx:-fx,ty:SIDE_Y+12,sc:SIDE_SCALE*.84,op:.22,br:.55,z:0,sh:'none'};
+}
+
+function applyPos(cw, p, anim){
+  const card = cw.querySelector('.card');
+  if(!anim) cw.classList.add('no-anim'); else cw.classList.remove('no-anim');
+  if(!anim) cw.offsetHeight;
+  cw.style.transform = `translate(${p.tx}px,${p.ty}px) scale(${p.sc})`;
+  cw.style.opacity   = p.op;
+  cw.style.zIndex    = p.z;
+  cw.style.filter    = p.br >= 1 ? 'none' : `brightness(${p.br})`;
+  // รวม carousel shadow + outer frame glow บน card
+  if(card){
+    const outerFrame = cw.dataset.outerShadow || '';
+    const combined   = [p.sh, outerFrame].filter(Boolean).join(', ');
+    card.style.boxShadow = combined || 'none';
+  }
+  if(!anim) requestAnimationFrame(()=>cw.classList.remove('no-anim'));
+}
+
+function layoutAll(anim=true){cwEls.forEach((cw,i)=>applyPos(cw,posFor(i),anim));updateCounter();}
+
+function refreshSlot(slot){
+  combos[slot]=mkCombo();
+  const cw=cwEls[slot];
+  const old=cw.querySelector('.card');
+  const fresh=buildCard(combos[slot],CW).querySelector('.card');
+  cw.replaceChild(fresh,old);
+  cw.style.width=CW+'px';cw.style.height=CW+'px';
+  cw.style.marginLeft=(-CW/2)+'px';cw.style.marginTop=(-CW/2)+'px';
+  fresh.style.width=CW+'px';fresh.style.height=CW+'px';
+}
+
+/* ── [แก้ข้อ 4] IMG COUNTER แทน DOTS ───────────────────────────────── */
+const dotsEl=document.getElementById('dotsEl');
+function buildDots(){dotsEl.innerHTML='';}// ซ่อน dots เดิม ไม่ต้องสร้าง
+
+function updateCounter(){
+  const total=M?.images?.length||1;
+  const curImgSrc=combos[curSlot()]?.imgSrc||'';
+  const fname=curImgSrc.split('/').pop().split('?')[0];
+  const imgIdx=M?.images?M.images.findIndex(s=>s===fname):-1;
+  const idx=(imgIdx>=0?imgIdx:Math.abs(globalIdx)%total)+1;
+  document.getElementById('imgCounterEl').textContent=`รูป ${idx} จาก ${total}`;
+}
+
+/* ── SWIPE ──────────────────────────────────────────────────────────── */
+function attachSwipe(){
+  let sx=0,sy=0,dx=0,dragging=false,horiz=null;
+  const THRESH=50;
+  const lerp=(a,b,t)=>a+(b-a)*t;
+
+  function liveLayout(rawDx){
+    const frac=Math.min(Math.abs(rawDx)/(CW*.55),1);
+    const dir=rawDx<0?1:-1;
+    cwEls.forEach((cw,i)=>{
+      const fromP=posFor(i);
+      const nc=(((curSlot()+dir)%POOL)+POOL)%POOL;
+      const d2=circDist(i,nc);
+      const fx2=SIDE_OFFSET+Math.abs(d2)*CW*.08;
+      const toP={
+        tx:d2===0?0:d2===1?SIDE_OFFSET:d2===-1?-SIDE_OFFSET:d2>0?fx2:-fx2,
+        ty:d2===0?0:Math.abs(d2)===1?SIDE_Y:SIDE_Y+12,
+        sc:d2===0?1:Math.abs(d2)===1?SIDE_SCALE:SIDE_SCALE*.84,
+        op:d2===0?1:Math.abs(d2)===1?.78:.22,
+        br:d2===0?1:Math.abs(d2)===1?.82:.55,
+        sh:d2===0?'0 28px 60px rgba(50,28,5,.42)':Math.abs(d2)===1?'0 8px 20px rgba(50,28,5,.14)':'none',
+      };
+      const card=cw.querySelector('.card');
+      const liveX=lerp(fromP.tx,toP.tx,frac)+(i===curSlot()?rawDx:0);
+      cw.style.transform=`translate(${liveX}px,${lerp(fromP.ty,toP.ty,frac)}px) scale(${lerp(fromP.sc,toP.sc,frac)})`;
+      cw.style.opacity=lerp(fromP.op,toP.op,frac)+'';
+      cw.style.filter=`brightness(${lerp(fromP.br,toP.br,frac)})`;
+      if(card)card.style.boxShadow=frac>.5?toP.sh:fromP.sh;
+    });
+  }
+
+  function onStart(x,y){sx=x;sy=y;dx=0;dragging=true;horiz=null;cwEls.forEach(cw=>cw.classList.add('no-anim'));}
+  function onMove(x,y){
+    if(!dragging)return;dx=x-sx;
+    const dy=y-sy;
+    if(horiz===null&&(Math.abs(dx)>6||Math.abs(dy)>6))horiz=Math.abs(dx)>=Math.abs(dy);
+    if(!horiz)return;
+    liveLayout(dx);
+  }
+  function onEnd(){
+    if(!dragging)return;dragging=false;
+    cwEls.forEach(cw=>cw.classList.remove('no-anim'));
+    if(horiz&&Math.abs(dx)>=THRESH){
+      if(dx<0){globalIdx++;refreshSlot(((globalIdx+2)%POOL+POOL)%POOL);}
+      else{globalIdx--;refreshSlot(((globalIdx-2)%POOL+POOL)%POOL);}
+      track2('next');
+    }
+    layoutAll(true);
+  }
+
+  stage.addEventListener('mousedown',e=>{e.preventDefault();onStart(e.clientX,e.clientY);});
+  window.addEventListener('mousemove',e=>{if(dragging)onMove(e.clientX,e.clientY);});
+  window.addEventListener('mouseup',()=>{if(dragging)onEnd();});
+  stage.addEventListener('touchstart',e=>onStart(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+  stage.addEventListener('touchmove',e=>{onMove(e.touches[0].clientX,e.touches[0].clientY);if(horiz)e.preventDefault();},{passive:false});
+  stage.addEventListener('touchend',()=>onEnd());
+}
+
+/* ── (เดิมมีฟังก์ชัน drawFrameOnCanvas ที่วาดกรอบลง canvas เอง — ตัดออกแล้ว)
+   ปัจจุบัน snapshot() ใช้ html2canvas จับ DOM ของการ์ดโดยตรง และกรอบทุกแบบ
+   เป็น <div> ล้วน ๆ จึงได้ภาพ "เหมือนที่เห็นบนเว็บเป๊ะ" ทุกช่องทาง
+   (แสดงผล / คัดลอก / บันทึก / LINE) โดยไม่ต้องวาดซ้ำสองที่ให้เสี่ยงไม่ตรงกัน ── */
+
+/* ── SNAPSHOT ───────────────────────────────────────────────────────── */
+// กรอบเป็น border element จริง (ใน applyFrameToCard) → html2canvas render ได้ตรง
+// clone card → render → ได้ภาพเหมือนเว็บเป๊ะทุกช่องทาง
+async function snapshot(){
+  const slot     = curSlot();
+  const liveCard = cwEls[slot].querySelector('.card');
+  const liveImg  = liveCard.querySelector('img.bg');
+
+  const S = 2;
+
+  // clone card (มี bg, scrim, frame-border, frame-inner, corner, content)
+  const cloneCard = liveCard.cloneNode(true);
+  cloneCard.style.transform = 'none';
+  cloneCard.style.boxShadow = 'none';   // outer glow ไม่เอา (อยู่บน .cw)
+  cloneCard.style.position  = 'absolute';
+  cloneCard.style.left = '0'; cloneCard.style.top = '0';
+  cloneCard.style.width  = CW + 'px';
+  cloneCard.style.height = CW + 'px';
+  // คง border-radius + overflow:hidden จาก CSS .card
+
+  // wrapper ซ่อนนอกจอ
+  const wrap = document.createElement('div');
+  wrap.style.cssText = `position:fixed;left:-${CW+300}px;top:0;width:${CW}px;height:${CW}px;overflow:hidden;z-index:-9999;opacity:0;pointer-events:none;background:#1a1208`;
+  wrap.appendChild(cloneCard);
+  document.body.appendChild(wrap);
+
+  // sync img
+  const cloneImg = cloneCard.querySelector('img.bg');
+  if(liveImg && cloneImg){
+    cloneImg.crossOrigin = 'anonymous';
+    cloneImg.style.opacity = '1';
+    if(cloneImg.src !== liveImg.src) cloneImg.src = liveImg.src;
+    if(!cloneImg.complete || cloneImg.naturalWidth === 0){
+      await new Promise(res => {
+        cloneImg.onload = res; cloneImg.onerror = res;
+        setTimeout(res, 8000);
+      });
+    }
+  }
+
+  // รอฟอนต์ทั้งหมดให้โหลดเสร็จก่อนจับภาพ (กันตัวอักษรเปลี่ยนขนาด/ขยับตำแหน่งในภาพที่บันทึก)
+  if(document.fonts && document.fonts.ready){
+    try{ await Promise.race([document.fonts.ready, new Promise(r=>setTimeout(r,3000))]); }catch(e){}
+  }
+
+  // render
+  let canvas;
+  try {
+    canvas = await html2canvas(cloneCard, {
+      useCORS: true, allowTaint: false, scale: S,
+      backgroundColor: '#1a1208', logging: false,
+      width: CW, height: CW, x: 0, y: 0, scrollX: 0, scrollY: 0,
+    });
+  } finally {
+    document.body.removeChild(wrap);
+  }
+
+  return canvas;
+}
+/* ── ACTIONS ────────────────────────────────────────────────────────── */
+document.getElementById('btnCopy').onclick=async()=>{
+  const btn=document.getElementById('btnCopy');
+  const orig=btn.textContent;btn.textContent='กำลังเตรียม…';btn.disabled=true;
+  try{
+    const c=await snapshot();
+    const canClip=!!(window.ClipboardItem&&navigator.clipboard?.write);
+    if(canClip){
+      c.toBlob(async b=>{
+        try{
+          await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);
+          toast('คัดลอกแล้ว พร้อมแปะใน LINE ✓');trackGC('copy');track2('copy');
+        }catch{
+          triggerDownload(c);
+          toast('คัดลอกไม่ได้ — บันทึกรูปแล้วแทน แล้วแนบใน LINE');
+        }
+        btn.textContent=orig;btn.disabled=false;
+      },'image/png');
+    }else{
+      triggerDownload(c);
+      toast('เปิดใน LINE: กดค้างที่รูปเพื่อแชร์ได้เลย');trackGC('copy');track2('copy');
+      btn.textContent=orig;btn.disabled=false;
+    }
+  }catch{toast('ไม่สำเร็จ ลองกดบันทึกแทน');btn.textContent=orig;btn.disabled=false;}
+};
+
+// ── ตรวจ LINE WebView
+const IS_LINE_WV = /Line/i.test(navigator.userAgent);
+
+function triggerDownload(canvas){
+  const fname = `${M.headline||'สวัสดีวันนี้'}.png`;
+  if(IS_LINE || IS_LINE_WV){
+    // LINE บล็อก <a>.click() → เปิดรูปใน tab ใหม่ให้ user กดค้างบันทึกเอง
+    showImageViewer(canvas, fname);
+  } else {
+    const a = document.createElement('a');
+    a.download = fname;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }
+  trackGC('download'); track2('download');
+}
+
+// แสดง overlay รูปใหญ่พร้อมคำแนะนำ "กดค้างที่รูปเพื่อบันทึก"
+function showImageViewer(canvas, fname){
+  // ลบ overlay เก่าถ้ามี
+  document.getElementById('imgViewer')?.remove();
+
+  const dataUrl = canvas.toDataURL('image/png');
+  const ov = document.createElement('div');
+  ov.id = 'imgViewer';
+  ov.style.cssText = `
+    position:fixed;inset:0;z-index:9999;
+    background:rgba(0,0,0,.88);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:20px;gap:16px;
+  `;
+
+  const tip = document.createElement('div');
+  tip.style.cssText = `
+    font-family:'Sarabun';font-size:17px;font-weight:700;color:#fff;
+    text-align:center;line-height:1.6;
+    background:rgba(255,255,255,.12);padding:12px 20px;border-radius:14px;
+  `;
+  tip.innerHTML = '📥 <strong>กดค้างที่รูปด้านล่าง</strong><br>แล้วเลือก "บันทึกรูปภาพ"';
+
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  img.style.cssText = `
+    max-width:100%;max-height:60vh;border-radius:16px;
+    box-shadow:0 8px 32px rgba(0,0,0,.6);display:block;
+  `;
+  img.setAttribute('alt', fname);
+
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕ ปิด';
+  closeBtn.style.cssText = `
+    font-family:'Kanit';font-size:16px;font-weight:600;
+    background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.35);
+    padding:11px 32px;border-radius:12px;cursor:pointer;
+  `;
+  closeBtn.onclick = () => ov.remove();
+
+  ov.append(tip, img, closeBtn);
+  document.body.appendChild(ov);
+}
+
+// [แก้ข้อ 7] ชื่อปุ่มชัดขึ้น — ปุ่ม btnSave
+document.getElementById('btnSave').onclick=async()=>{
+  const btn=document.getElementById('btnSave');
+  const t=btn.textContent;btn.textContent='กำลังบันทึก…';btn.disabled=true;
+  try{
+    const c=await snapshot();
+    const fname=`${M.headline||'สวัสดีวันนี้'}.png`;
+    if(IS_LINE || IS_LINE_WV){
+      showImageViewer(c, fname);
+      toast('กดค้างที่รูปเพื่อบันทึก 👆');
+    } else {
+      const a=document.createElement('a');
+      a.download=fname; a.href=c.toDataURL('image/png'); a.click();
+      toast('บันทึกแล้ว ✓');
+    }
+    trackGC('download');track2('download');
+  }catch(e){
+    console.error(e);
+    toast('บันทึกไม่สำเร็จ ลองแคปหน้าจอแทน');
+  }
+  finally{btn.textContent=t;btn.disabled=false;}
+};
+
+/* ── INIT CAROUSEL ──────────────────────────────────────────────────── */
+function initCarousel(){
+  // รอ 2 frames ให้ browser วัด layout เสร็จก่อน (สำคัญมากใน LINE WebView)
+  requestAnimationFrame(()=>requestAnimationFrame(()=>_initCarouselInner()));
+}
+function _initCarouselInner(){
+  computeSizes();
+  globalIdx=0;uImg=[];uFr=[];uLay=[];uBl=[];uTx=[];uOv=[];
+  combos=Array.from({length:POOL},()=>mkCombo());
+  cwEls=combos.map(c=>buildCard(c,CW));
+  stage.innerHTML='';
+  cwEls.forEach(cw=>stage.appendChild(cw));
+  layoutAll(false);
+  buildDots();
+  attachSwipe();
+  document.getElementById('actions').style.display='';
+  document.getElementById('trustEl').style.display=''; // [แก้ข้อ 8] แสดง trust badges
+  updateCounter();
+  M.images.forEach(src=>{const im=new Image();im.crossOrigin='anonymous';im.src=`${BASE}/${src}?v=${M.version}`;});
+}
+
+/* ── BOOT ───────────────────────────────────────────────────────────── */
+async function boot(){
+  track2('open');
+  if(REPO.includes('REPO_NAME')){
+    stage.innerHTML=`<div class="msg">⚠️ ยังไม่ได้ตั้งค่า — แก้ <code>const REPO</code> ให้เป็นรีโปจริงก่อน</div>`;
+    document.getElementById('dateLine').textContent='';return;
+  }
+  try{
+    const res=await fetch(`${BASE}/manifest.json?v=${Date.now()}`,{cache:'no-store'});
+    if(!res.ok)throw new Error('manifest '+res.status);
+    M=await res.json();
+  }catch{
+    stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen ตอนดึก หรือไปที่ <b>Actions → Run workflow</b></div>`;
+    document.getElementById('dateLine').textContent='';return;
+  }
+  document.getElementById('dateLine').textContent=M.dateThai||'';
+  if(M.isFestival)document.getElementById('topTitle').textContent=M.headline||'สวัสดีวันนี้';
+  initCarousel();
+}
+
+window.addEventListener('resize',()=>{
+  // รอ layout เสร็จก่อน
+  requestAnimationFrame(()=>{
+    computeSizes();
+    cwEls.forEach((cw,i)=>{
+      cw.style.width=CW+'px';cw.style.height=CW+'px';
+      cw.style.marginLeft=(-CW/2)+'px';cw.style.marginTop=(-CW/2)+'px';
+      const card=cw.querySelector('.card');
+      if(card){card.style.width=CW+'px';card.style.height=CW+'px';}
+    });
+    layoutAll(false);
+  });
+});
+
+// LINE WebView บางครั้ง viewport เปลี่ยนหลัง load — recompute อีกครั้งเมื่อ fonts/images โหลดเสร็จ
+window.addEventListener('load',()=>{
+  if(CW>0) requestAnimationFrame(()=>{
+    computeSizes();
+    cwEls.forEach((cw,i)=>{
+      cw.style.width=CW+'px';cw.style.height=CW+'px';
+      cw.style.marginLeft=(-CW/2)+'px';cw.style.marginTop=(-CW/2)+'px';
+      const card=cw.querySelector('.card');
+      if(card){card.style.width=CW+'px';card.style.height=CW+'px';}
+    });
+    layoutAll(false);
+  });
+});
+
+boot();
+</script>
+</body>
+</html>
