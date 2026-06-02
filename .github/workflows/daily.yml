@@ -30,6 +30,12 @@ jobs:
         with:
           node-version: 20
 
+      # ติดตั้ง jpeg-js (วิเคราะห์พื้นที่ว่างของภาพ เพื่อวางข้อความไม่บังจุดสำคัญ) — เบา ใช้ทุกครั้ง
+      - name: Install jpeg-js
+        run: |
+          npm init -y >/dev/null 2>&1 || true
+          npm i jpeg-js
+
       # ติดตั้ง Puppeteer + Chromium เฉพาะตอนเปิดโหมด composite (กดรันเองแล้วติ๊ก composite)
       - name: Install Puppeteer + Chromium (composite mode only)
         if: ${{ github.event.inputs.composite == 'true' }}
