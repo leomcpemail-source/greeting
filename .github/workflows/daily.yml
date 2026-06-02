@@ -8,7 +8,7 @@ on:
       composite:
         description: 'ตรวจภาพประกอบจริง (รูป+กรอบ+ข้อความ) ด้วย headless browser'
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: write
@@ -38,7 +38,7 @@ jobs:
 
       # ติดตั้ง Puppeteer + Chromium เฉพาะตอนเปิดโหมด composite (กดรันเองแล้วติ๊ก composite)
       - name: Install Puppeteer + Chromium (composite mode only)
-        if: ${{ github.event.inputs.composite == 'true' }}
+        if: ${{ github.event.inputs.composite != 'false' }}
         run: |
           npm init -y >/dev/null 2>&1 || true
           npm i puppeteer@23
@@ -50,8 +50,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          # เปิด composite เฉพาะเมื่อกดรันเองและติ๊ก composite=true (ตารางอัตโนมัติ = ปิดเสมอ)
-          COMPOSITE_SCORING: ${{ github.event.inputs.composite == 'true' && '1' || '0' }}
+          # composite เปิดเป็นค่าเริ่มต้น (รวมรอบอัตโนมัติ) — ปิดเฉพาะเมื่อกดรันเองแล้ว "ติ๊กออก" (composite=false)
+          COMPOSITE_SCORING: ${{ github.event.inputs.composite == 'false' && '0' || '1' }}
 
       - name: Publish to daily-images branch (single commit, no history bloat)
         run: |
