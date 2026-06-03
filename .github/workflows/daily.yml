@@ -62,6 +62,8 @@ jobs:
         run: node scripts/generate.mjs
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # จำเป็น: secret key (sk_) จาก enter.pollinations.ai — เปิดให้ gen รูป + vision ฝั่ง Pollinations ทำงาน
+          POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
           # ออปชัน: ใส่คีย์เพื่อเปิดรูปถ่าย royalty-free (ดอกไม้/ต้นไม้/สถานที่) จาก Pexels
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           TARGET: '30'
