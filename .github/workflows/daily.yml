@@ -1,65 +1,82 @@
 name: Daily Greeting Generation
 
 on:
+  workflow_dispatch: {}            # กดรันเองได้
   schedule:
-    - cron: '15 17 * * *'      # 00:15 เวลาไทย (17:15 UTC)
-  workflow_dispatch:           # กดรันเองได้จากหน้า Actions
-    inputs:
-      composite:
-        description: 'ตรวจภาพประกอบจริง (รูป+กรอบ+ข้อความ) ด้วย headless browser'
-        type: boolean
-        default: true
+    # รันทุก ~90 นาที (16 รอบ/วัน) เวลา UTC — สคริปต์คำนวณ "วันเป้าหมาย" จากเวลาไทยเอง
+    # (cutoff = เที่ยงคืน -> ทุกรอบสร้างชุดของ "พรุ่งนี้" ; freeze ตอนเที่ยงคืน)
+    - cron: '0 0 * * *'
+    - cron: '30 1 * * *'
+    - cron: '0 3 * * *'
+    - cron: '30 4 * * *'
+    - cron: '0 6 * * *'
+    - cron: '30 7 * * *'
+    - cron: '0 9 * * *'
+    - cron: '30 10 * * *'
+    - cron: '0 12 * * *'
+    - cron: '30 13 * * *'
+    - cron: '0 15 * * *'
+    - cron: '30 16 * * *'
+    - cron: '0 18 * * *'
+    - cron: '30 19 * * *'
+    - cron: '0 21 * * *'
+    - cron: '30 22 * * *'
 
 permissions:
   contents: write
 
+# กันรอบชนกัน: ถ้ารอบก่อนยังรันอยู่ รอบใหม่จะ "รอ" (ไม่ยกเลิกของเดิม)
 concurrency:
   group: daily-greeting
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 88            # < 90 (cron spacing); สคริปต์ self-stop ~85 นาที
     steps:
       - name: Checkout (main)
         uses: actions/checkout@v4
+
+      # ดึงรูปสะสมเดิมจาก branch daily-images มาที่ ./output เพื่อทำงานต่อ (rolling)
+      - name: Checkout image branch -> output
+        uses: actions/checkout@v4
+        with:
+          ref: daily-images
+          path: output
+        continue-on-error: true     # รอบแรกสุดที่ branch ยังไม่มี
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # ติดตั้ง jpeg-js (วิเคราะห์พื้นที่ว่างของภาพ เพื่อวางข้อความไม่บังจุดสำคัญ) — เบา ใช้ทุกครั้ง
-      - name: Install jpeg-js
+      # composite เป็นทางหลักแล้ว (รูปสำเร็จ) — ติดตั้ง Puppeteer/Chromium + jpeg-js ทุกครั้ง
+      - name: Install deps
         run: |
           npm init -y >/dev/null 2>&1 || true
-          npm i jpeg-js
-
-      # ติดตั้ง Puppeteer + Chromium เฉพาะตอนเปิดโหมด composite (กดรันเองแล้วติ๊ก composite)
-      - name: Install Puppeteer + Chromium (composite mode only)
-        if: ${{ github.event.inputs.composite != 'false' }}
-        run: |
-          npm init -y >/dev/null 2>&1 || true
-          npm i puppeteer@23
+          npm i jpeg-js puppeteer@23
           npx puppeteer browsers install chrome
 
-      - name: Generate images + blessings
+      - name: Generate (rolling, self-stops ~85 min)
         run: node scripts/generate.mjs
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          # composite เปิดเป็นค่าเริ่มต้น (รวมรอบอัตโนมัติ) — ปิดเฉพาะเมื่อกดรันเองแล้ว "ติ๊กออก" (composite=false)
-          COMPOSITE_SCORING: ${{ github.event.inputs.composite == 'false' && '0' || '1' }}
+          # ออปชัน: ใส่คีย์เพื่อเปิดรูปถ่าย royalty-free (ดอกไม้/ต้นไม้/สถานที่) จาก Pexels
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          TARGET: '30'
+          RUN_BUDGET_MS: '5100000'  # 85 นาที
+          OUT_ROOT: 'output/img'
 
-      - name: Publish to daily-images branch (single commit, no history bloat)
+      # publish: บีบเป็น commit เดียว (orphan) แล้ว force-push — ไม่มี history bloat แต่คงไฟล์สะสมไว้
+      - name: Publish to daily-images branch
+        working-directory: output
         run: |
-          cd output
           git init -q
           git config user.name "greeting-bot"
           git config user.email "greeting-bot@users.noreply.github.com"
-          git checkout -q -b daily-images
           git add -A
-          git commit -q -m "daily greetings $(date -u +%F_%H:%M)"
-          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" daily-images
+          git checkout -q --orphan _pub 2>/dev/null || git checkout -q -b _pub
+          git add -A
+          git commit -q -m "daily greetings $(date -u +%F_%H:%M)" || { echo "nothing to commit"; exit 0; }
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" _pub:daily-images
