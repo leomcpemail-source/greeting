@@ -1,0 +1,105 @@
+// lib/rubric.mjs
+// ให้คะแนน "การ์ดสำเร็จ" (composited: รูป+กรอบ+ข้อความ) ด้วย panel 2 AI
+// แต่ละ AI คืน JSON คะแนนรายข้อ 0-10 -> โค้ดคูณน้ำหนักเป็น 0-100 -> เฉลี่ย 2 ตัว
+//
+// การออกแบบ: ไม่ผูกกับ endpoint ของ AI โดยตรง — รับ "ตัวเรียก vision" เป็น dependency
+// (ส่ง fn ของ Pollinations / Gemini ที่พิสูจน์แล้วในโค้ดเดิมเข้ามา) จึงไม่ต้องเดา API
+
+export const WEIGHTS = {
+  clarity: 0.30,        // ความชัดของข้อความ
+  appropriateness: 0.20, // ความเหมาะสมของข้อความอวยพร
+  beauty: 0.20,         // สวยแบบผู้ใหญ่ไทยนิยม
+  warmth: 0.15,         // อบอุ่นเป็นมิตร
+  quality: 0.15,        // คุณภาพภาพ / ข้อผิดพลาด AI
+};
+
+export const RUBRIC_PROMPT = `คุณเป็นกรรมการประเมิน "การ์ดสวัสดี" ภาษาไทย สำหรับส่งใน LINE ให้กลุ่มผู้ใหญ่/ผู้สูงอายุ
+ให้คะแนนภาพนี้เป็น "จำนวนเต็ม 0-10" ในแต่ละหัวข้อ (0 = แย่สุด, 5 = กลาง ๆ, 10 = ดีมาก):
+
+1. clarity — ความชัดของข้อความ: อ่านได้ภายใน 2 วินาทีไหม ตัวอักษรตัดกับพื้นหลังไหม คนอายุ 60+ อ่านออกไหม
+2. appropriateness — ความเหมาะสมของข้อความอวยพร: เชิงบวก สุภาพ ไม่มีคำแปลก ไม่สะกดผิด ไม่มีคำไม่เหมาะสม
+3. beauty — ความสวยแบบผู้ใหญ่ไทยนิยม: มีดอกไม้/ธรรมชาติ/พระ/เด็กน่ารัก/สีสว่าง ตรงรสนิยมกลุ่มเป้าหมาย
+4. warmth — ความอบอุ่นเป็นมิตร: เห็นแล้วรู้สึกดี อยากแชร์ต่อ
+5. quality — คุณภาพภาพ/ข้อผิดพลาด AI: ตัวอักษรเพี้ยน ดอกไม้เบี้ยว นิ้วเกิน วัตถุผิดรูป (10 = ไม่มีข้อผิดพลาดเลย)
+
+ตอบกลับเป็น JSON อย่างเดียว ห้ามมีข้อความอื่น ห้ามใส่ markdown:
+{"clarity":0,"appropriateness":0,"beauty":0,"warmth":0,"quality":0}`;
+
+const KEYS = ["clarity", "appropriateness", "beauty", "warmth", "quality"];
+
+export function parseRubric(text) {
+  if (!text) return null;
+  const m = String(text).match(/\{[\s\S]*?\}/); // ดึง JSON ก้อนแรก (เผื่อมี fence/ข้อความนำ)
+  if (!m) return null;
+  let o;
+  try { o = JSON.parse(m[0]); } catch { return null; }
+  const out = {};
+  for (const k of KEYS) {
+    const v = Number(o[k]);
+    if (!Number.isFinite(v)) return null;
+    out[k] = Math.max(0, Math.min(10, v));
+  }
+  return out;
+}
+
+// คะแนนถ่วงน้ำหนัก 0-100
+export function weighted100(s) {
+  let sum = 0;
+  for (const k of KEYS) sum += s[k] * WEIGHTS[k];
+  return Math.round(sum * 10); // (0-10 ถ่วงน้ำหนัก) * 10 = 0-100
+}
+
+// veto (safety floor): ข้อความไม่เหมาะสม หรือ ภาพพังชัด -> ทิ้งทันที
+function vetoed(s) {
+  return s.appropriateness === 0 || s.quality === 0;
+}
+
+/**
+ * scorePanel(imageInput, callers, opts)
+ *   imageInput : ส่งผ่านตรง ๆ ไปยัง caller fn (เช่น Buffer jpeg หรือ base64 — แล้วแต่ fn เดิม)
+ *   callers    : [{ name, fn }] โดย fn(imageInput, prompt) => Promise<string|null> (raw text จาก AI)
+ *   opts.passScore (default 50)  -> ผ่านเมื่อคะแนนรวม "เกิน" ค่านี้ (เกิน 50 = เกิน 5/10)
+ *   opts.minClarity (default 5)  -> ความชัดข้อความต้อง >= ค่านี้ (เพราะหนัก 30%)
+ *   opts.minVoters (default 2)   -> ต้องมี AI ตอบครบกี่ตัวถึงจะตัดสิน
+ * คืน: { decision: 'keep'|'reject'|'pending', score, perAI, reason }
+ */
+export async function scorePanel(imageInput, callers, opts = {}) {
+  const passScore = opts.passScore ?? 50;
+  const minClarity = opts.minClarity ?? 5;
+  const minVoters = opts.minVoters ?? 2;
+
+  const results = await Promise.all(callers.map(async (c) => {
+    try {
+      const txt = await c.fn(imageInput, RUBRIC_PROMPT);
+      return { name: c.name, scores: parseRubric(txt) };
+    } catch (e) {
+      return { name: c.name, scores: null, error: String(e?.message || e) };
+    }
+  }));
+
+  const perAI = results.map(r => ({ name: r.name, scores: r.scores, error: r.error }));
+  const valid = results.filter(r => r.scores);
+
+  // ตอบไม่ครบ -> ค้างตรวจ (รอบหน้าตรวจซ้ำ ไม่ต้อง gen ใหม่)
+  if (valid.length < minVoters) {
+    return { decision: "pending", score: null, perAI, reason: `voters ${valid.length}/${minVoters}` };
+  }
+
+  // veto -> reject ทันทีแม้คะแนนรวมจะผ่าน
+  if (valid.some(r => vetoed(r.scores))) {
+    return { decision: "reject", score: null, perAI, reason: "veto: appropriateness/quality = 0" };
+  }
+
+  // เฉลี่ยรายข้อ (2 ตัว: mean = median)
+  const avg = {};
+  for (const k of KEYS) avg[k] = valid.reduce((a, r) => a + r.scores[k], 0) / valid.length;
+  const score = weighted100(avg);
+
+  if (avg.clarity < minClarity) {
+    return { decision: "reject", score, perAI, reason: `clarity ${avg.clarity.toFixed(1)} < ${minClarity}` };
+  }
+  if (score <= passScore) {
+    return { decision: "reject", score, perAI, reason: `score ${score} <= ${passScore}` };
+  }
+  return { decision: "keep", score, perAI, reason: "ok" };
+}
