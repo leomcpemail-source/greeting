@@ -69,7 +69,8 @@ jobs:
           TARGET: '30'
           RUN_BUDGET_MS: '5100000'  # 85 นาที
           OUT_ROOT: 'output/img'
-          PHOTO_SHARE: '0.92'          # Pollen หมด -> ใช้รูปถ่าย Pexels เป็นหลัก (ลดลงเมื่อ Pollen กลับมา)
+          PHOTO_SHARE: '1.0'           # Pollen หมด -> Pexels ล้วน (ไม่เสียเวลา gen ที่ 402) ; ลดเมื่อ Pollen กลับมา
+          USE_POLL_VISION: '0'         # ปิด vision Pollinations (กัน gate 15.5วิ/ใบ) ; เปิด '1' เมื่อ Pollen กลับมา
 
       # publish: บีบเป็น commit เดียว (orphan) แล้ว force-push — ไม่มี history bloat แต่คงไฟล์สะสมไว้
       - name: Publish to daily-images branch
