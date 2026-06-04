@@ -117,11 +117,29 @@ window.composeCard = async (opts) => {
   stage.appendChild(cw);
   const card = cw.querySelector('.card');
   // รอฟอนต์ + รูปโหลด ก่อนจับภาพ (สำคัญมาก ไม่งั้นตัวอักษร/รูปเพี้ยน)
-  try { await document.fonts.ready; } catch(e){}
+  // บังคับโหลดฟอนต์ที่ใช้จริงก่อนจับภาพ (กันตัวอักษรไทยเป็นกล่อง)
+  try {
+    await Promise.all([
+      document.fonts.load("700 48px 'Chonburi'"), document.fonts.load("700 40px 'Charm'"),
+      document.fonts.load("700 24px 'Sarabun'"), document.fonts.load("600 24px 'Kanit'"),
+      document.fonts.load("600 24px 'Mitr'"),    document.fonts.load("600 24px 'Prompt'"),
+      document.fonts.load("500 24px 'Pridi'"),
+    ]);
+    await document.fonts.ready;
+  } catch(e){}
+  // รอรูปพื้นหลัง decode ให้เสร็จจริง (กันการ์ดดำ)
   const img = card.querySelector('img.bg');
-  if (img && !img.complete) await new Promise(r => { img.onload = r; img.onerror = r; setTimeout(r, 8000); });
-  const canvas = await html2canvas(card, { scale: 1, useCORS: true, backgroundColor: null, logging: false });
-  return canvas.toDataURL('image/jpeg', 0.85);
+  if (img) { try { await img.decode(); } catch(e){ if(!img.complete) await new Promise(r=>{img.onload=r;img.onerror=r;setTimeout(r,8000);}); } }
+  await new Promise(r => setTimeout(r, 250));   // ให้ layout/paint นิ่งก่อนจับภาพ
+  const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null, logging: false, imageTimeout: 15000 });
+  // กันการ์ดดำ: ถ้าพื้นหลังหายจน "ดำเกือบทั้งใบ" ให้ถือว่า render ล้มเหลว
+  try {
+    const cx = canvas.getContext('2d');
+    const pts = [[canvas.width/2,canvas.height/2],[canvas.width*0.25,canvas.height*0.5],[canvas.width*0.75,canvas.height*0.5],[canvas.width*0.5,canvas.height*0.78]];
+    let sum=0; for (const [x,y] of pts){ const d=cx.getImageData(x|0,y|0,1,1).data; sum += d[0]+d[1]+d[2]; }
+    if (sum/(pts.length*3) < 12) throw new Error('render too dark (bg missing)');
+  } catch(e){ if(String(e.message).includes('too dark')) throw e; }
+  return canvas.toDataURL('image/jpeg', 0.9);
 };
 window.__harnessReady = true;
 </script></body></html>`;
