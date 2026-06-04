@@ -54,6 +54,7 @@ jobs:
       # composite เป็นทางหลักแล้ว (รูปสำเร็จ) — ติดตั้ง Puppeteer/Chromium + jpeg-js ทุกครั้ง
       - name: Install deps
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-thai-tlwg fonts-noto-color-emoji || true
           npm init -y >/dev/null 2>&1 || true
           npm i jpeg-js puppeteer@23
           npx puppeteer browsers install chrome
