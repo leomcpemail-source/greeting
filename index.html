@@ -551,8 +551,9 @@ function buildCard(cb,CW){
   card.appendChild(sc);
   applyFrameToCard(card,fr);
   const L=lay;
-  const hs=Math.round((tx?tx.hs_mul:1)*L.hs);
-  const bsz=Math.round((tx?tx.bs_mul:1)*L.bs);
+  const TEXT_SCALE=1.25;   // ขยายตัวอักษรให้อ่านง่าย (กลุ่มผู้สูงอายุ)
+  const hs=Math.round((tx?tx.hs_mul:1)*L.hs*TEXT_SCALE);
+  const bsz=Math.round((tx?tx.bs_mul:1)*L.bs*TEXT_SCALE);
   const gap=tx?tx.gap:8;
   const content=document.createElement('div');content.className='content';
   // ── ดันเนื้อหาให้อยู่ในช่องกลางของกรอบ: บังคับ padding ทุกด้าน >= fi (กันตัวอักษรชนกรอบ) ──
@@ -618,7 +619,7 @@ function buildCard(cb,CW){
     h.style.textShadow=_ring(oc,Math.max(2,Math.round(hs/20)))+`,0 2px 10px rgba(0,0,0,.45)`;
     blEl.style.textShadow=_ring(oc,Math.max(1,Math.round(bsz/24)))+`,0 1px 6px rgba(0,0,0,.5)`;
   }
-  const dt=document.createElement('div');dt.className='date';dt.textContent=M.dateThai;
+  const dt=document.createElement('div');dt.className='date';dt.textContent=M.dateThai;dt.style.fontSize=Math.round(bsz*0.62)+'px';
   tb.append(h,blEl,dt);content.appendChild(tb);card.appendChild(content);
   for(let i=0;i<7;i++){
     const s=document.createElement('div');s.className='sparkle';
