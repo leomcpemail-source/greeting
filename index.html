@@ -481,7 +481,14 @@ function buildThumbStrip(){
 function updateThumbActive(){
   document.querySelectorAll('.thumb').forEach((el,i)=>el.classList.toggle('active',i===curIdx));
   const row=document.getElementById('thumbRow');const items=row.querySelectorAll('.thumb');
-  if(items[curIdx])items[curIdx].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  const it=items[curIdx];
+  // เลื่อนเฉพาะแถบ thumbnail เท่านั้น — ห้ามใช้ scrollIntoView เพราะมันจะไป
+  // เลื่อน ancestor (ทั้งหน้า) ตอนหน้าแรกยังถูก transform ออกไปนอกจอ → จอค้างครึ่งจอ
+  if(it){
+    const target=it.offsetLeft-(row.clientWidth-it.clientWidth)/2;
+    const max=row.scrollWidth-row.clientWidth;
+    row.scrollTo({left:Math.max(0,Math.min(target,max)),behavior:'smooth'});
+  }
 }
 
 /* ── FRAMES (กรอบภาพ) ──────────────────────────────────────────────────
@@ -859,8 +866,14 @@ async function snapshot(){
     if(!cloneImg.complete||cloneImg.naturalWidth===0){await new Promise(res=>{cloneImg.onload=res;cloneImg.onerror=res;setTimeout(res,8000);});}}
   if(document.fonts&&document.fonts.ready){try{await Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,3000))]);}catch(e){}}
   let canvas;
-  try{canvas=await html2canvas(clone,{useCORS:true,allowTaint:false,scale:S,backgroundColor:'#1a1208',logging:false,width:CW,height:CW,x:0,y:0,scrollX:0,scrollY:0});}
-  finally{document.body.removeChild(wrap);}
+  try{
+    // กัน html2canvas ค้างไม่จบใน in-app browser (เช่น LINE) ด้วย timeout
+    canvas=await Promise.race([
+      html2canvas(clone,{useCORS:true,allowTaint:false,scale:S,backgroundColor:'#1a1208',logging:false,width:CW,height:CW,x:0,y:0,scrollX:0,scrollY:0}),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('snapshot-timeout')),15000))
+    ]);
+  }
+  finally{if(wrap.parentNode)document.body.removeChild(wrap);}
   return canvas;
 }
 
@@ -880,24 +893,37 @@ function showImageViewer(canvas,fname){
 }
 
 document.getElementById('btnSave').onclick=async()=>{
-  const btn=document.getElementById('btnSave');const m=btn.querySelector('.bt-main');const orig=m.textContent;
+  const btn=document.getElementById('btnSave');const m=btn.querySelector('.bt-main');const orig=m.innerHTML;
+  if(btn.disabled)return;
   m.textContent='กำลังบันทึก…';btn.disabled=true;
   try{const c=await snapshot();const fname=`${M.headline||'สวัสดีวันนี้'}.png`;
     if(IS_LINE||IS_LINE_WV){showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อบันทึก 👆');}
     else{const a=document.createElement('a');a.download=fname;a.href=c.toDataURL('image/png');a.click();toast('บันทึกแล้ว ✓');}
     trackGC('download');track2('download');}
   catch(e){toast('บันทึกไม่สำเร็จ ลองแคปหน้าจอแทน');}
-  finally{m.textContent=orig;btn.disabled=false;}
+  finally{m.innerHTML=orig;btn.disabled=false;}
 };
 document.getElementById('btnLine').onclick=async()=>{
   const btn=document.getElementById('btnLine');const m=btn.querySelector('.bt-main');const orig=m.innerHTML;
+  if(btn.disabled)return;
   m.textContent='กำลังเตรียม…';btn.disabled=true;
-  try{const c=await snapshot();
+  try{
+    const c=await snapshot();
     const canClip=!!(window.ClipboardItem&&navigator.clipboard?.write);
-    if(canClip&&!IS_LINE){c.toBlob(async b=>{try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);toast('คัดลอกแล้ว เปิด LINE แล้ววางได้เลย ✓');}catch{showImageViewer(c,'สวัสดี.png');}m.innerHTML=orig;btn.disabled=false;},'image/png');}
-    else{showImageViewer(c,'สวัสดี.png');toast('กดค้างที่รูปเพื่อแชร์เข้า LINE 👆');m.innerHTML=orig;btn.disabled=false;}
-    trackGC('line');track2('line');}
-  catch(e){toast('ไม่สำเร็จ ลองกดบันทึกแทน');m.innerHTML=orig;btn.disabled=false;}
+    let copied=false;
+    if(canClip&&!IS_LINE){
+      // รอ toBlob ให้จบจริง (เป็น Promise) จะได้ไม่มี callback ค้าง
+      const b=await new Promise(res=>c.toBlob(res,'image/png'));
+      if(b){
+        try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);copied=true;toast('คัดลอกแล้ว เปิด LINE แล้ววางได้เลย ✓');}
+        catch{copied=false;}
+      }
+    }
+    if(!copied){showImageViewer(c,'สวัสดี.png');toast('กดค้างที่รูปเพื่อแชร์เข้า LINE 👆');}
+    trackGC('line');track2('line');
+  }
+  catch(e){toast('ไม่สำเร็จ ลองกดบันทึกแทน');}
+  finally{m.innerHTML=orig;btn.disabled=false;}
 };
 
 /* ════════════ CATEGORY ════════════ */
@@ -991,8 +1017,9 @@ document.getElementById('catdUse').addEventListener('click',()=>{
   imgBase=selectedCatCard._base||imgBase;
   const existing=CARDS.filter(c=>c.file!==newCard.file);
   CARDS.length=0;CARDS.push(newCard,...existing);
-  showCard(0,0);buildThumbStrip();
+  // สลับไปหน้าแรกก่อน เพื่อให้หน้าอยู่ในจอจริงก่อนค่อย build/เลื่อน thumbnail
   switchTab('today');
+  showCard(0,0);buildThumbStrip();
   const lbl=CATEGORIES.find(c=>c.id===currentCatId)?.label||'';
   toast(`✓ เปลี่ยนรูป${lbl?(' '+lbl):''}แล้ว`);track2('next');
 });
