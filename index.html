@@ -909,17 +909,25 @@ document.getElementById('btnLine').onclick=async()=>{
   m.textContent='กำลังเตรียม…';btn.disabled=true;
   try{
     const c=await snapshot();
-    const canClip=!!(window.ClipboardItem&&navigator.clipboard?.write);
-    let copied=false;
-    if(canClip&&!IS_LINE){
-      // รอ toBlob ให้จบจริง (เป็น Promise) จะได้ไม่มี callback ค้าง
-      const b=await new Promise(res=>c.toBlob(res,'image/png'));
-      if(b){
-        try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);copied=true;toast('คัดลอกแล้ว เปิด LINE แล้ววางได้เลย ✓');}
-        catch{copied=false;}
-      }
+    const fname=`${M.headline||'สวัสดี'}.png`;
+    const blob=await new Promise(res=>c.toBlob(res,'image/png'));
+    const file=blob?new File([blob],fname,{type:'image/png'}):null;
+
+    // 1) Web Share API — เปิดแผงแชร์ของระบบ เลือก LINE แล้วส่งให้เพื่อนได้จริง (Chrome/Safari มือถือ)
+    if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file]});trackGC('line');track2('line');return;}
+      catch(err){if(err&&err.name==='AbortError')return;/* ไม่รองรับ/หมดสิทธิ์ → fallback ข้างล่าง */}
     }
-    if(!copied){showImageViewer(c,'สวัสดี.png');toast('กดค้างที่รูปเพื่อแชร์เข้า LINE 👆');}
+
+    // 2) เดสก์ท็อป: คัดลอกรูปลงคลิปบอร์ด แล้วไปวางใน LINE ได้เลย
+    if(!IS_LINE&&blob&&window.ClipboardItem&&navigator.clipboard?.write){
+      try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+        toast('คัดลอกแล้ว เปิด LINE แล้ววางได้เลย ✓');trackGC('line');track2('line');return;}
+      catch{/* ตกไป viewer */}
+    }
+
+    // 3) Fallback (LINE in-app / เบราว์เซอร์เก่า): แสดงรูปให้กดค้างเพื่อแชร์/บันทึก
+    showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อแชร์เข้า LINE 👆');
     trackGC('line');track2('line');
   }
   catch(e){toast('ไม่สำเร็จ ลองกดบันทึกแทน');}
