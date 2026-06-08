@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สวัสดีวันนี้ - ปรับปรุงระบบ</title>
+
+<style>
+:root{
+    --blue:#1967c2;
+    --blue-dark:#13235f;
+    --orange:#f4a12c;
+    --text:#394150;
+    --light:#f8fafc;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(180deg,#dbe9f8,#cfe0f4);
+    font-family:
+        "Noto Sans Thai",
+        system-ui,
+        sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:32px;
+}
+
+.card{
+    width:min(1400px,100%);
+    background:white;
+    border-radius:40px;
+    box-shadow:
+        0 20px 50px rgba(0,0,0,.08);
+    padding:60px;
+}
+
+.layout{
+    display:grid;
+    grid-template-columns:1fr 520px;
+    gap:40px;
+    align-items:center;
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:24px;
+}
+
+.logo-text{
+    font-size:72px;
+    font-weight:800;
+    line-height:1;
+}
+
+.logo-blue{
+    color:var(--blue);
+}
+
+.logo-orange{
+    color:var(--orange);
+}
+
+.divider{
+    width:320px;
+    height:3px;
+    background:#b9d4f4;
+    margin:20px auto 0;
+    border-radius:999px;
+    position:relative;
+}
+
+.divider::after{
+    content:"";
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:#9fc4f0;
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+}
+
+.title{
+    text-align:center;
+    color:var(--blue-dark);
+    font-size:68px;
+    font-weight:800;
+    line-height:1.15;
+    margin-top:40px;
+}
+
+.subtitle{
+    text-align:center;
+    margin-top:20px;
+    font-size:30px;
+    color:#444;
+}
+
+.subtitle strong{
+    color:var(--blue);
+}
+
+.big-highlight{
+    text-align:center;
+    color:var(--blue);
+    font-size:64px;
+    font-weight:900;
+    line-height:1.15;
+    margin-top:8px;
+}
+
+.line-small{
+    width:120px;
+    height:4px;
+    background:#c9dff8;
+    margin:24px auto;
+    border-radius:999px;
+}
+
+.desc{
+    text-align:center;
+    font-size:28px;
+    color:#444;
+    line-height:1.7;
+}
+
+.notice{
+    margin:32px auto;
+    max-width:760px;
+    background:#eef5fd;
+    border-radius:22px;
+    padding:24px 32px;
+    display:flex;
+    gap:20px;
+    align-items:center;
+}
+
+.icon{
+    font-size:52px;
+}
+
+.notice h3{
+    color:var(--blue);
+    font-size:34px;
+}
+
+.notice p{
+    color:#32527e;
+    font-size:24px;
+}
+
+.features{
+    display:flex;
+    justify-content:center;
+    gap:60px;
+    margin-top:40px;
+}
+
+.feature{
+    text-align:center;
+    color:#335;
+}
+
+.feature .emoji{
+    font-size:52px;
+}
+
+.feature p{
+    margin-top:12px;
+    font-size:24px;
+    line-height:1.4;
+}
+
+.footer{
+    text-align:center;
+    margin-top:36px;
+    font-size:26px;
+    color:#444;
+}
+
+/* Character */
+
+.character-wrap{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.bubble{
+    width:480px;
+    height:520px;
+    background:#edf4fc;
+    border-radius:45% 55% 50% 50%;
+    position:relative;
+}
+
+.person{
+    position:absolute;
+    left:50%;
+    top:55%;
+    transform:translate(-50%,-50%);
+}
+
+.head{
+    width:180px;
+    height:160px;
+    background:#ffd8be;
+    border-radius:50%;
+    position:relative;
+}
+
+.hair{
+    position:absolute;
+    width:190px;
+    height:110px;
+    background:#452919;
+    border-radius:90px 90px 60px 60px;
+    top:-5px;
+    left:-5px;
+}
+
+.body{
+    width:160px;
+    height:180px;
+    background:#195ab0;
+    margin:0 auto;
+    border-radius:25px;
+    margin-top:-10px;
+}
+
+.legs{
+    display:flex;
+    justify-content:center;
+    gap:16px;
+}
+
+.leg{
+    width:44px;
+    height:110px;
+    background:#404d63;
+}
+
+.shoes{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.shoe{
+    width:70px;
+    height:28px;
+    background:#5a3525;
+    border-radius:40px;
+}
+
+.bow{
+    transform:rotate(15deg);
+}
+
+@media(max-width:1100px){
+
+    .layout{
+        grid-template-columns:1fr;
+    }
+
+    .character-wrap{
+        order:-1;
+    }
+
+    .card{
+        padding:30px;
+    }
+
+    .title{
+        font-size:42px;
+    }
+
+    .big-highlight{
+        font-size:38px;
+    }
+
+    .subtitle{
+        font-size:22px;
+    }
+
+    .desc{
+        font-size:18px;
+    }
+
+    .notice h3{
+        font-size:24px;
+    }
+
+    .notice p{
+        font-size:18px;
+    }
+
+    .features{
+        gap:20px;
+        flex-wrap:wrap;
+    }
+
+    .feature p{
+        font-size:18px;
+    }
+
+    .logo-text{
+        font-size:48px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+    <div class="layout">
+
+        <div>
+
+            <div class="logo">
+                <div class="logo-text">
+                    <span class="logo-blue">สวัสดี</span><span class="logo-orange">วันนี้</span>
+                </div>
+                <div class="divider"></div>
+            </div>
+
+            <div class="title">
+                ขออภัยในความไม่สะดวก
+            </div>
+
+            <div class="subtitle">
+                ขณะนี้เว็บไซต์ <strong>สวัสดีวันนี้</strong>
+            </div>
+
+            <div class="big-highlight">
+                อยู่ระหว่างการปรับปรุงระบบ<br>
+                และการให้บริการ
+            </div>
+
+            <div class="line-small"></div>
+
+            <div class="desc">
+                เรากำลังพัฒนาเพื่อให้คุณได้รับประสบการณ์ที่ดียิ่งขึ้น<br>
+                ขอบคุณทุกท่านที่ให้การสนับสนุนและไว้วางใจเสมอมา
+            </div>
+
+            <div class="notice">
+                <div class="icon">🔧</div>
+                <div>
+                    <h3>เราจะกลับมาให้บริการอีกครั้งในเร็ว ๆ นี้</h3>
+                    <p>ขออภัยในความไม่สะดวกมา ณ ที่นี้</p>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="emoji">♡</div>
+                    <p>ขอบคุณ<br>สำหรับความเข้าใจ</p>
+                </div>
+
+                <div class="feature">
+                    <div class="emoji">🕒</div>
+                    <p>กำลังปรับปรุง<br>อย่างเต็มที่</p>
+                </div>
+
+                <div class="feature">
+                    <div class="emoji">🌱</div>
+                    <p>เพื่อบริการที่ดียิ่งขึ้น<br>สำหรับคุณ</p>
+                </div>
+            </div>
+
+            <div class="footer">
+                💛 ขอบคุณที่อยู่เคียงข้างกันเสมอมา
+            </div>
+
+        </div>
+
+        <div class="character-wrap">
+
+            <div class="bubble">
+
+                <div class="person bow">
+
+                    <div class="head">
+                        <div class="hair"></div>
+                    </div>
+
+                    <div class="body"></div>
+
+                    <div class="legs">
+                        <div class="leg"></div>
+                        <div class="leg"></div>
+                    </div>
+
+                    <div class="shoes">
+                        <div class="shoe"></div>
+                        <div class="shoe"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
