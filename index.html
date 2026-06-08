@@ -352,89 +352,89 @@ function toast(t){const el=document.getElementById('toastEl');el.textContent=t;e
 ──────────────────────────────────────────────────────────────────────── */
 const FRAMES=[
   // 1) ทองคลาสสิก 3 ชั้น
-  {n:'ทองคลาสสิก', fi:24, layers:[
-    {line:1,inset:8, w:3,  color:'#ffd700', radius:12},
-    {line:1,inset:14,w:1.5,color:'#ffe9a8', radius:7},
-    {line:1,inset:18,w:1,  color:'#b8860b', radius:4},
+  {n:'ทองคลาสสิก', fi:28, layers:[
+    {line:1,inset:8, w:4,  color:'#ffd700', radius:12},
+    {line:1,inset:15,w:2,  color:'#ffe9a8', radius:7},
+    {line:1,inset:20,w:1.5,color:'#b8860b', radius:4},
   ]},
   // 2) อาร์ตเดโคทอง — มุมเหลี่ยมซ้อนชั้น
-  {n:'อาร์ตเดโคทอง', fi:24, layers:[
-    {line:1,inset:11,w:2,color:'#e8c25a',radius:0},
-  ], corners:{t:'steps',inset:11,size:32,w:3,gap:5,color:'#ffd700',color2:'#b8860b'}},
+  {n:'อาร์ตเดโคทอง', fi:28, layers:[
+    {line:1,inset:11,w:3,color:'#e8c25a',radius:0},
+  ], corners:{t:'steps',inset:11,size:32,w:4,gap:5,color:'#ffd700',color2:'#b8860b'}},
   // 3) ทองเมทัลลิกนูน
-  {n:'ทองเมทัลลิก', fi:24, layers:[
-    {bevel:'out',inset:9,w:7,light:'#ffe9a8',dark:'#9a7b1e',radius:6},
-    {line:1,inset:18,w:1,color:'#fff3c4',radius:2},
+  {n:'ทองเมทัลลิก', fi:28, layers:[
+    {bevel:'out',inset:9,w:9,light:'#ffe9a8',dark:'#9a7b1e',radius:6},
+    {line:1,inset:20,w:1.5,color:'#fff3c4',radius:2},
   ]},
   // 4) 3D นูน (เงิน)
-  {n:'3D นูนเงิน', fi:25, layers:[
-    {bevel:'out',inset:9,w:8,light:'#ffffff',dark:'#6d6d6d',radius:8},
-    {line:1,inset:19,w:1,color:'rgba(255,255,255,.55)',radius:4},
+  {n:'3D นูนเงิน', fi:30, layers:[
+    {bevel:'out',inset:9,w:11,light:'#ffffff',dark:'#6d6d6d',radius:8},
+    {line:1,inset:22,w:1.5,color:'rgba(255,255,255,.55)',radius:4},
   ]},
   // 5) 3D จม
-  {n:'3D จม', fi:23, layers:[
-    {bevel:'in',inset:9,w:8,light:'#ffffff',dark:'#4d4d4d',radius:8},
+  {n:'3D จม', fi:28, layers:[
+    {bevel:'in',inset:9,w:11,light:'#ffffff',dark:'#4d4d4d',radius:8},
   ]},
   // 6) เงาลึกสามมิติ
-  {n:'เงาลึก 3 มิติ', fi:22, layers:[
-    {shadow:1,inset:0,depth:30,color:'rgba(0,0,0,.55)'},
-    {line:1,inset:11,w:1.5,color:'rgba(255,255,255,.6)',radius:12},
+  {n:'เงาลึก 3 มิติ', fi:26, layers:[
+    {shadow:1,inset:0,depth:36,color:'rgba(0,0,0,.55)'},
+    {line:1,inset:11,w:2,color:'rgba(255,255,255,.6)',radius:12},
   ]},
   // 7) โพลารอยด์ขาว
-  {n:'โพลารอยด์ขาว', fi:32, layers:[
-    {band:1,inset:10,w:15,bg:'#ffffff'},
-    {line:1,inset:25,w:1,color:'#d8d0bf',radius:0},
+  {n:'โพลารอยด์ขาว', fi:38, layers:[
+    {band:1,inset:10,w:19,bg:'#ffffff'},
+    {line:1,inset:29,w:1,color:'#d8d0bf',radius:0},
   ]},
   // 8) ฟิล์มขอบดำ
-  {n:'ฟิล์มขอบดำ', fi:26, layers:[
-    {band:1,inset:0,w:18,bg:'#121212'},
-    {line:1,inset:18,w:1.5,color:'#e8c25a',radius:0},
+  {n:'ฟิล์มขอบดำ', fi:32, layers:[
+    {band:1,inset:0,w:22,bg:'#121212'},
+    {line:1,inset:22,w:2,color:'#e8c25a',radius:0},
   ]},
   // 9) กรอบไม้
-  {n:'กรอบไม้', fi:28, layers:[
-    {bevel:'out',inset:9,w:12,light:'#a1887f',dark:'#5d4037',radius:3},
-    {line:1,inset:21,w:1,color:'#4e342e',radius:0},
+  {n:'กรอบไม้', fi:34, layers:[
+    {bevel:'out',inset:9,w:16,light:'#a1887f',dark:'#5d4037',radius:3},
+    {line:1,inset:25,w:1.5,color:'#4e342e',radius:0},
   ]},
   // 10) แดงทองมงคล
-  {n:'แดงทองมงคล', fi:22, layers:[
-    {line:1,inset:8, w:5,  color:'#c0392b',radius:5},
-    {line:1,inset:15,w:1.5,color:'#ffd700',radius:2},
+  {n:'แดงทองมงคล', fi:26, layers:[
+    {line:1,inset:8, w:7,  color:'#c0392b',radius:5},
+    {line:1,inset:17,w:2,  color:'#ffd700',radius:2},
   ], corners:{t:'dots',inset:9,r:4,color:'#ffd700'}},
   // 11) นีออนฟ้า
-  {n:'นีออนฟ้า', fi:22, layers:[
-    {line:1,inset:9, w:5,color:'rgba(0,229,255,.22)',radius:14},
-    {line:1,inset:14,w:2,color:'#00e5ff',radius:9},
+  {n:'นีออนฟ้า', fi:26, layers:[
+    {line:1,inset:9, w:6,color:'rgba(0,229,255,.22)',radius:14},
+    {line:1,inset:17,w:3,color:'#00e5ff',radius:9},
   ]},
   // 12) ชมพูดอกไม้
-  {n:'ชมพูดอกไม้', fi:20, layers:[
-    {line:1,inset:10,w:3,color:'#ffb6c1',radius:16},
+  {n:'ชมพูดอกไม้', fi:24, layers:[
+    {line:1,inset:10,w:4,color:'#ffb6c1',radius:16},
   ], corners:{t:'petals',inset:11,r:4,color:'#ff8fab',color2:'#ffd6e0'}},
   // 13) ไทยกนกมุม
-  {n:'ไทยกนกมุม', fi:24, layers:[
-    {line:1,inset:10,w:2,color:'#e8c060',radius:0},
-  ], corners:{t:'steps',inset:10,size:34,w:3,gap:6,color:'#e8c060',color2:'#b8860b'}},
+  {n:'ไทยกนกมุม', fi:28, layers:[
+    {line:1,inset:10,w:3,color:'#e8c060',radius:0},
+  ], corners:{t:'steps',inset:10,size:34,w:4,gap:6,color:'#e8c060',color2:'#b8860b'}},
   // 14) ขาวเรียบหรู
-  {n:'ขาวเรียบหรู', fi:24, layers:[
-    {line:1,inset:12,w:1.5,color:'#ffffff',radius:14},
-    {line:1,inset:18,w:1.5,color:'rgba(255,255,255,.45)',radius:10},
+  {n:'ขาวเรียบหรู', fi:28, layers:[
+    {line:1,inset:12,w:2,  color:'#ffffff',radius:14},
+    {line:1,inset:19,w:2,  color:'rgba(255,255,255,.45)',radius:10},
   ]},
   // 15) สีประจำวัน — เส้นคู่ (DAY = M.color/M.color2)
-  {n:'สีประจำวันคู่', fi:24, layers:[
-    {line:1,inset:9, w:5,  color:'DAY', radius:14},
-    {line:1,inset:16,w:2,  color:'DAY2',radius:9},
+  {n:'สีประจำวันคู่', fi:28, layers:[
+    {line:1,inset:9, w:7,  color:'DAY', radius:14},
+    {line:1,inset:19,w:2.5,color:'DAY2',radius:9},
   ]},
   // 16) สีประจำวัน — เส้นเดี่ยวหนา
-  {n:'สีประจำวันหนา', fi:24, layers:[
-    {line:1,inset:9, w:6,  color:'DAY', radius:12},
+  {n:'สีประจำวันหนา', fi:28, layers:[
+    {line:1,inset:9, w:8,  color:'DAY', radius:12},
   ]},
   // 17) สีประจำวัน — นูน 3 มิติ
-  {n:'สีประจำวันนูน', fi:24, layers:[
-    {bevel:'out',inset:9,w:9,light:'DAY',dark:'DAY2',radius:7},
+  {n:'สีประจำวันนูน', fi:28, layers:[
+    {bevel:'out',inset:9,w:12,light:'DAY',dark:'DAY2',radius:7},
   ]},
   // 18) สีประจำวัน — มุมลายไทย
-  {n:'สีประจำวันกนก', fi:24, layers:[
-    {line:1,inset:10,w:3,color:'DAY',radius:0},
-  ], corners:{t:'steps',inset:10,size:34,w:4,gap:6,color:'DAY',color2:'DAY2'}},
+  {n:'สีประจำวันกนก', fi:28, layers:[
+    {line:1,inset:10,w:4,color:'DAY',radius:0},
+  ], corners:{t:'steps',inset:10,size:34,w:5,gap:6,color:'DAY',color2:'DAY2'}},
 ];
 
 /* ── LAYOUTS ────────────────────────────────────────────────────────── */
@@ -732,7 +732,8 @@ function applyFrameToCard(card, fr){
   // FW = 800/cardW (จำกัด 1..2.4) ทำให้กรอบหนาขึ้นเมื่อ card เล็ก แต่ inset คงสัดส่วนเดิม
   const _cardW = card.offsetWidth || parseFloat(card.style.width) || 800;
   // กรอบออกแบบบนฐาน 800px เมื่อย่อมาจอเล็กจะบาง → ชดเชย + เพิ่มฐาน ×1.35 ให้กรอบเด่นเหมาะกับภาพ
-  const FW = Math.min(3.2, Math.max(1.35, (800/_cardW)*1.35));
+  // เพิ่ม cap จาก 3.2→4.2 (มิ.ย.2569: ผู้ใช้แจ้งกรอบเล็กเกินไป ขยายขึ้น ~30%)
+  const FW = Math.min(4.2, Math.max(1.35, (800/_cardW)*1.35));
   const wScale=(w)=>Math.round(fNum(w,1)*FW*10)/10;
   const sides=(ins)=>`top:${ins}px;right:${ins}px;bottom:${ins}px;left:${ins}px`;
 
