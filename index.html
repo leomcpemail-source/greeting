@@ -12,16 +12,19 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --pink:#e91e8c;--pink2:#ff6bb5;--pink-bg:#fff0f8;
-  --text:#2d1a2e;--text2:#7a5a7a;
+  --pink:#e91e8c;--pink2:#ff6bb5;
+  --green:#1a8a3a;--green2:#22a847;   /* ปุ่มสีเขียวตามภาพ */
+  --line-green:#06c755;
+  --text:#2d1a2e;--text2:#888;
   --white:#ffffff;
-  --card-r:20px;
-  --tab-h:64px;
+  --cream:#fff8ee;                    /* พื้น date box */
+  --cream-border:#f5dfc0;
+  --tab-h:60px;
 }
 html,body{
   height:100%;height:100dvh;overflow:hidden;
   font-family:'Sarabun',sans-serif;color:var(--text);
-  background:#fdf5fc;
+  background:#fff;
   overscroll-behavior:none;
 }
 
@@ -48,8 +51,8 @@ html,body{
 .tab-bar{
   position:absolute;bottom:0;left:0;right:0;
   height:var(--tab-h);
-  background:var(--white);
-  border-top:1.5px solid #f0d6ee;
+  background:#fff;
+  border-top:1px solid #f0e0ee;
   display:flex;align-items:stretch;
   padding-bottom:max(0px, env(safe-area-inset-bottom));
   z-index:100;
@@ -58,65 +61,73 @@ html,body{
   flex:1;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:3px;
   border:none;background:none;cursor:pointer;
-  font-family:'Sarabun';font-size:12px;font-weight:600;
-  color:var(--text2);transition:color .2s;
+  font-family:'Sarabun';font-size:13px;font-weight:600;
+  color:#bbb;transition:color .2s;
   padding:0;
 }
-.tab-btn .tab-icon{font-size:22px;line-height:1;transition:transform .2s;}
+.tab-btn .tab-icon{font-size:24px;line-height:1;transition:transform .2s;}
 .tab-btn.active{color:var(--pink);}
-.tab-btn.active .tab-icon{transform:scale(1.15);}
+.tab-btn.active .tab-icon{transform:scale(1.1);}
 
 /* ─────────────────────────── PAGE: TODAY ─────────────────────────── */
-#pageToday{background:#fdf5fc;}
+#pageToday{background:#fff;}
 
-/* Header */
+/* Header — เหมือนภาพ: ☀️ ซ้าย + title + subtitle */
 .today-header{
   flex-shrink:0;
-  background:var(--white);
-  padding:max(12px,env(safe-area-inset-top)) 18px 12px;
-  border-bottom:1px solid #f0d6ee;
+  background:#fff;
+  padding:max(14px,env(safe-area-inset-top)) 16px 10px;
+  border-bottom:none;
 }
-.today-header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.header-title-block{}
-.header-app-name{font-family:'Chonburi';font-size:22px;color:var(--pink);line-height:1.1;}
-.header-app-sub{font-size:13px;color:var(--text2);margin-top:2px;}
+.today-header-row{display:flex;align-items:center;gap:10px;}
 .header-sun{
-  width:52px;height:52px;border-radius:50%;
-  background:linear-gradient(135deg,#ffe066,#ffc840);
-  display:flex;align-items:center;justify-content:center;
-  font-size:28px;flex-shrink:0;
-  box-shadow:0 4px 14px rgba(255,180,0,.32);
+  font-size:38px;line-height:1;flex-shrink:0;
+  /* ☀️ emoji ธรรมดา ไม่มีวงกลม */
 }
+.header-title-block{flex:1;}
+.header-app-name{
+  font-family:'Chonburi';font-size:24px;color:var(--pink);line-height:1.1;
+  display:flex;align-items:center;gap:6px;
+}
+.header-heart{color:var(--pink);font-size:18px;}
+.header-app-sub{font-size:13px;color:var(--text2);margin-top:1px;}
+
+/* Date box — พื้นครีม สองคอลัมน์ */
 .date-box{
-  margin-top:10px;
-  background:linear-gradient(135deg,#fff0fb,#fce8ff);
-  border:1.5px solid #f0d0ee;border-radius:14px;
-  padding:8px 14px;
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin:10px 0 0;
+  background:var(--cream);
+  border:1.5px solid var(--cream-border);border-radius:14px;
+  padding:10px 14px;
+  display:flex;align-items:stretch;justify-content:space-between;gap:10px;
 }
-.date-box-left{display:flex;align-items:center;gap:8px;}
-.date-box-icon{font-size:20px;}
+.date-box-left{display:flex;align-items:center;gap:10px;}
+.date-box-icon{font-size:22px;flex-shrink:0;}
+.date-main{display:flex;flex-direction:column;gap:1px;}
 .date-text{font-family:'Sarabun';font-size:14px;font-weight:700;color:var(--text);line-height:1.3;}
-.date-sub{font-family:'Sarabun';font-size:12px;color:var(--text2);}
-.day-badge{
-  background:var(--pink);color:#fff;
-  font-family:'Sarabun';font-size:12px;font-weight:700;
-  padding:5px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0;
-  display:flex;align-items:center;gap:5px;
+.date-lunar{font-family:'Sarabun';font-size:12px;color:var(--text2);} /* ขึ้น N ค่ำ เดือน N */
+/* ขวา: 🌸 วันสำคัญนี้ / ชื่อวัน */
+.date-box-right{
+  display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px;
+  flex-shrink:0;
+}
+.date-box-right-label{font-family:'Sarabun';font-size:11px;color:var(--text2);}
+.date-box-right-day{
+  font-family:'Sarabun';font-size:13px;font-weight:700;color:var(--pink);
+  display:flex;align-items:center;gap:4px;
 }
 
 /* Main card display */
 .today-main-card{
   flex:1;min-height:0;
   display:flex;align-items:center;justify-content:center;
-  padding:14px 18px 8px;
+  padding:10px 16px 6px;
   position:relative;
 }
 .main-stage{
   width:100%;height:100%;
   display:flex;align-items:center;justify-content:center;
   position:relative;overflow:hidden;
-  border-radius:20px;
+  border-radius:16px;
 }
 
 /* card wrapper */
@@ -139,59 +150,71 @@ html,body{
 .date{font-family:'Sarabun';font-size:12px;opacity:.92;text-shadow:0 1px 6px rgba(0,0,0,.5)}
 .sparkle{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 8px 2px rgba(255,255,255,.8);z-index:2;pointer-events:none}
 
-/* Action buttons */
+/* Action buttons — ทั้งคู่สีเขียวตามภาพ */
 .today-actions{
   flex-shrink:0;
   display:grid;grid-template-columns:1fr 1fr;gap:10px;
-  padding:0 18px 10px;
+  padding:0 16px 8px;
 }
 .btn{
-  border:none;border-radius:16px;padding:13px 12px;
-  font-family:'Kanit';font-size:16px;font-weight:600;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;
-  transition:transform .12s;min-height:50px;
+  border:none;border-radius:16px;padding:0 12px;
+  font-family:'Kanit';font-weight:600;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  transition:transform .12s;min-height:56px;
 }
 .btn:active{transform:scale(.95)}.btn:disabled{opacity:.5}
-.btn.copy{background:#fff;color:var(--text);border:1.5px solid #f0d0ee;box-shadow:0 2px 8px rgba(180,20,110,.08)}
+.btn-main-text{font-size:16px;display:flex;align-items:center;gap:7px;}
+.btn-sub-text{font-size:11px;opacity:.82;font-family:'Sarabun';}
+/* ซ้าย: เขียวเข้ม บันทึกรูป */
 .btn.save{
-  background:linear-gradient(135deg,var(--pink),#ff5fa0);
-  color:#fff;box-shadow:0 4px 16px rgba(233,30,140,.32);
+  background:var(--green);
+  color:#fff;box-shadow:0 3px 12px rgba(26,138,58,.3);
 }
-.line-browser .btn.copy{display:none}
+/* ขวา: เขียว LINE */
+.btn.line-share{
+  background:var(--line-green);
+  color:#fff;box-shadow:0 3px 12px rgba(6,199,85,.3);
+}
+.btn.copy{background:var(--green);color:#fff;box-shadow:0 3px 12px rgba(26,138,58,.3);}
+.line-browser #btnCopy{display:none}
 .line-browser .today-actions{grid-template-columns:1fr}
-.line-browser .usage-tip{display:none}
 
-/* Thumbnail strip (replaces carousel, scrollable row at bottom of today) */
+/* Thumbnail strip — ตามภาพ: "🌸 รูปเพิ่มเติมของวันนี้" + thumbnail row */
 .thumb-strip{
   flex-shrink:0;
-  padding:0 18px 10px;
+  padding:4px 16px 10px;
 }
 .thumb-strip-label{
-  font-family:'Sarabun';font-size:13px;font-weight:700;color:var(--text2);
+  font-family:'Sarabun';font-size:14px;font-weight:700;color:var(--text);
   margin-bottom:8px;display:flex;align-items:center;gap:6px;
 }
 .thumb-row{
   display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;
-  padding-bottom:4px;-webkit-overflow-scrolling:touch;
+  -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
 }
 .thumb-row::-webkit-scrollbar{display:none}
+/* thumbnail มีข้อความ overlay "สวัสดีวันจันทร์" */
 .thumb-item{
-  flex-shrink:0;width:72px;height:72px;
+  flex-shrink:0;width:78px;height:78px;
   scroll-snap-align:start;
-  border-radius:14px;overflow:hidden;position:relative;cursor:pointer;
+  border-radius:12px;overflow:hidden;position:relative;cursor:pointer;
   border:2.5px solid transparent;transition:border-color .2s,transform .15s;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
 }
 .thumb-item.active{border-color:var(--pink);}
 .thumb-item:active{transform:scale(.95)}
-.thumb-item img{width:100%;height:100%;object-fit:cover;display:block;}
-.thumb-nav{
-  display:flex;align-items:center;gap:8px;margin-top:6px;
+.thumb-item img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.thumb-caption{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(0deg,rgba(0,0,0,.58) 0%,transparent 100%);
+  padding:14px 4px 4px;
+  font-family:'Chonburi';font-size:9px;color:#fff;text-align:center;
+  line-height:1.2;
 }
-.thumb-counter{
-  font-family:'Sarabun';font-size:13px;font-weight:700;color:var(--text2);
-  flex:1;
-}
+/* ลูกศรซ้าย-ขวา สำหรับ desktop */
+.thumb-nav{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.thumb-counter{font-family:'Sarabun';font-size:13px;font-weight:700;color:var(--text2);flex:1;}
 .swipe-arrows{display:flex;gap:4px;}
 .swipe-arrow{
   font-size:20px;padding:6px 10px;border-radius:12px;
@@ -209,17 +232,20 @@ html,body{
 .line-notice-text{font-family:'Sarabun';font-size:14px;font-weight:600;color:#fff;line-height:1.5;}
 
 /* ─────────────────────────── PAGE: CATEGORIES ─────────────────────────── */
-#pageCategory{background:#fdf5fc;overflow-y:auto;}
+#pageCategory{background:#fff;overflow-y:auto;}
 
 .cat-header{
   flex-shrink:0;
-  background:var(--white);
-  padding:max(14px,env(safe-area-inset-top)) 18px 14px;
-  border-bottom:1px solid #f0d6ee;
+  background:#fff;
+  padding:max(14px,env(safe-area-inset-top)) 18px 12px;
+  border-bottom:none;
   position:sticky;top:0;z-index:10;
+  display:flex;align-items:center;gap:10px;
 }
-.cat-header-title{font-family:'Chonburi';font-size:20px;color:var(--pink);}
-.cat-header-sub{font-size:13px;color:var(--text2);margin-top:2px;}
+.cat-header-icon{font-size:24px;}
+.cat-header-text{}
+.cat-header-title{font-family:'Chonburi';font-size:20px;color:var(--pink);line-height:1.1;}
+.cat-header-sub{font-size:13px;color:var(--text2);margin-top:1px;}
 
 .cat-grid-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .cat-grid{
@@ -249,9 +275,22 @@ html,body{
 .cat-card-label{
   font-family:'Sarabun';font-size:13px;font-weight:700;
   color:#fff;text-align:center;line-height:1.2;
-  text-shadow:0 1px 4px rgba(0,0,0,.5);
-  display:flex;align-items:center;gap:3px;
+  text-shadow:0 1px 5px rgba(0,0,0,.6);
+  display:flex;align-items:center;gap:4px;
 }
+/* สีพื้นหลัง cat card ตายตัวตามภาพ (ถ้ารูปโหลดไม่ขึ้น) */
+.cat-card[data-id="flowers"]{background:#fce4f0;}
+.cat-card[data-id="dharma"]{background:#fff3d6;}
+.cat-card[data-id="inspire"]{background:#ffe8f4;}
+.cat-card[data-id="miss"]{background:#fce4f0;}
+.cat-card[data-id="birthday"]{background:#f3e5f5;}
+.cat-card[data-id="elderly"]{background:#e8f5e9;}
+.cat-card[data-id="health"]{background:#e1f5fe;}
+.cat-card[data-id="festival"]{background:#1a237e;}
+.cat-card[data-id="family"]{background:#e8f5e9;}
+.cat-card[data-id="pets"]{background:#fff3e0;}
+.cat-card[data-id="coffee"]{background:#efebe9;}
+.cat-card[data-id="nature"]{background:#e3f2fd;}
 
 /* ─────────────────────────── PAGE: CATEGORY DETAIL ─────────────────────────── */
 #pageCatDetail{background:#fdf5fc;}
@@ -334,24 +373,28 @@ html,body{
   <!-- ══════════════ PAGE: TODAY ══════════════ -->
   <div class="page active" id="pageToday">
 
-    <!-- Header -->
+    <!-- Header — ตามภาพ -->
     <div class="today-header">
       <div class="today-header-row">
+        <div class="header-sun">☀️</div>
         <div class="header-title-block">
-          <div class="header-app-name">สวัสดีวันนี้ ♥</div>
+          <div class="header-app-name">สวัสดีทุกวัน <span class="header-heart">♥</span></div>
           <div class="header-app-sub">ภาพสวย ส่งต่อความสุข</div>
         </div>
-        <div class="header-sun">☀️</div>
       </div>
+      <!-- Date box: ซ้าย=📅+วันที่+ขึ้นค่ำ, ขวา=🌸+วันสำคัญนี้+ชื่อวัน -->
       <div class="date-box">
         <div class="date-box-left">
           <div class="date-box-icon">📅</div>
-          <div>
+          <div class="date-main">
             <div class="date-text" id="dateLine">กำลังโหลด…</div>
-            <div class="date-sub" id="dateSubLine"></div>
+            <div class="date-lunar" id="dateLunar"></div>
           </div>
         </div>
-        <div class="day-badge" id="dayBadge">🌸 วันสำคัญ</div>
+        <div class="date-box-right">
+          <div class="date-box-right-label">วันสำคัญนี้</div>
+          <div class="date-box-right-day" id="dayBadge"><span>🌸</span><span id="dayBadgeText">วันจันทร์</span></div>
+        </div>
       </div>
     </div>
 
@@ -360,10 +403,16 @@ html,body{
       <div class="main-stage" id="stage"></div>
     </div>
 
-    <!-- Action buttons -->
+    <!-- Action buttons — เขียวทั้งคู่ตามภาพ -->
     <div class="today-actions" id="actions" style="display:none">
-      <button class="btn copy" id="btnCopy">📋 คัดลอกรูป</button>
-      <button class="btn save" id="btnSave">⬇️ บันทึกรูป</button>
+      <button class="btn save" id="btnSave">
+        <div class="btn-main-text">⬇️ บันทึกรูป</div>
+        <div class="btn-sub-text">เก็บไว้ในเครื่อง</div>
+      </button>
+      <button class="btn line-share" id="btnLineShare">
+        <div class="btn-main-text"><span style="font-size:20px">💬</span> ส่งเข้า LINE</div>
+        <div class="btn-sub-text">ส่งต่อให้เพื่อน</div>
+      </button>
     </div>
 
     <!-- LINE Notice -->
@@ -376,11 +425,12 @@ html,body{
       </div>
     </div>
 
-    <!-- Thumbnail strip -->
+    <!-- Thumbnail strip — ตามภาพ -->
     <div class="thumb-strip" id="thumbStrip" style="display:none">
       <div class="thumb-strip-label">🌸 รูปเพิ่มเติมของวันนี้</div>
       <div class="thumb-row" id="thumbRow"></div>
-      <div class="thumb-nav">
+      <!-- nav ซ่อนบนมือถือ แสดงบน desktop -->
+      <div class="thumb-nav" id="thumbNav" style="display:none">
         <div class="thumb-counter" id="thumbCounter">รูป 1 จาก …</div>
         <div class="swipe-arrows">
           <button class="swipe-arrow" id="arrowLeft">⬅️</button>
@@ -394,8 +444,11 @@ html,body{
   <!-- ══════════════ PAGE: CATEGORIES ══════════════ -->
   <div class="page hidden" id="pageCategory">
     <div class="cat-header">
-      <div class="cat-header-title">🌸 หมวดหมู่ภาพ</div>
-      <div class="cat-header-sub">เลือกภาพที่คุณต้องการ</div>
+      <div class="cat-header-icon">🌸</div>
+      <div class="cat-header-text">
+        <div class="cat-header-title">หมวดหมู่ภาพ</div>
+        <div class="cat-header-sub">เลือกภาพที่คุณต้องการ</div>
+      </div>
     </div>
     <div class="cat-grid-scroll">
       <div class="cat-grid" id="catGrid">
@@ -457,18 +510,22 @@ const SID    = 's_'+Math.random().toString(36).slice(2);
 
 /* ── CATEGORY DEFINITIONS ───────────────────────────────────────────── */
 const CATEGORIES = [
-  { id:'flowers',  label:'ดอกไม้',      icon:'🌸', color:'#f48fb1', bg:'#fce4ec' },
-  { id:'dharma',   label:'ธรรมะ',       icon:'🙏', color:'#ce9a38', bg:'#fff8e1' },
-  { id:'inspire',  label:'กำลังใจ',     icon:'💪', color:'#e91e63', bg:'#fce4ec' },
-  { id:'miss',     label:'คิดถึง',      icon:'❤️', color:'#e53935', bg:'#ffebee' },
-  { id:'birthday', label:'วันเกิด',     icon:'🎂', color:'#8e24aa', bg:'#f3e5f5' },
-  { id:'elderly',  label:'ผู้สูงวัย',   icon:'👵', color:'#00897b', bg:'#e0f2f1' },
-  { id:'health',   label:'สุขภาพ',      icon:'🏥', color:'#0288d1', bg:'#e1f5fe' },
-  { id:'festival', label:'เทศกาล',      icon:'🎉', color:'#f57c00', bg:'#fff3e0' },
-  { id:'family',   label:'ครอบครัว',   icon:'👨‍👩‍👧‍👦', color:'#2e7d32', bg:'#e8f5e9' },
-  { id:'pets',     label:'สัตว์เลี้ยง',icon:'🐱', color:'#ad1457', bg:'#fce4ec' },
-  { id:'coffee',   label:'กาแฟยามเช้า',icon:'☕', color:'#5d4037', bg:'#efebe9' },
-  { id:'nature',   label:'วิวธรรมชาติ',icon:'🌄', color:'#1565c0', bg:'#e3f2fd' },
+  // สีตามภาพ: แถว 1
+  { id:'flowers',  label:'ดอกไม้',      icon:'🌸', color:'#e91e8c', bg:'#fce4f0' },
+  { id:'dharma',   label:'ธรรมะ',       icon:'🙏', color:'#c07c28', bg:'#fff3d6' },
+  { id:'inspire',  label:'กำลังใจ',     icon:'❤️', color:'#e91e8c', bg:'#ffe8f4' },
+  // แถว 2
+  { id:'miss',     label:'คิดถึง',      icon:'❤️', color:'#e91e8c', bg:'#fce4f0' },
+  { id:'birthday', label:'วันเกิด',     icon:'🎂', color:'#9c27b0', bg:'#f3e5f5' },
+  { id:'elderly',  label:'ผู้สูงวัย',   icon:'👵', color:'#2e7d32', bg:'#e8f5e9' },
+  // แถว 3
+  { id:'health',   label:'สุขภาพ',      icon:'🏥', color:'#0288d1', bg:'#e3f2fd' },
+  { id:'festival', label:'เทศกาล',      icon:'⭐', color:'#f57c00', bg:'#1a237e' },
+  { id:'family',   label:'ครอบครัว',    icon:'🏠', color:'#2e7d32', bg:'#e8f5e9' },
+  // แถว 4
+  { id:'pets',     label:'สัตว์เลี้ยง', icon:'🐾', color:'#ad1457', bg:'#fce4ec' },
+  { id:'coffee',   label:'กาแฟยามเช้า', icon:'☕', color:'#5d4037', bg:'#efebe9' },
+  { id:'nature',   label:'วิวธรรมชาติ', icon:'🏔️', color:'#1565c0', bg:'#e3f2fd' },
 ];
 
 /* ── ANALYTICS ──────────────────────────────────────────────────────── */
@@ -1007,6 +1064,21 @@ document.getElementById('btnCopy').onclick=async()=>{
     else{triggerDownload(c);toast('เปิดใน LINE: กดค้างที่รูปเพื่อแชร์ได้เลย');trackGC('copy');track2('copy');btn.textContent=orig;btn.disabled=false;}}
   catch{toast('ไม่สำเร็จ ลองกดบันทึกแทน');btn.textContent=orig;btn.disabled=false;}
 };
+// ── ปุ่มส่งเข้า LINE (btnLineShare) — เปิด LINE share sheet ──
+document.getElementById('btnLineShare').onclick=async()=>{
+  const btn=document.getElementById('btnLineShare');
+  const t=btn.querySelector('.btn-main-text').textContent;
+  btn.querySelector('.btn-main-text').textContent='กำลังเตรียม…';btn.disabled=true;
+  try{
+    const c=await snapshot();
+    const fname=`${M.headline||'สวัสดีวันนี้'}.png`;
+    showImageViewer(c,fname);
+    toast('กดค้างที่รูปเพื่อบันทึก แล้วแชร์ใน LINE 👆');
+    trackGC('download');track2('download');
+  }catch(e){toast('ไม่สำเร็จ ลองกดบันทึกแทน');}
+  finally{btn.querySelector('.btn-main-text').textContent=t;btn.disabled=false;}
+};
+
 document.getElementById('btnSave').onclick=async()=>{
   const btn=document.getElementById('btnSave');
   const t=btn.textContent;btn.textContent='กำลังบันทึก…';btn.disabled=true;
@@ -1060,14 +1132,24 @@ function showSource(src){
 /* ── THUMBNAIL STRIP ─────────────────────────────────────────────────── */
 function buildThumbStrip(){
   const row=document.getElementById('thumbRow');row.innerHTML='';
+  const headline=M&&(M.headline||('สวัสดีวัน'+(M.dayTh||'')));
   CARDS.forEach((c,i)=>{
     const item=document.createElement('div');item.className='thumb-item'+(i===0?' active':'');
-    const img=document.createElement('img');img.src=`${imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;img.alt='';
+    // รูป
+    const img=document.createElement('img');
+    img.src=`${imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;img.alt='';
     item.appendChild(img);
+    // caption overlay "สวัสดีวันจันทร์" ตามภาพ
+    const cap=document.createElement('div');cap.className='thumb-caption';
+    cap.textContent=headline||'สวัสดีวันนี้';
+    item.appendChild(cap);
     item.addEventListener('click',()=>goToCard(i));
     row.appendChild(item);
   });
   document.getElementById('thumbStrip').style.display='';
+  // แสดง nav บน desktop (จอกว้าง)
+  const nav=document.getElementById('thumbNav');
+  if(nav){nav.style.display=window.innerWidth>480?'flex':'';}
   updateThumbCounter();
 }
 
@@ -1126,6 +1208,7 @@ function buildCatGrid(){
   const grid=document.getElementById('catGrid');grid.innerHTML='';
   CATEGORIES.forEach(cat=>{
     const card=document.createElement('div');card.className='cat-card';
+    card.dataset.id=cat.id;card.setAttribute("data-id",cat.id);
     card.style.background=cat.bg;
     // placeholder color div ก่อน load manifest
     const placeholder=document.createElement('div');
@@ -1319,21 +1402,36 @@ async function boot(){
     M.color=_dc[_w];M.color2=_d2[_w];
   }
 
+  // อัปเดตวันที่ใน header
   document.getElementById('dateLine').textContent=M.dateThai||'';
-  if(M.wanPhra){document.getElementById('dateSubLine').textContent='🕯️ วันพระ';}
-  else if(M.wanPhraSpecial){document.getElementById('dateSubLine').textContent=`🛕 ${M.wanPhraSpecial}`;}
-  else{document.getElementById('dateSubLine').style.display='none';}
-  const badge=document.getElementById('dayBadge');
-  if(M.isFestival&&M.festival){badge.textContent=`🌸 ${M.festival}`;badge.style.display='';}
-  else if(M.wanPhra){badge.innerHTML='🕯️ วันพระ';badge.style.background='#ce9a38';}
-  else if(M.wanPhraSpecial){badge.innerHTML=`🛕 ${M.wanPhraSpecial}`;badge.style.background='#ce9a38';}
-  else{badge.textContent=`🌸 ${M.dayTh||''}`;badge.style.background='var(--pink)';}
+  // ขึ้น N ค่ำ เดือน N — คำนวณแบบง่ายจากปฏิทินไทย (ถ้า manifest มี lunarDate ใช้เลย)
+  const lunarEl=document.getElementById('dateLunar');
+  if(M.lunarDate){lunarEl.textContent=M.lunarDate;}
+  else if(M.wanPhra){lunarEl.textContent='🕯️ วันพระ';}
+  else{lunarEl.textContent='';}
+  // day badge ขวา
+  const badgeText=document.getElementById('dayBadgeText');
+  const badgeRow=document.getElementById('dayBadge');
+  if(M.isFestival&&M.festival){
+    badgeText.textContent=M.festival;
+    badgeRow.querySelector('span:first-child').textContent='🌸';
+  } else if(M.wanPhra){
+    badgeText.textContent='วันพระ';
+    badgeRow.querySelector('span:first-child').textContent='🕯️';
+  } else {
+    badgeText.textContent=M.dayTh||'วันนี้';
+    badgeRow.querySelector('span:first-child').textContent='🌸';
+  }
 
   initCarousel();
   buildCatGrid();
 }
 
-window.addEventListener('resize',()=>{requestAnimationFrame(relayout);});
+window.addEventListener('resize',()=>{
+  requestAnimationFrame(relayout);
+  const nav=document.getElementById('thumbNav');
+  if(nav)nav.style.display=window.innerWidth>480?'flex':'';
+});
 window.addEventListener('load',()=>{if(CW>0)requestAnimationFrame(relayout);});
 
 boot();
