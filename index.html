@@ -1190,8 +1190,9 @@ let catManifests={};
 let currentCatId=null;
 let selectedCatCardIdx=0;
 let selectedCatCard=null;        // {file, blessing, src} ของรูปที่เลือกใน category detail
-let _manifestCache=null;         // cache manifest เพื่อไม่ fetch ซ้ำ
+let _manifestCache=null;
 let _manifestFolder='';
+let _catBankCache=null;          // cache cat_bank/index.json
 
 async function getManifest(){
   if(_manifestCache)return{m:_manifestCache,folder:_manifestFolder};
@@ -1201,6 +1202,14 @@ async function getManifest(){
   if(r&&r.ok){_manifestCache=await r.json();_manifestFolder=todayISO;return{m:_manifestCache,folder:todayISO};}
   r=await fetch(`${BASE}/img/evergreen/manifest.json?v=${Date.now()}`,{cache:'no-store'}).catch(()=>null);
   if(r&&r.ok){_manifestCache=await r.json();_manifestFolder='evergreen';return{m:_manifestCache,folder:'evergreen'};}
+  return null;
+}
+
+// โหลด cat_bank index (cache ไว้)
+async function getCatBank(){
+  if(_catBankCache)return _catBankCache;
+  const r=await fetch(`${BASE}/img/cat_bank/index.json?v=${Date.now()}`,{cache:'no-store'}).catch(()=>null);
+  if(r&&r.ok){_catBankCache=await r.json();return _catBankCache;}
   return null;
 }
 
@@ -1229,20 +1238,37 @@ function buildCatGrid(){
 
 async function loadCatThumbnail(cat,card,placeholder){
   try{
-    const res=await getManifest();if(!res)return;
-    const{m,folder}=res;
-    const allImgs=(m.images||[]).map(x=>typeof x==='string'?{file:x,category:null}:{file:x.file,category:x.category||null});
-    const fromCat=(m.categories&&m.categories[cat.id])||[];
-    const fromImgCat=allImgs.filter(x=>x.category===cat.id);
-    const catImages=fromCat.length>0?fromCat:fromImgCat;
-    const count=catImages.length;
+    // ลอง cat_bank ก่อน (แหล่งหลัก)
+    const cb=await getCatBank();
+    const catData=cb&&cb[cat.id];
+    let count=catData?catData.count:0;
+    let thumbSrc=null;
+    if(catData&&catData.images&&catData.images.length>0){
+      const first=catData.images[0];
+      thumbSrc=`${BASE}/img/cat_bank/${cat.id}/${first.file}`;
+    }
+    // fallback: ดึงจาก manifest วันนี้
+    if(!thumbSrc){
+      const res=await getManifest();
+      if(res){
+        const{m,folder}=res;
+        const allImgs=(m.images||[]).map(x=>typeof x==='string'?{file:x,category:null}:{file:x.file,category:x.category||null});
+        const fromCat=(m.categories&&m.categories[cat.id])||[];
+        const fromImgCat=allImgs.filter(x=>x.category===cat.id);
+        const catImages=fromCat.length>0?fromCat:fromImgCat;
+        if(catImages.length>0){
+          count=catImages.length;
+          thumbSrc=`${BASE}/img/${folder}/${catImages[0].file}`;
+        }
+      }
+    }
     const badge=document.createElement('div');
     badge.style.cssText='position:absolute;top:7px;right:7px;background:rgba(0,0,0,.52);color:#fff;font-family:Sarabun;font-size:11px;font-weight:700;padding:3px 7px;border-radius:10px;z-index:5;pointer-events:none;';
     badge.textContent=count>0?count+' รูป':'ยังไม่มี';
     card.appendChild(badge);
-    if(!count)return;
+    if(!thumbSrc)return;
     const img=document.createElement('img');img.className='cat-card-img';img.crossOrigin='anonymous';img.alt=cat.label;
-    img.src=`${BASE}/img/${folder}/${catImages[0].file}?v=${m.version||''}`;
+    img.src=thumbSrc;
     img.onload=()=>{card.insertBefore(img,placeholder);card.removeChild(placeholder);};
     img.onerror=()=>{};
   }catch(e){}
@@ -1258,18 +1284,37 @@ async function openCategory(cat){
   document.getElementById('catdUseBtn').style.opacity='0.5';
   switchTab('catdetail');
   try{
+    // priority 1: cat_bank (รูปถาวรแยกหมวด)
+    const cb=await getCatBank();
+    const catData=cb&&cb[cat.id];
+    const fromBank=catData&&catData.images&&catData.images.length>0?catData.images:null;
+
+    // priority 2: manifest วันนี้
+    let fromManifest=null;
     const res=await getManifest();
-    if(!res){showCatEmpty(cat,'ยังไม่มีรูปของวันนี้เลย');return;}
-    const{m,folder}=res;
-    const allImgs=(m.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null}:{file:x.file,blessing:x.blessing||''  ,src:x.src||null,category:x.category||null});
-    const fromCatField=(m.categories&&m.categories[cat.id]&&m.categories[cat.id].length>0)?m.categories[cat.id]:null;
-    const fromImgCat=allImgs.filter(x=>x.category===cat.id);
-    const catImages=fromCatField||(fromImgCat.length>0?fromImgCat:null);
-    if(!catImages){showCatEmpty(cat,`ยังไม่มีรูป${cat.label}วันนี้`);return;}
-    document.getElementById('catdCount').textContent=`${catImages.length} รูป`;
+    if(res){
+      const{m,folder}=res;
+      const allImgs=(m.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null}:{file:x.file,blessing:x.blessing||''  ,src:x.src||null,category:x.category||null});
+      const fromCatField=(m.categories&&m.categories[cat.id]&&m.categories[cat.id].length>0)?m.categories[cat.id]:null;
+      const fromImgCat=allImgs.filter(x=>x.category===cat.id);
+      fromManifest=fromCatField||(fromImgCat.length>0?fromImgCat:null);
+    }
+
+    // รวม: bank ก่อน ถ้าไม่มีใช้ manifest
+    const catImages=fromBank||fromManifest;
+    if(!catImages||catImages.length===0){showCatEmpty(cat,`ยังไม่มีรูป${cat.label}`);return;}
+
+    // สร้าง base URL ตาม source
+    // รูปจาก bank: file = "cat_flower_xxx.jpg" อยู่ใน cat_bank/<catId>/
+    // รูปจาก manifest: file = "card_xxx.jpg" อยู่ใน img/<folder>/
+    const isFromBank=!!fromBank;
+    const baseUrl=isFromBank?`${BASE}/img/cat_bank/${cat.id}`:(res?`${BASE}/img/${res.folder}`:`${BASE}/img/evergreen`);
+    const version=res&&res.m?res.m.version||'':'';
+
+    document.getElementById('catdCount').textContent=`${catImages.length} รูป${isFromBank?' (คลังถาวร)':''}`; 
     document.getElementById('catdUseBtn').disabled=false;
     document.getElementById('catdUseBtn').style.opacity='1';
-    buildCatDetailGrid(catImages,`${BASE}/img/${folder}`,m.version||'');
+    buildCatDetailGrid(catImages,baseUrl,version);
   }catch(e){showCatEmpty(cat,'โหลดไม่สำเร็จ ลองใหม่นะคะ');}
 }
 
@@ -1391,6 +1436,8 @@ async function boot(){
   catch{stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen สักครู่ หรือไปที่ <b>Actions → Run workflow</b></div>`;return;}}
   // set manifest cache ด้วย เพื่อให้ category ใช้ข้อมูลเดียวกันได้ทันที
   _manifestCache=M; _manifestFolder=folder;
+  // preload cat_bank ในพื้นหลัง (non-blocking)
+  getCatBank().catch(()=>{});
   imgBase=`${BASE}/img/${folder}`;
   CARDS=(M.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null}:{file:x.file,blessing:x.blessing||'',src:x.src||null}).filter(c=>c.file);
   if(!CARDS.length){stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen สักครู่นะคะ</div>`;return;}
