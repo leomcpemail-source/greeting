@@ -11,90 +11,119 @@
 <script data-goatcounter="https://leomcpemail.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--ink:#1c3a52;--gold:#2d9cdb;--gold2:#6cc4f5}
+:root{
+  --pink:#e91e8c;--pink2:#ff6bb5;--pink-bg:#fff0f8;
+  --text:#2d1a2e;--text2:#7a5a7a;
+  --white:#ffffff;
+  --card-r:20px;
+  --tab-h:64px;
+}
 html,body{
-  /* dvh = dynamic viewport height รองรับ browser chrome bar ของ LINE/Safari */
-  height: 100%; height: 100dvh;
-  overflow:hidden;
-  font-family:'Sarabun',sans-serif;color:var(--ink);
-  background:radial-gradient(1200px 600px at 50% -10%,#eaf6fd 0%,transparent 60%),
-  linear-gradient(160deg,#dceefb 0%,#cfe8f8 100%);
+  height:100%;height:100dvh;overflow:hidden;
+  font-family:'Sarabun',sans-serif;color:var(--text);
+  background:#fdf5fc;
   overscroll-behavior:none;
 }
+
+/* ── APP SHELL ── */
 .app{
-  display:flex;flex-direction:column;align-items:center;
+  display:flex;flex-direction:column;
   height:100%;height:100dvh;
   max-width:480px;margin:0 auto;
-  /* safe-area-inset รองรับ notch + home bar บน iOS/Android */
-  padding: max(8px, env(safe-area-inset-top)) 0 max(8px, env(safe-area-inset-bottom));
-  gap:5px;
+  position:relative;overflow:hidden;
 }
 
-/* ── HEADER ── */
-.header{text-align:center;flex-shrink:0;padding:0 20px;width:100%}
-/* [แก้ข้อ 5] เปลี่ยน DAILY GREETING → สวัสดีวันนี้ / ซ่อน .mark เดิม */
-.header .mark{display:none}
-.header .brand{
-  font-family:'Kanit';font-size:11px;letter-spacing:.18em;
-  color:var(--gold);opacity:.75;text-transform:none;margin-bottom:1px
-}
-/* [แก้ข้อ 6] ขนาดหัวใหญ่ขึ้นอ่านง่าย */
-.header h1{font-family:'Chonburi';font-size:21px;color:var(--ink);margin:1px 0 0;line-height:1.1}
-.header .dl{font-size:13px;color:#5b7a92;margin-top:1px}
-
-/* [แก้ข้อ 2] กล่องคำแนะนำด้านบน */
-.usage-tip{
-  width:100%;padding:0 18px;flex-shrink:0;
-}
-.usage-tip-inner{
-  background:linear-gradient(135deg,#ffffff,#eaf6fd);
-  border:1.5px solid #cfe6f5;border-radius:14px;
-  padding:8px 14px;
-  display:flex;align-items:center;gap:9px;
-}
-.usage-tip-icon{font-size:20px;flex-shrink:0}
-/* [แก้ข้อ 6] ข้อความคำแนะนำใหญ่ขึ้น */
-.usage-tip-text{
-  font-family:'Sarabun';font-size:15px;font-weight:600;
-  color:#2b5168;line-height:1.35;
-}
-.usage-tip-text span{color:var(--gold);font-weight:700}
-
-/* [แก้ข้อ 9] แถบแจ้งเตือน LINE Browser */
-.line-notice{
-  display:none; /* แสดงเฉพาะเมื่อตรวจพบ LINE Browser */
-  width:100%;padding:0 18px;flex-shrink:0;
-}
-.line-notice.show{display:block}
-/* ใน LINE Browser ซ่อนแถบเขียว — ปุ่ม copy ถูกซ่อนแล้ว ไม่ต้องแจ้งซ้ำ ประหยัด space */
-.line-browser .line-notice{display:none!important}
-.line-notice-inner{
-  background:#06c755;border-radius:12px;
-  padding:10px 14px;
-  display:flex;align-items:flex-start;gap:8px;
-}
-.line-notice-inner .li{font-size:16px;flex-shrink:0;margin-top:1px}
-.line-notice-text{
-  font-family:'Sarabun';font-size:14px;font-weight:600;
-  color:#fff;line-height:1.5;
-}
-
-/* STAGE */
-.stage{
-  position:relative;width:100%;flex:1;min-height:0;
-  display:flex;align-items:center;justify-content:center;
+/* ── PAGE SYSTEM ── */
+.page{
+  position:absolute;inset:0;bottom:var(--tab-h);
+  display:flex;flex-direction:column;
   overflow:hidden;
-  /* ให้ stage กิน space ที่เหลือทั้งหมด */
-  flex-grow:1;
+  transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .3s;
+  will-change:transform;
+}
+.page.hidden{transform:translateX(100%);opacity:0;pointer-events:none;}
+.page.active{transform:translateX(0);opacity:1;}
+
+/* ── TAB BAR ── */
+.tab-bar{
+  position:absolute;bottom:0;left:0;right:0;
+  height:var(--tab-h);
+  background:var(--white);
+  border-top:1.5px solid #f0d6ee;
+  display:flex;align-items:stretch;
+  padding-bottom:max(0px, env(safe-area-inset-bottom));
+  z-index:100;
+}
+.tab-btn{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;
+  border:none;background:none;cursor:pointer;
+  font-family:'Sarabun';font-size:12px;font-weight:600;
+  color:var(--text2);transition:color .2s;
+  padding:0;
+}
+.tab-btn .tab-icon{font-size:22px;line-height:1;transition:transform .2s;}
+.tab-btn.active{color:var(--pink);}
+.tab-btn.active .tab-icon{transform:scale(1.15);}
+
+/* ─────────────────────────── PAGE: TODAY ─────────────────────────── */
+#pageToday{background:#fdf5fc;}
+
+/* Header */
+.today-header{
+  flex-shrink:0;
+  background:var(--white);
+  padding:max(12px,env(safe-area-inset-top)) 18px 12px;
+  border-bottom:1px solid #f0d6ee;
+}
+.today-header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.header-title-block{}
+.header-app-name{font-family:'Chonburi';font-size:22px;color:var(--pink);line-height:1.1;}
+.header-app-sub{font-size:13px;color:var(--text2);margin-top:2px;}
+.header-sun{
+  width:52px;height:52px;border-radius:50%;
+  background:linear-gradient(135deg,#ffe066,#ffc840);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;flex-shrink:0;
+  box-shadow:0 4px 14px rgba(255,180,0,.32);
+}
+.date-box{
+  margin-top:10px;
+  background:linear-gradient(135deg,#fff0fb,#fce8ff);
+  border:1.5px solid #f0d0ee;border-radius:14px;
+  padding:8px 14px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.date-box-left{display:flex;align-items:center;gap:8px;}
+.date-box-icon{font-size:20px;}
+.date-text{font-family:'Sarabun';font-size:14px;font-weight:700;color:var(--text);line-height:1.3;}
+.date-sub{font-family:'Sarabun';font-size:12px;color:var(--text2);}
+.day-badge{
+  background:var(--pink);color:#fff;
+  font-family:'Sarabun';font-size:12px;font-weight:700;
+  padding:5px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0;
+  display:flex;align-items:center;gap:5px;
+}
+
+/* Main card display */
+.today-main-card{
+  flex:1;min-height:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:14px 18px 8px;
+  position:relative;
+}
+.main-stage{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  border-radius:20px;
 }
 
 /* card wrapper */
 .cw{
   position:absolute;left:50%;top:50%;
   transform-origin:center center;
-  transition:transform .44s cubic-bezier(.34,1.1,.64,1),
-    opacity .38s ease,
-    filter .38s ease;
+  transition:transform .44s cubic-bezier(.34,1.1,.64,1),opacity .38s ease,filter .38s ease;
   cursor:grab;user-select:none;touch-action:pan-y;
 }
 .cw.no-anim{transition:none!important}
@@ -104,111 +133,194 @@ html,body{
 }
 .card img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:opacity .25s}
 .scrim{position:absolute;inset:0;z-index:1}
-.frame-el{display:none}
-.frame-before{position:absolute;pointer-events:none;transition:all .4s ease}
-.corner{position:absolute;width:44px;height:44px;z-index:5;transition:opacity .3s}
-.corner.tl{top:6px;left:6px}.corner.tr{top:6px;right:6px;transform:scaleX(-1)}
-.corner.bl{bottom:6px;left:6px;transform:scaleY(-1)}.corner.br{bottom:6px;right:6px;transform:scale(-1,-1)}
 .content{position:absolute;inset:0;display:flex;flex-direction:column;z-index:3;color:#fff}
 .hello{font-family:'Chonburi';line-height:1.15;text-shadow:0 2px 12px rgba(0,0,0,.5);word-break:keep-all;overflow-wrap:break-word}
 .bless{font-family:'Charm';font-weight:700;line-height:1.45;text-shadow:0 1px 8px rgba(0,0,0,.55);word-break:keep-all;overflow-wrap:break-word}
 .date{font-family:'Sarabun';font-size:12px;opacity:.92;text-shadow:0 1px 6px rgba(0,0,0,.5)}
-.sparkle{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;
-  box-shadow:0 0 8px 2px rgba(255,255,255,.8);z-index:2;pointer-events:none}
+.sparkle{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 8px 2px rgba(255,255,255,.8);z-index:2;pointer-events:none}
 
-/* [แก้ข้อ 4] เปลี่ยน dots → ข้อความ "รูป X จาก Y" */
-.img-counter{
+/* Action buttons */
+.today-actions{
   flex-shrink:0;
-  /* [แก้ข้อ 6] ขนาดใหญ่ขึ้น */
-  font-family:'Sarabun';font-size:14px;font-weight:700;
-  color:var(--ink);opacity:.65;
-  letter-spacing:.02em;
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  padding:0 18px 10px;
 }
-/* ซ่อน dots เดิม (ยังคงไว้ใน DOM แต่ซ่อน) */
-.dots{display:none}
-.dot{display:none}
-
-/* [แก้ข้อ 3] ลูกศรซ้าย-ขวา + ข้อความปัด */
-.swipe-hint{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  flex-shrink:0;
-}
-/* [แก้ข้อ 6] ขนาดข้อความ hint ใหญ่ขึ้น */
-.swipe-hint-text{
-  font-family:'Sarabun';font-size:14px;font-weight:600;
-  color:var(--ink);opacity:.55;
-  display:flex;align-items:center;gap:6px;
-}
-.swipe-arrow{
-  font-size:22px;opacity:.55;
-  padding:6px 10px;border-radius:12px;line-height:1;
-  animation:arrowPulse 2s ease-in-out infinite;
-  -webkit-user-select:none;user-select:none;
-}
-.swipe-arrow:hover{background:rgba(45,156,219,.12);opacity:.95}
-.swipe-arrow:active{transform:scale(.9)}
-.swipe-arrow.left{animation-delay:0s}
-.swipe-arrow.right{animation-delay:.3s}
-@keyframes arrowPulse{
-  0%,100%{transform:translateX(0);opacity:.45}
-  50%{transform:translateX(4px);opacity:.75}
-}
-.swipe-arrow.left{animation-name:arrowPulseLeft}
-@keyframes arrowPulseLeft{
-  0%,100%{transform:translateX(0);opacity:.45}
-  50%{transform:translateX(-4px);opacity:.75}
-}
-
-/* ซ่อน hint เดิม */
-.hint{display:none}
-
-/* [แก้ข้อ 10] ปรับปุ่มใหญ่ขึ้น ≥ 52px */
-.actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 18px;flex-shrink:0}
 .btn{
-  border:none;border-radius:16px;
-  /* [แก้ข้อ 10] สูงขึ้น */
-  padding:13px 12px;
+  border:none;border-radius:16px;padding:13px 12px;
   font-family:'Kanit';font-size:16px;font-weight:600;
   cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;
-  transition:transform .12s;
-  min-height:50px;
+  transition:transform .12s;min-height:50px;
 }
 .btn:active{transform:scale(.95)}.btn:disabled{opacity:.5}
-.btn.copy{background:#fff;color:var(--ink);border:1.5px solid #cfe1ee;box-shadow:0 2px 8px rgba(20,70,110,.08)}
-.btn.save{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;box-shadow:0 4px 16px rgba(45,156,219,.32)}
-/* [แก้ข้อ 1] ซ่อนปุ่ม copy ใน LINE Browser */
+.btn.copy{background:#fff;color:var(--text);border:1.5px solid #f0d0ee;box-shadow:0 2px 8px rgba(180,20,110,.08)}
+.btn.save{
+  background:linear-gradient(135deg,var(--pink),#ff5fa0);
+  color:#fff;box-shadow:0 4px 16px rgba(233,30,140,.32);
+}
 .line-browser .btn.copy{display:none}
-.line-browser .actions{grid-template-columns:1fr}
-/* LINE: ซ่อน usage-tip (ประหยัด space) */
+.line-browser .today-actions{grid-template-columns:1fr}
 .line-browser .usage-tip{display:none}
 
-/* [แก้ข้อ 8] กล่องความน่าเชื่อถือ */
-.trust-badges{
-  display:flex;flex-direction:column;gap:2px;
-  align-items:center;flex-shrink:0;
-  padding:0 18px 0;
+/* Thumbnail strip (replaces carousel, scrollable row at bottom of today) */
+.thumb-strip{
+  flex-shrink:0;
+  padding:0 18px 10px;
 }
-.trust-row{
-  display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center;
+.thumb-strip-label{
+  font-family:'Sarabun';font-size:13px;font-weight:700;color:var(--text2);
+  margin-bottom:8px;display:flex;align-items:center;gap:6px;
 }
-.trust-item{
-  font-family:'Sarabun';font-size:13px;font-weight:600;
-  color:#5b7a92;display:flex;align-items:center;gap:4px;
+.thumb-row{
+  display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;
+  padding-bottom:4px;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
 }
-.trust-item .ti{font-size:14px}
+.thumb-row::-webkit-scrollbar{display:none}
+.thumb-item{
+  flex-shrink:0;width:72px;height:72px;
+  scroll-snap-align:start;
+  border-radius:14px;overflow:hidden;position:relative;cursor:pointer;
+  border:2.5px solid transparent;transition:border-color .2s,transform .15s;
+}
+.thumb-item.active{border-color:var(--pink);}
+.thumb-item:active{transform:scale(.95)}
+.thumb-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.thumb-nav{
+  display:flex;align-items:center;gap:8px;margin-top:6px;
+}
+.thumb-counter{
+  font-family:'Sarabun';font-size:13px;font-weight:700;color:var(--text2);
+  flex:1;
+}
+.swipe-arrows{display:flex;gap:4px;}
+.swipe-arrow{
+  font-size:20px;padding:6px 10px;border-radius:12px;
+  cursor:pointer;line-height:1;border:none;background:none;
+  color:var(--text2);transition:background .15s,color .15s;
+}
+.swipe-arrow:hover{background:rgba(233,30,140,.1);color:var(--pink);}
+.swipe-arrow:active{transform:scale(.9)}
 
-/* error/loading msg */
-.msg{text-align:center;padding:40px 20px;color:#5b7a92;font-size:14px;line-height:1.7}
-.msg code{background:#fff;padding:2px 6px;border-radius:6px;border:1px solid #cfe1ee;font-size:12px}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
-  padding:11px 20px;border-radius:24px;font-family:'Kanit';font-size:14px;z-index:99;
-  opacity:0;transition:.25s;pointer-events:none;white-space:nowrap}
+/* LINE notice */
+.line-notice{display:none;padding:0 18px 8px;flex-shrink:0;}
+.line-notice.show{display:block}
+.line-browser .line-notice{display:none!important}
+.line-notice-inner{background:#06c755;border-radius:12px;padding:10px 14px;display:flex;align-items:flex-start;gap:8px;}
+.line-notice-text{font-family:'Sarabun';font-size:14px;font-weight:600;color:#fff;line-height:1.5;}
+
+/* ─────────────────────────── PAGE: CATEGORIES ─────────────────────────── */
+#pageCategory{background:#fdf5fc;overflow-y:auto;}
+
+.cat-header{
+  flex-shrink:0;
+  background:var(--white);
+  padding:max(14px,env(safe-area-inset-top)) 18px 14px;
+  border-bottom:1px solid #f0d6ee;
+  position:sticky;top:0;z-index:10;
+}
+.cat-header-title{font-family:'Chonburi';font-size:20px;color:var(--pink);}
+.cat-header-sub{font-size:13px;color:var(--text2);margin-top:2px;}
+
+.cat-grid-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.cat-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;padding:14px;
+}
+.cat-card{
+  border-radius:18px;overflow:hidden;
+  background:var(--white);
+  box-shadow:0 2px 12px rgba(180,20,110,.08);
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+  display:flex;flex-direction:column;
+  aspect-ratio:1;position:relative;
+}
+.cat-card:active{transform:scale(.95)}
+.cat-card:hover{box-shadow:0 4px 18px rgba(180,20,110,.18);}
+.cat-card-img{
+  position:absolute;inset:0;
+  object-fit:cover;width:100%;height:100%;display:block;
+}
+.cat-card-overlay{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(0deg,rgba(0,0,0,.6) 0%,transparent 100%);
+  padding:8px 8px 10px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.cat-card-label{
+  font-family:'Sarabun';font-size:13px;font-weight:700;
+  color:#fff;text-align:center;line-height:1.2;
+  text-shadow:0 1px 4px rgba(0,0,0,.5);
+  display:flex;align-items:center;gap:3px;
+}
+
+/* ─────────────────────────── PAGE: CATEGORY DETAIL ─────────────────────────── */
+#pageCatDetail{background:#fdf5fc;}
+
+.catd-header{
+  flex-shrink:0;
+  background:var(--white);
+  padding:max(14px,env(safe-area-inset-top)) 18px 12px;
+  border-bottom:1px solid #f0d6ee;
+  display:flex;align-items:center;gap:12px;
+}
+.catd-back{
+  font-size:24px;cursor:pointer;padding:4px 6px;border-radius:10px;
+  border:none;background:none;
+  transition:background .15s;line-height:1;
+}
+.catd-back:hover{background:rgba(233,30,140,.1);}
+.catd-title-block{}
+.catd-title{font-family:'Chonburi';font-size:18px;color:var(--pink);}
+.catd-count{font-size:12px;color:var(--text2);}
+
+.catd-grid-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.catd-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px;}
+.catd-item{
+  border-radius:16px;overflow:hidden;
+  aspect-ratio:1;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  position:relative;
+  box-shadow:0 2px 10px rgba(180,20,110,.08);
+}
+.catd-item:active{transform:scale(.95)}
+.catd-item.selected{box-shadow:0 0 0 3px var(--pink),0 4px 14px rgba(233,30,140,.3);}
+.catd-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.catd-item-check{
+  position:absolute;top:8px;right:8px;
+  width:24px;height:24px;border-radius:50%;
+  background:var(--pink);color:#fff;
+  display:none;align-items:center;justify-content:center;font-size:14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.catd-item.selected .catd-item-check{display:flex;}
+
+.catd-actions{
+  flex-shrink:0;padding:12px 18px;
+  background:var(--white);border-top:1px solid #f0d6ee;
+}
+.catd-use-btn{
+  width:100%;padding:14px;border:none;border-radius:16px;
+  background:linear-gradient(135deg,var(--pink),#ff5fa0);
+  color:#fff;font-family:'Kanit';font-size:17px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 16px rgba(233,30,140,.32);
+  transition:transform .12s;
+}
+.catd-use-btn:active{transform:scale(.97)}
+
+/* ── misc ── */
+.msg{text-align:center;padding:40px 20px;color:var(--text2);font-size:14px;line-height:1.7}
+.msg code{background:#fff;padding:2px 6px;border-radius:6px;border:1px solid #f0d0ee;font-size:12px}
+.toast{position:fixed;bottom:calc(var(--tab-h) + 16px);left:50%;transform:translateX(-50%);
+  background:var(--text);color:#fff;padding:11px 20px;border-radius:24px;
+  font-family:'Kanit';font-size:14px;z-index:999;opacity:0;transition:.25s;
+  pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1}
 /* image viewer overlay สำหรับ LINE */
 #imgViewer img{-webkit-touch-callout:default!important;touch-action:auto!important}
-/* ปุ่ม i อ้างอิงแหล่งที่มาของภาพ — tint glass วงกลมเล็ก มุมขวาล่าง */
-.src-btn{position:absolute;right:10px;bottom:10px;z-index:6;width:26px;height:26px;border-radius:50%;
-  border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.20);
+/* ปุ่ม i แหล่งที่มา */
+.src-btn{position:absolute;right:10px;bottom:10px;z-index:6;width:26px;height:26px;
+  border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.20);
   -webkit-backdrop-filter:blur(6px) saturate(1.2);backdrop-filter:blur(6px) saturate(1.2);
   color:#fff;font-family:'Charm',serif;font-style:italic;font-weight:700;font-size:15px;line-height:1;
   display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
@@ -219,81 +331,116 @@ html,body{
 <body>
 <div class="app" id="appEl">
 
-  <div class="header">
-    <div class="mark">Daily Greeting</div><!-- ซ่อนด้วย CSS -->
-    <!-- [แก้ข้อ 5] เปลี่ยนชื่อเป็นภาษาไทย -->
-    <div class="brand">รูปสวัสดีประจำวัน</div>
-    <h1 id="topTitle">สวัสดีวันนี้</h1>
-    <div class="dl" id="dateLine">กำลังโหลด…</div>
-  </div>
+  <!-- ══════════════ PAGE: TODAY ══════════════ -->
+  <div class="page active" id="pageToday">
 
-  <!-- [แก้ข้อ 2] คำแนะนำการใช้งาน -->
-  <div class="usage-tip">
-    <div class="usage-tip-inner">
-      <div class="usage-tip-icon">🖼️</div>
-      <div class="usage-tip-text">
-        เลือกรูปที่ชอบ แล้วกด <span>⬇️ บันทึกรูป</span> เพื่อส่งใน LINE
+    <!-- Header -->
+    <div class="today-header">
+      <div class="today-header-row">
+        <div class="header-title-block">
+          <div class="header-app-name">สวัสดีวันนี้ ♥</div>
+          <div class="header-app-sub">ภาพสวย ส่งต่อความสุข</div>
+        </div>
+        <div class="header-sun">☀️</div>
+      </div>
+      <div class="date-box">
+        <div class="date-box-left">
+          <div class="date-box-icon">📅</div>
+          <div>
+            <div class="date-text" id="dateLine">กำลังโหลด…</div>
+            <div class="date-sub" id="dateSubLine"></div>
+          </div>
+        </div>
+        <div class="day-badge" id="dayBadge">🌸 วันสำคัญ</div>
       </div>
     </div>
-  </div>
 
-  <!-- [แก้ข้อ 9] แจ้งเตือน LINE Browser (แสดงเฉพาะเมื่อตรวจพบ) -->
-  <div class="line-notice" id="lineNoticeEl">
-    <div class="line-notice-inner">
-      <div class="li">💬</div>
-      <div class="line-notice-text">
-        การคัดลอกรูปอาจไม่รองรับใน LINE<br>กรุณาใช้ปุ่ม <strong>⬇️ บันทึกรูป</strong> แทน
+    <!-- Main card display (stage) -->
+    <div class="today-main-card">
+      <div class="main-stage" id="stage"></div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="today-actions" id="actions" style="display:none">
+      <button class="btn copy" id="btnCopy">📋 คัดลอกรูป</button>
+      <button class="btn save" id="btnSave">⬇️ บันทึกรูป</button>
+    </div>
+
+    <!-- LINE Notice -->
+    <div class="line-notice" id="lineNoticeEl">
+      <div class="line-notice-inner">
+        <div style="font-size:16px;flex-shrink:0;margin-top:1px">💬</div>
+        <div class="line-notice-text">
+          ใน LINE กรุณาใช้ปุ่ม <strong>⬇️ บันทึกรูป</strong> แล้วกดค้างที่รูปเพื่อบันทึก
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="stage" id="stage"></div>
-
-  <!-- [แก้ข้อ 4] แสดง "รูป X จาก Y" แทน dots -->
-  <div class="img-counter" id="imgCounterEl">รูป 1 จาก …</div>
-  <!-- dots เดิมยังอยู่แต่ซ่อน -->
-  <div class="dots" id="dotsEl"></div>
-
-  <!-- [แก้ข้อ 3] ลูกศรปัดซ้าย-ขวา -->
-  <div class="swipe-hint">
-    <span class="swipe-arrow left">⬅️</span>
-    <span class="swipe-hint-text">แตะลูกศร หรือปัดซ้าย-ขวา</span>
-    <span class="swipe-arrow right">➡️</span>
-  </div>
-
-  <!-- ซ่อน hint เดิม -->
-  <div class="hint" id="hintEl">
-    <span class="hint-item">← เลื่อนซ้าย <em>เปลี่ยนรูป</em></span>
-    <span class="hint-sep">·</span>
-    <span class="hint-item">เลื่อนขวา <em>ย้อนกลับ</em> →</span>
-    <span class="hint-sep">·</span>
-    <span class="hint-item">📋 <em>คัดลอก</em> ส่ง LINE</span>
-    <span class="hint-sep">·</span>
-    <span class="hint-item">⬇ <em>บันทึก</em> ลงเครื่อง</span>
-  </div>
-
-  <div class="actions" id="actions" style="display:none">
-    <!-- [แก้ข้อ 1] ปุ่ม copy ซ่อนใน LINE ด้วย CSS class .line-browser -->
-    <!-- [แก้ข้อ 7] เปลี่ยนชื่อปุ่มให้ชัดเจน -->
-    <button class="btn copy" id="btnCopy">📋 คัดลอกรูป</button>
-    <button class="btn save" id="btnSave">⬇️ บันทึกรูป</button>
-  </div>
-
-  <!-- [แก้ข้อ 8] ป้ายความน่าเชื่อถือ -->
-  <div class="trust-badges" id="trustEl" style="display:none">
-    <div class="trust-row">
-      <span class="trust-item"><span class="ti">✅</span> ฟรี 100%</span>
-      <span class="trust-item"><span class="ti">✅</span> ไม่ต้องสมัครสมาชิก</span>
-      <span class="trust-item"><span class="ti">✅</span> ไม่ต้องติดตั้งแอป</span>
+    <!-- Thumbnail strip -->
+    <div class="thumb-strip" id="thumbStrip" style="display:none">
+      <div class="thumb-strip-label">🌸 รูปเพิ่มเติมของวันนี้</div>
+      <div class="thumb-row" id="thumbRow"></div>
+      <div class="thumb-nav">
+        <div class="thumb-counter" id="thumbCounter">รูป 1 จาก …</div>
+        <div class="swipe-arrows">
+          <button class="swipe-arrow" id="arrowLeft">⬅️</button>
+          <button class="swipe-arrow" id="arrowRight">➡️</button>
+        </div>
+      </div>
     </div>
+
+  </div><!-- /pageToday -->
+
+  <!-- ══════════════ PAGE: CATEGORIES ══════════════ -->
+  <div class="page hidden" id="pageCategory">
+    <div class="cat-header">
+      <div class="cat-header-title">🌸 หมวดหมู่ภาพ</div>
+      <div class="cat-header-sub">เลือกภาพที่คุณต้องการ</div>
+    </div>
+    <div class="cat-grid-scroll">
+      <div class="cat-grid" id="catGrid">
+        <!-- สร้างจาก JS -->
+      </div>
+    </div>
+  </div><!-- /pageCategory -->
+
+  <!-- ══════════════ PAGE: CATEGORY DETAIL ══════════════ -->
+  <div class="page hidden" id="pageCatDetail">
+    <div class="catd-header">
+      <button class="catd-back" id="catdBack">←</button>
+      <div class="catd-title-block">
+        <div class="catd-title" id="catdTitle">ดอกไม้</div>
+        <div class="catd-count" id="catdCount">กำลังโหลด…</div>
+      </div>
+    </div>
+    <div class="catd-grid-scroll">
+      <div class="catd-grid" id="catdGrid">
+        <!-- สร้างจาก JS -->
+      </div>
+    </div>
+    <div class="catd-actions">
+      <button class="catd-use-btn" id="catdUseBtn">✨ ใช้รูปนี้</button>
+    </div>
+  </div><!-- /pageCatDetail -->
+
+  <!-- ══════════════ TAB BAR ══════════════ -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabToday" onclick="switchTab('today')">
+      <span class="tab-icon">🏠</span>
+      <span>วันนี้</span>
+    </button>
+    <button class="tab-btn" id="tabCat" onclick="switchTab('category')">
+      <span class="tab-icon">⊞</span>
+      <span>หมวดหมู่</span>
+    </button>
   </div>
 
-</div>
+</div><!-- /app -->
 
 <div class="toast" id="toastEl"></div>
 
 <script>
-/* ── LINE BROWSER DETECTION [แก้ข้อ 1 + 9] ─────────────────────────── */
+/* ── LINE BROWSER DETECTION ─────────────────────────────────────────── */
 const IS_LINE = /\bLine\b/i.test(navigator.userAgent) || /FBAN|FBAV|Instagram|Twitter/i.test(navigator.userAgent);
 if(IS_LINE){
   document.getElementById('appEl').classList.add('line-browser');
@@ -308,47 +455,47 @@ const SB_URL = "https://bbtmcwydwscjjoxydbfp.supabase.co";
 const SB_ANON= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJidG1jd3lkd3NjampveHlkYmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzUyNDIsImV4cCI6MjA5NTY1MTI0Mn0.q_rVvMWenYI_dkc1JhSiXWgwWBqtGtgLYEVMqwBSZX0";
 const SID    = 's_'+Math.random().toString(36).slice(2);
 
+/* ── CATEGORY DEFINITIONS ───────────────────────────────────────────── */
+const CATEGORIES = [
+  { id:'flowers',  label:'ดอกไม้',      icon:'🌸', color:'#f48fb1', bg:'#fce4ec' },
+  { id:'dharma',   label:'ธรรมะ',       icon:'🙏', color:'#ce9a38', bg:'#fff8e1' },
+  { id:'inspire',  label:'กำลังใจ',     icon:'💪', color:'#e91e63', bg:'#fce4ec' },
+  { id:'miss',     label:'คิดถึง',      icon:'❤️', color:'#e53935', bg:'#ffebee' },
+  { id:'birthday', label:'วันเกิด',     icon:'🎂', color:'#8e24aa', bg:'#f3e5f5' },
+  { id:'elderly',  label:'ผู้สูงวัย',   icon:'👵', color:'#00897b', bg:'#e0f2f1' },
+  { id:'health',   label:'สุขภาพ',      icon:'🏥', color:'#0288d1', bg:'#e1f5fe' },
+  { id:'festival', label:'เทศกาล',      icon:'🎉', color:'#f57c00', bg:'#fff3e0' },
+  { id:'family',   label:'ครอบครัว',   icon:'👨‍👩‍👧‍👦', color:'#2e7d32', bg:'#e8f5e9' },
+  { id:'pets',     label:'สัตว์เลี้ยง',icon:'🐱', color:'#ad1457', bg:'#fce4ec' },
+  { id:'coffee',   label:'กาแฟยามเช้า',icon:'☕', color:'#5d4037', bg:'#efebe9' },
+  { id:'nature',   label:'วิวธรรมชาติ',icon:'🌄', color:'#1565c0', bg:'#e3f2fd' },
+];
+
 /* ── ANALYTICS ──────────────────────────────────────────────────────── */
 function visitorId(){
-  try{
-    let v=localStorage.getItem('gv_id'),isNew=false;
+  try{let v=localStorage.getItem('gv_id'),isNew=false;
     if(!v){v='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('gv_id',v);isNew=true;}
-    return{v,isNew};
-  }catch{return{v:'v_anon',isNew:false};}
+    return{v,isNew};}catch{return{v:'v_anon',isNew:false};}
 }
 async function track2(type){
   if(SB_URL.includes('YOURPROJECT'))return;
-  try{
-    const{v,isNew}=visitorId();
+  try{const{v,isNew}=visitorId();
     await fetch(`${SB_URL}/rest/v1/events`,{method:'POST',
       headers:{'Content-Type':'application/json','apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'return=minimal'},
       body:JSON.stringify({visitor_id:v,session_id:SID,type,
         tz:Intl.DateTimeFormat().resolvedOptions().timeZone,lang:navigator.language,
         ua:navigator.userAgent.slice(0,200),ref:document.referrer.slice(0,200),
-        is_returning:type==='open'?!isNew:false})});
-  }catch{}
+        is_returning:type==='open'?!isNew:false})});}catch{}
 }
 function trackGC(name){try{if(window.goatcounter?.count)window.goatcounter.count({path:name,title:name,event:true});}catch{}}
 function toast(t){const el=document.getElementById('toastEl');el.textContent=t;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),2400);}
 
 /* ── FRAMES (กรอบภาพ) ──────────────────────────────────────────────────
-   หลักการสำคัญ: ทุกกรอบสร้างจาก <div> ล้วน ๆ (เส้น / แถบ / มุมประดับ / เงาขอบ)
-   ซึ่ง html2canvas render ออกมาได้ "ตรงกับที่เห็นบนเว็บ 100%"
+   หลักการสำคัญ: ทุกกรอบสร้างจาก <div> ล้วน ๆ (เส้น/แถบ/มุมประดับ/เงาขอบ)
+   html2canvas render ออกมาได้ "ตรงกับที่เห็นบนเว็บ 100%"
    → ภาพที่แสดงบนเว็บ = ภาพที่ copy = ภาพที่ save = ภาพใน LINE เหมือนกันเป๊ะ
    จงหลีกเลี่ยง box-shadow เรืองแสง / filter / backdrop / clip-path / mask
    เพราะ html2canvas จับไม่ได้ → จะทำให้ภาพ "ที่เห็น" กับ "ที่บันทึก" ไม่ตรงกัน
-
-   schema ของแต่ละกรอบ:
-     n:  ชื่อกรอบ
-     fi: ระยะ "ขอบในของกรอบ" (px) — ข้อความ/เนื้อหาจะถูกดันให้อยู่ในช่องกลาง
-         ไม่ให้ตัวหนังสือไปทับแถบกรอบ (สำคัญกับกรอบหนา เช่น โพลารอยด์/ฟิล์ม/ไม้)
-     layers: [
-       {line:1,  inset, w, color, style?, radius?}   เส้นกรอบ (solid/dashed/double)
-       {bevel:'out'|'in', inset, w, light, dark, radius?}  ขอบนูน/จม 3 มิติ
-       {shadow:1, inset, depth, color}               เงาขอบด้านในแบบ 3 มิติ (ภาพดูจมลง)
-       {band:1,  inset, w, bg}                        แถบทึบ (เช่น ขอบขาวโพลารอยด์/ฟิล์มดำ)
-     ]
-     corners: {t:'bracket'|'steps'|'dots'|'petals', inset, size, w, gap, r, color, color2}
 ──────────────────────────────────────────────────────────────────────── */
 const FRAMES=[
   // 1) ทองคลาสสิก 3 ชั้น
@@ -462,7 +609,6 @@ const LAYOUTS=[
   {font:'Sarabun', j:'center', a:'flex-end', ta:'center',rot:0, scrim:'center',panel:true, narrow:false,hs:28,bs:17,pad:'20px'},
   {font:'Kanit', j:'flex-end', a:'flex-end', ta:'right', rot:8, scrim:'bottom',panel:true, narrow:true, hs:34,bs:20,pad:'18px 26px 30px'},
 ];
-
 const TEXT_SIZES=[
   {id:'normal', hs_mul:1.00, bs_mul:1.00, gap:8 },
   {id:'hero',   hs_mul:1.28, bs_mul:0.90, gap:6, outline:true },
@@ -470,32 +616,20 @@ const TEXT_SIZES=[
   {id:'wide',   hs_mul:1.08, bs_mul:1.12, gap:10, outline:true },
   {id:'mini',   hs_mul:0.68, bs_mul:0.78, gap:4 },
 ];
-
 const OVERLAYS=[
   {id:'none',    cssFilter:'', canvasFn:null},
-  {id:'warm',    cssFilter:'sepia(0.22) saturate(1.18) hue-rotate(-8deg)',
-    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(180,90,0,0.08)';ctx.fillRect(0,0,w,h);ctx.restore();}},
-  {id:'cool',    cssFilter:'saturate(0.88) hue-rotate(18deg) brightness(1.04)',
-    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(0,60,160,0.07)';ctx.fillRect(0,0,w,h);ctx.restore();}},
-  {id:'pastel',  cssFilter:'saturate(0.72) brightness(1.08) contrast(0.92)',
-    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(255,230,230,0.10)';ctx.fillRect(0,0,w,h);ctx.restore();}},
-  {id:'vignette',cssFilter:'',
-    canvasFn:(ctx,w,h)=>{
-      ctx.save();
-      const g=ctx.createRadialGradient(w/2,h/2,w*.28,w/2,h/2,w*.72);
-      g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,0.38)');
-      ctx.fillStyle=g;ctx.fillRect(0,0,w,h);ctx.restore();
-    }},
-  {id:'dreamy',  cssFilter:'brightness(1.06) saturate(1.12) contrast(0.95)',
-    canvasFn:(ctx,w,h)=>{ctx.save();ctx.fillStyle='rgba(200,180,255,0.08)';ctx.fillRect(0,0,w,h);ctx.restore();}},
+  {id:'warm',    cssFilter:'sepia(0.22) saturate(1.18) hue-rotate(-8deg)', canvasFn:null},
+  {id:'cool',    cssFilter:'saturate(0.88) hue-rotate(18deg) brightness(1.04)', canvasFn:null},
+  {id:'pastel',  cssFilter:'saturate(0.72) brightness(1.08) contrast(0.92)', canvasFn:null},
+  {id:'vignette',cssFilter:'', canvasFn:null},
+  {id:'dreamy',  cssFilter:'brightness(1.06) saturate(1.12) contrast(0.95)', canvasFn:null},
 ];
 
 /* ── MANIFEST / STATE ───────────────────────────────────────────────── */
 let M=null;
 let uImg=[],uFr=[],uLay=[],uBl=[],uTx=[],uOv=[];
 let lastBlIdx=-1;
-// ── การ์ดที่ผ่านการตรวจแล้วตอนดึก (frozen vetted combos) — ถ้า manifest มี M.cards ──
-let cardOrder=[], cardPtr=0;   // ลำดับสุ่มของ index การ์ด + ตัวชี้
+let cardOrder=[], cardPtr=0;
 
 function hexA(hex,a){try{const n=parseInt(hex.replace('#',''),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}catch{return`rgba(0,0,0,${a})`;}}
 
@@ -528,24 +662,21 @@ function pickBless(){
 }
 
 function mkCombo(){
-  // ── โหมดใหม่: ถ้า manifest มี cards[] (ผ่านการตรวจภาพประกอบจริงตอนดึก) ใช้คู่ที่ตรึงไว้ ──
-  // แต่ละ card = { img, fr, lay, tx, ov, bl } โดย fr/lay/tx/ov เป็น index เข้า array เดียวกับฝั่งนี้
-  if(Array.isArray(M.cards) && M.cards.length){
-    if(cardOrder.length!==M.cards.length){            // เตรียมลำดับสุ่มครั้งแรก
+  if(Array.isArray(M.cards)&&M.cards.length){
+    if(cardOrder.length!==M.cards.length){
       cardOrder=M.cards.map((_,i)=>i);
       for(let i=cardOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cardOrder[i],cardOrder[j]]=[cardOrder[j],cardOrder[i]];}
       cardPtr=0;
     }
     const c=M.cards[cardOrder[cardPtr%cardOrder.length]];
     cardPtr++;
-    const fr = FRAMES[c.fr]      || FRAMES[0];
-    const lay= LAYOUTS[c.lay]    || LAYOUTS[0];
-    const tx = TEXT_SIZES[c.tx]  || TEXT_SIZES[0];
-    const ov = OVERLAYS[c.ov]    || OVERLAYS[0];
-    const imgIdx = M.images ? M.images.indexOf(c.img) : -1;
-    return{ imgSrc:`${BASE}/${c.img}?v=${M.version}`, imgIdx, fr, lay, bl:c.bl, tx, ov, vp:c.vp };
+    const fr=FRAMES[c.fr]||FRAMES[0];
+    const lay=LAYOUTS[c.lay]||LAYOUTS[0];
+    const tx=TEXT_SIZES[c.tx]||TEXT_SIZES[0];
+    const ov=OVERLAYS[c.ov]||OVERLAYS[0];
+    const imgIdx=M.images?M.images.indexOf(c.img):-1;
+    return{imgSrc:`${BASE}/${c.img}?v=${M.version}`,imgIdx,fr,lay,bl:c.bl,tx,ov,vp:c.vp};
   }
-  // ── โหมดเดิม (fallback): สุ่ม รูป+กรอบ+เลย์เอาต์+คำ ทุกครั้ง ──
   const imgRes=pickPool(M.images,uImg,Math.max(4,Math.floor(M.images.length/2)));
   const frRes =pickPool(FRAMES,uFr,6);
   const layRes=pickPool(LAYOUTS,uLay,4);
@@ -557,7 +688,7 @@ function mkCombo(){
 /* ── BUILD CARD DOM ─────────────────────────────────────────────────── */
 function buildCard(cb,CW){
   const{imgSrc,fr,lay,bl,tx,ov}=cb;
-  const _vp=(cb.vp==='top'||cb.vp==='bottom')?cb.vp:null;   // ตำแหน่งข้อความที่วิเคราะห์จากภาพ (ทับค่า layout)
+  const _vp=(cb.vp==='top'||cb.vp==='bottom')?cb.vp:null;
   const cw=document.createElement('div');cw.className='cw';
   cw.style.width=CW+'px';cw.style.height=CW+'px';
   cw.style.marginLeft=(-CW/2)+'px';cw.style.marginTop=(-CW/2)+'px';
@@ -572,12 +703,11 @@ function buildCard(cb,CW){
   card.appendChild(sc);
   applyFrameToCard(card,fr);
   const L=lay;
-  const TEXT_SCALE=1.8;    // ขยายตัวอักษรให้อ่านง่าย (กลุ่มผู้สูงอายุ) — 1.25→1.5→1.8 (มิ.ย.2569: ผู้ใช้แจ้งตัวหนังสือยังเล็กไป)
+  const TEXT_SCALE=1.8;
   const hs=Math.round((tx?tx.hs_mul:1)*L.hs*TEXT_SCALE);
   const bsz=Math.round((tx?tx.bs_mul:1)*L.bs*TEXT_SCALE);
   const gap=tx?tx.gap:8;
   const content=document.createElement('div');content.className='content';
-  // ── ดันเนื้อหาให้อยู่ในช่องกลางของกรอบ: บังคับ padding ทุกด้าน >= fi (กันตัวอักษรชนกรอบ) ──
   const _fi=parseFloat(fr.fi)||18;
   const _pp=String(L.pad||'22px').trim().split(/\s+/).map(v=>parseFloat(v)||0);
   let _pt,_pr,_pb,_pl;
@@ -586,54 +716,42 @@ function buildCard(cb,CW){
   else if(_pp.length===3){_pt=_pp[0];_pr=_pl=_pp[1];_pb=_pp[2];}
   else{_pt=_pp[0];_pr=_pp[1];_pb=_pp[2];_pl=_pp[3];}
   _pt=Math.max(_pt,_fi);_pr=Math.max(_pr,_fi);_pb=Math.max(_pb,_fi);_pl=Math.max(_pl,_fi);
-  // ── ตำแหน่งข้อความ: บน/กลาง/ล่าง + ซ้าย/กลาง/ขวา (เว้นกลางให้รูปได้ ไม่ทับเสมอ) ──
-  // กลาง: ใช้ flex justify-content:center (เสถียรกับ html2canvas) ; บน/ล่าง: absolute offset
-  // — เลี่ยง flex-end/transform ที่ html2canvas เคยเรนเดอร์เพี้ยน
-  const vpos = _vp ? _vp : (L.j==='flex-start' ? 'top' : (L.j==='flex-end' ? 'bottom' : 'center'));
-  const hpos = L.ta==='left' ? 'left' : (L.ta==='right' ? 'right' : 'center');
-  const _hAlign = hpos==='left' ? 'align-items:flex-start;text-align:left'
-               : hpos==='right' ? 'align-items:flex-end;text-align:right'
-               : 'align-items:center;text-align:center';
+  const vpos=_vp?_vp:(L.j==='flex-start'?'top':(L.j==='flex-end'?'bottom':'center'));
+  const hpos=L.ta==='left'?'left':(L.ta==='right'?'right':'center');
+  const _hAlign=hpos==='left'?'align-items:flex-start;text-align:left'
+                :hpos==='right'?'align-items:flex-end;text-align:right'
+                :'align-items:center;text-align:center';
   const tb=document.createElement('div');
   if(vpos==='center'){
     content.style.cssText=`position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:${_pt}px ${_pr}px ${_pb}px ${_pl}px;${_hAlign}`;
     tb.style.cssText=`display:flex;flex-direction:column;gap:${gap}px;max-width:100%;${_hAlign}`;
   }else{
     content.style.cssText=`position:absolute;inset:0`;
-    const _v = vpos==='top' ? `top:${_pt}px;` : `bottom:${_pb}px;`;
+    const _v=vpos==='top'?`top:${_pt}px;`:`bottom:${_pb}px;`;
     tb.style.cssText=`position:absolute;left:${_pl}px;right:${_pr}px;${_v}display:flex;flex-direction:column;gap:${gap}px;${_hAlign}`;
   }
   if(L.panel)tb.style.cssText+=`;background:rgba(0,0,0,.34);padding:14px 18px;border-radius:16px;border:1px solid rgba(255,255,255,.22)`;
-  // ── ตัดบรรทัดภาษาไทยที่ "ขอบเขตคำ" เท่านั้น (ไม่ตัดกลางคำ เช่น "วันจันทร์") ──
-  // ห่อแต่ละคำด้วย <span nowrap> แล้วคั่นด้วย ZWSP (U+200B) → เบราว์เซอร์/LINE
-  // ตัดบรรทัดได้เฉพาะตรงรอยต่อคำ ไม่ตัดกลางคำ (กันแบบ "สวัสดีวัน / จันทร์")
   const _esc=(s)=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   const _wrap=(parts)=>parts.filter(x=>x!==''&&x!=null).map(p=>`<span style="white-space:nowrap">${_esc(p)}</span>`).join('\u200B');
   const _segHTML=(text)=>String(text).split(/(\s+)/).map(tok=>{
-    if(tok===''||/^\s+$/.test(tok))return tok;            // ช่องว่างเดิม = จุดตัดบรรทัดตามธรรมชาติ
+    if(tok===''||/^\s+$/.test(tok))return tok;
     let words=[tok];
-    try{ if(typeof Intl!=='undefined'&&Intl.Segmenter){
+    try{if(typeof Intl!=='undefined'&&Intl.Segmenter){
       words=Array.from(new Intl.Segmenter('th',{granularity:'word'}).segment(tok),s=>s.segment).filter(w=>w!=='');
     }}catch(e){}
-    // กลึง "วัน" เข้ากับคำถัดไป เพื่อไม่ให้ชื่อวัน/ชื่อเทศกาลแตก (เช่น วัน+อังคาร, วัน+มาฆบูชา)
     const merged=[];
     for(let i=0;i<words.length;i++){
-      if(words[i]==='วัน'&&i+1<words.length){ merged.push('วัน'+words[i+1]); i++; }
+      if(words[i]==='วัน'&&i+1<words.length){merged.push('วัน'+words[i+1]);i++;}
       else merged.push(words[i]);
     }
     return _wrap(merged);
   }).join('');
   const h=document.createElement('div');h.className='hello';
   h.style.cssText=`font-family:'${L.font}',sans-serif;font-size:${hs}px`;
-  // ปกติ ("สวัสดีวัน<ชื่อวัน>"): ตัดเป็น "สวัสดี" | "วัน<ชื่อวัน>" (ชื่อวันไม่แตก)
-  // เทศกาล/อื่น ๆ: ตัดตามคำ (กลึง "วัน" กับคำถัดไปแล้ว)
-  const _hl = M.headline || ('สวัสดีวัน'+M.dayTh);
-  h.innerHTML = (M.dayTh && _hl === ('สวัสดีวัน'+M.dayTh))
-    ? _wrap(['สวัสดี','วัน'+M.dayTh])
-    : _segHTML(_hl);
+  const _hl=M.headline||('สวัสดีวัน'+M.dayTh);
+  h.innerHTML=(M.dayTh&&_hl===('สวัสดีวัน'+M.dayTh))?_wrap(['สวัสดี','วัน'+M.dayTh]):_segHTML(_hl);
   const blEl=document.createElement('div');blEl.className='bless';blEl.style.fontSize=bsz+'px';
   blEl.innerHTML=_segHTML(bl);
-  // ── สไตล์ตัวหนังสือมีขอบสีตามวัน (เหมือนภาพตัวอย่าง) — ใช้ text-shadow ซ้อน (html2canvas เรนเดอร์ได้) ──
   if(tx&&tx.outline){
     const oc=M.color||'#c0392b';
     const _ring=(c,w)=>`${-w}px ${-w}px 0 ${c},${w}px ${-w}px 0 ${c},${-w}px ${w}px 0 ${c},${w}px ${w}px 0 ${c}`;
@@ -651,167 +769,96 @@ function buildCard(cb,CW){
   return cw;
 }
 
-/* ── helper: อ่านตัวเลข (รองรับ 0 และ default) ── */
 const fNum=(v,d)=>{const n=parseFloat(v);return isNaN(n)?(d||0):n;};
 
-/* ── สร้างมุมประดับจาก <div> ล้วน ๆ (html2canvas render ตรง) ── */
-function buildCorners(card, spec){
-  const t     = spec.t,
-        ins    = fNum(spec.inset, 8),
-        size   = fNum(spec.size, 30),
-        w      = fNum(spec.w, 3),
-        gap    = fNum(spec.gap, 5),
-        r      = fNum(spec.r, 5),
-        color  = spec.color  || '#ffd700',
-        color2 = spec.color2 || color;
-  const fc=(css)=>{
-    const d=document.createElement('div');
-    d.className='fcorner';
-    d.style.cssText='position:absolute;pointer-events:none;z-index:6;'+css;
-    card.appendChild(d);
-  };
-  // มุมทั้ง 4 — ยึดขอบด้วย top/bottom + left/right จึงไม่ต้องใช้ transform
+function buildCorners(card,spec){
+  const t=spec.t,ins=fNum(spec.inset,8),size=fNum(spec.size,30),w=fNum(spec.w,3),
+        gap=fNum(spec.gap,5),r=fNum(spec.r,5),color=spec.color||'#ffd700',color2=spec.color2||color;
+  const fc=(css)=>{const d=document.createElement('div');d.className='fcorner';
+    d.style.cssText='position:absolute;pointer-events:none;z-index:6;'+css;card.appendChild(d);};
   const corners=[['top','left'],['top','right'],['bottom','left'],['bottom','right']];
   corners.forEach(([vy,hx])=>{
-    if(t==='bracket' || t==='steps'){
-      const offs = (t==='steps') ? [0, gap+w] : [0];
+    if(t==='bracket'||t==='steps'){
+      const offs=(t==='steps')?[0,gap+w]:[0];
       offs.forEach((off,i)=>{
-        const sz = size - i*(gap+w);
-        if(sz<=w) return;
-        const col = i ? color2 : color;
+        const sz=size-i*(gap+w);if(sz<=w)return;
+        const col=i?color2:color;
         fc(`${vy}:${ins+off}px;${hx}:${ins+off}px;width:${sz}px;height:${w}px;background:${col}`);
         fc(`${vy}:${ins+off}px;${hx}:${ins+off}px;width:${w}px;height:${sz}px;background:${col}`);
       });
-    } else if(t==='dots' || t==='petals'){
-      const cnt = (t==='petals') ? 4 : 3;
+    }else if(t==='dots'||t==='petals'){
+      const cnt=(t==='petals')?4:3;
       for(let i=0;i<cnt;i++){
-        const off = ins + i*(r*2+3);
-        const col = (t==='petals' && (i%2)) ? color2 : color;
+        const off=ins+i*(r*2+3);
+        const col=(t==='petals'&&(i%2))?color2:color;
         fc(`${vy}:${off}px;${hx}:${ins}px;width:${r*2}px;height:${r*2}px;border-radius:50%;background:${col}`);
-        if(t==='petals' && i>0)
-          fc(`${vy}:${ins}px;${hx}:${off}px;width:${r*2}px;height:${r*2}px;border-radius:50%;background:${col}`);
+        if(t==='petals'&&i>0)fc(`${vy}:${ins}px;${hx}:${off}px;width:${r*2}px;height:${r*2}px;border-radius:50%;background:${col}`);
       }
     }
   });
 }
 
-/* ── ใส่กรอบลงการ์ด — ทุกชิ้นเป็น <div> ที่ html2canvas จับได้ตรง ──────────
-   จึงได้ภาพ "เหมือนที่เห็นบนเว็บ" ทั้งตอนแสดง / copy / save / ใน LINE ──────── */
-function applyFrameToCard(card, fr){
-  // ล้างกรอบเก่า (รองรับทั้ง schema เก่าและใหม่)
-  card.querySelectorAll('.frame-layer,.fcorner,.frame-border,.frame-inner,.corner')
-      .forEach(e=>e.remove());
-  // แปลง color:'DAY'/'DAY2' → สีประจำวันจาก M.color/M.color2 (ทำใน layer/corners แต่ละตัว)
-  const _DAY  = (M&&M.color)  ? M.color  : '#1F73C4';
-  const _DAY2 = (M&&M.color2) ? M.color2 : '#0f4677';
-  const _dc=(v)=> v==='DAY'?_DAY : v==='DAY2'?_DAY2 : v;
-  if(fr){
-    fr={...fr,
-      layers:(fr.layers||[]).map(L=>({...L,
-        color:_dc(L.color), color2:_dc(L.color2),
-        light:_dc(L.light), dark:_dc(L.dark), bg:_dc(L.bg)})),
-      corners: fr.corners ? {...fr.corners, color:_dc(fr.corners.color), color2:_dc(fr.corners.color2)} : fr.corners
-    };
-  }
-
-  // กรอบทั้งหมดอยู่ "ในกรอบสี่เหลี่ยม" → ไม่ใช้ outer glow บน .cw
-  // (outer glow จะถูก html2canvas ตัดทิ้ง ทำให้ภาพที่เห็น ≠ ภาพที่บันทึก)
+function applyFrameToCard(card,fr){
+  card.querySelectorAll('.frame-layer,.fcorner,.frame-border,.frame-inner,.corner').forEach(e=>e.remove());
+  const _DAY=(M&&M.color)?M.color:'#1F73C4';
+  const _DAY2=(M&&M.color2)?M.color2:'#0f4677';
+  const _dc=(v)=>v==='DAY'?_DAY:v==='DAY2'?_DAY2:v;
+  if(fr){fr={...fr,
+    layers:(fr.layers||[]).map(L=>({...L,color:_dc(L.color),color2:_dc(L.color2),light:_dc(L.light),dark:_dc(L.dark),bg:_dc(L.bg)})),
+    corners:fr.corners?{...fr.corners,color:_dc(fr.corners.color),color2:_dc(fr.corners.color2)}:fr.corners
+  };}
   const cw=card.parentElement;
-  if(cw && cw.classList.contains('cw')) cw.dataset.outerShadow='';
+  if(cw&&cw.classList.contains('cw'))cw.dataset.outerShadow='';
   card.style.boxShadow='none';
-  if(!fr) return;
-
-  const add=(css)=>{
-    const d=document.createElement('div');
-    d.className='frame-layer';
-    d.style.cssText='position:absolute;pointer-events:none;z-index:4;'+css;
-    card.appendChild(d);
-  };
-  // กรอบถูกออกแบบบนฐาน card 800px (ขนาด composite) เมื่อแสดงบนจอเล็ก (~340px)
-  // ความหนา w จะถูกย่อตามจนดูบาง → ชดเชยด้วยตัวคูณ FW โดยอิงความกว้าง card จริง
-  // FW = 800/cardW (จำกัด 1..2.4) ทำให้กรอบหนาขึ้นเมื่อ card เล็ก แต่ inset คงสัดส่วนเดิม
-  const _cardW = card.offsetWidth || parseFloat(card.style.width) || 800;
-  // กรอบออกแบบบนฐาน 800px เมื่อย่อมาจอเล็กจะบาง → ชดเชย + เพิ่มฐาน ×1.35 ให้กรอบเด่นเหมาะกับภาพ
-  // เพิ่ม cap จาก 3.2→4.2 (มิ.ย.2569: ผู้ใช้แจ้งกรอบเล็กเกินไป ขยายขึ้น ~30%)
-  const FW = Math.min(4.2, Math.max(1.35, (800/_cardW)*1.35));
+  if(!fr)return;
+  const add=(css)=>{const d=document.createElement('div');d.className='frame-layer';
+    d.style.cssText='position:absolute;pointer-events:none;z-index:4;'+css;card.appendChild(d);};
+  const _cardW=card.offsetWidth||parseFloat(card.style.width)||800;
+  const FW=Math.min(4.2,Math.max(1.35,(800/_cardW)*1.35));
   const wScale=(w)=>Math.round(fNum(w,1)*FW*10)/10;
   const sides=(ins)=>`top:${ins}px;right:${ins}px;bottom:${ins}px;left:${ins}px`;
-
   (fr.layers||[]).forEach(L=>{
     const ins=fNum(L.inset);
     if(L.line){
-      // เส้นกรอบ (box-sizing:border-box → เส้นวาดด้านในของกล่อง = อยู่ที่ inset พอดี)
       add(`${sides(ins)};border:${wScale(L.w)}px ${L.style||'solid'} ${L.color};border-radius:${fNum(L.radius)}px`);
-    } else if(L.bevel){
-      // ขอบ 3 มิติ: ด้านสว่าง (บน-ซ้าย) + ด้านมืด (ล่าง-ขวา) → นูน ; สลับกัน → จม
-      const lt = (L.bevel==='out') ? L.light : L.dark;
-      const dk = (L.bevel==='out') ? L.dark  : L.light;
-      add(`${sides(ins)};border-style:solid;border-width:${wScale(L.w)}px;`+
-          `border-top-color:${lt};border-left-color:${lt};`+
-          `border-right-color:${dk};border-bottom-color:${dk};`+
-          `border-radius:${fNum(L.radius)}px`);
-    } else if(L.shadow){
-      // เงาขอบด้านใน 4 ด้าน (gradient จากขอบเข้มจางเข้ากลาง) → ภาพดูจมเป็น 3 มิติ
-      const d=fNum(L.depth,24), c=L.color||'rgba(0,0,0,.5)';
+    }else if(L.bevel){
+      const lt=(L.bevel==='out')?L.light:L.dark;
+      const dk=(L.bevel==='out')?L.dark:L.light;
+      add(`${sides(ins)};border-style:solid;border-width:${wScale(L.w)}px;border-top-color:${lt};border-left-color:${lt};border-right-color:${dk};border-bottom-color:${dk};border-radius:${fNum(L.radius)}px`);
+    }else if(L.shadow){
+      const d=fNum(L.depth,24),c=L.color||'rgba(0,0,0,.5)';
       add(`left:${ins}px;right:${ins}px;top:${ins}px;height:${d}px;background:linear-gradient(180deg,${c},rgba(0,0,0,0))`);
       add(`left:${ins}px;right:${ins}px;bottom:${ins}px;height:${d}px;background:linear-gradient(0deg,${c},rgba(0,0,0,0))`);
       add(`top:${ins}px;bottom:${ins}px;left:${ins}px;width:${d}px;background:linear-gradient(90deg,${c},rgba(0,0,0,0))`);
       add(`top:${ins}px;bottom:${ins}px;right:${ins}px;width:${d}px;background:linear-gradient(270deg,${c},rgba(0,0,0,0))`);
-    } else if(L.band){
-      // แถบทึบเป็นวง (4 แท่งขอบ) — เช่น ขอบขาวโพลารอยด์ / ฟิล์มดำ
-      const t=wScale(L.w||12), bg=L.bg||'#ffffff';
+    }else if(L.band){
+      const t=wScale(L.w||12),bg=L.bg||'#ffffff';
       add(`left:${ins}px;right:${ins}px;top:${ins}px;height:${t}px;background:${bg}`);
       add(`left:${ins}px;right:${ins}px;bottom:${ins}px;height:${t}px;background:${bg}`);
       add(`top:${ins}px;bottom:${ins}px;left:${ins}px;width:${t}px;background:${bg}`);
       add(`top:${ins}px;bottom:${ins}px;right:${ins}px;width:${t}px;background:${bg}`);
     }
   });
-
-  if(fr.corners) buildCorners(card, fr.corners);
+  if(fr.corners)buildCorners(card,fr.corners);
 }
 
 /* ── SIZING ─────────────────────────────────────────────────────────── */
 const stage=document.getElementById('stage');
 let CW=0,SIDE_SCALE=0.78,SIDE_OFFSET=0,SIDE_Y=0;
 
-// คำนวณความสูงของ fixed elements เพื่อหักออกจาก viewport
-function fixedH(){
-  // header + usage-tip + img-counter + swipe-hint + actions + trust + gaps + padding
-  // วัดจาก element จริง
-  const ids=['appEl'];
-  let h=0;
-  ['header','usage-tip-inner','imgCounterEl','swipe-hint','actions','trustEl'].forEach(id=>{
-    const el=document.getElementById(id)||document.querySelector('.'+id);
-    if(el&&el.offsetHeight)h+=el.offsetHeight;
-  });
-  return h+80; // buffer สำหรับ gaps + padding
-}
-
 function computeSizes(){
-  const sw = stage.offsetWidth;
-
-  // วัด stage height จริงหลัง layout — รอ 1 frame ถ้าจำเป็น
-  const sh = stage.offsetHeight;
-
-  // CW = min(92% ของ width, 98% ของ stage height จริง)
-  // ใช้ stage.offsetHeight เป็น source of truth เพราะมันคือ flex:1 ที่เหลือจริงๆ
-  // max(sh, 200) ป้องกัน edge case ตอน init
-  const availH = Math.max(sh, 200);
-  CW = Math.min(
-    Math.round(sw * 0.92),   // ไม่เกิน 92% ของ width
-    Math.round(availH * 0.95) // ไม่เกิน 95% ของ stage height (เผื่อกันชน — กันการ์ดล้นเวทีตอน layout ขยับ)
-  );
-  CW = Math.max(CW, 180);
-
-  SIDE_SCALE  = 0.78;
-  SIDE_OFFSET = Math.round(sw * 0.58);
-  SIDE_Y      = Math.round(CW * 0.04);
+  const sw=stage.offsetWidth;
+  const sh=stage.offsetHeight;
+  const availH=Math.max(sh,200);
+  CW=Math.min(Math.round(sw*0.92),Math.round(availH*0.95));
+  CW=Math.max(CW,180);
+  SIDE_SCALE=0.78;
+  SIDE_OFFSET=Math.round(sw*0.58);
+  SIDE_Y=Math.round(CW*0.04);
 }
-
-// คำนวณขนาดใหม่ + ปรับขนาดการ์ดทุกใบ + จัดวางใหม่ (เรียกตอน resize / โหลดเสร็จ / ฟอนต์โหลดเสร็จ)
 function relayout(){
   computeSizes();
-  cwEls.forEach((cw)=>{
+  cwEls.forEach(cw=>{
     cw.style.width=CW+'px';cw.style.height=CW+'px';
     cw.style.marginLeft=(-CW/2)+'px';cw.style.marginTop=(-CW/2)+'px';
     const card=cw.querySelector('.card');
@@ -821,38 +868,30 @@ function relayout(){
 }
 
 /* ── CAROUSEL STATE ─────────────────────────────────────────────────── */
-const POOL=7,DOT_N=7;
+const POOL=7;
 let combos=[],cwEls=[],globalIdx=0;
 function curSlot(){return((globalIdx%POOL)+POOL)%POOL;}
 function circDist(i,c){let d=i-c;if(d>POOL/2)d-=POOL;if(d<-POOL/2)d+=POOL;return d;}
 
 function posFor(i){
   const d=circDist(i,curSlot());
-  if(d===0) return{tx:0,ty:0,sc:1,op:1,br:1,z:10,sh:'0 28px 60px rgba(50,28,5,.42),0 8px 20px rgba(50,28,5,.24)'};
-  if(d===1) return{tx:SIDE_OFFSET,ty:SIDE_Y,sc:SIDE_SCALE,op:.78,br:.82,z:5,sh:'0 8px 20px rgba(50,28,5,.14)'};
+  if(d===0)return{tx:0,ty:0,sc:1,op:1,br:1,z:10,sh:'0 28px 60px rgba(50,28,5,.42),0 8px 20px rgba(50,28,5,.24)'};
+  if(d===1)return{tx:SIDE_OFFSET,ty:SIDE_Y,sc:SIDE_SCALE,op:.78,br:.82,z:5,sh:'0 8px 20px rgba(50,28,5,.14)'};
   if(d===-1)return{tx:-SIDE_OFFSET,ty:SIDE_Y,sc:SIDE_SCALE,op:.78,br:.82,z:5,sh:'0 8px 20px rgba(50,28,5,.14)'};
   const fx=SIDE_OFFSET+Math.abs(d)*CW*.08;
   return{tx:d>0?fx:-fx,ty:SIDE_Y+12,sc:SIDE_SCALE*.84,op:.22,br:.55,z:0,sh:'none'};
 }
-
-function applyPos(cw, p, anim){
-  const card = cw.querySelector('.card');
-  if(!anim) cw.classList.add('no-anim'); else cw.classList.remove('no-anim');
-  if(!anim) cw.offsetHeight;
-  cw.style.transform = `translate(${p.tx}px,${p.ty}px) scale(${p.sc})`;
-  cw.style.opacity   = p.op;
-  cw.style.zIndex    = p.z;
-  cw.style.filter    = p.br >= 1 ? 'none' : `brightness(${p.br})`;
-  // รวม carousel shadow + outer frame glow บน card
-  if(card){
-    const outerFrame = cw.dataset.outerShadow || '';
-    const combined   = [p.sh, outerFrame].filter(Boolean).join(', ');
-    card.style.boxShadow = combined || 'none';
-  }
-  if(!anim) requestAnimationFrame(()=>cw.classList.remove('no-anim'));
+function applyPos(cw,p,anim){
+  const card=cw.querySelector('.card');
+  if(!anim)cw.classList.add('no-anim');else cw.classList.remove('no-anim');
+  if(!anim)cw.offsetHeight;
+  cw.style.transform=`translate(${p.tx}px,${p.ty}px) scale(${p.sc})`;
+  cw.style.opacity=p.op;cw.style.zIndex=p.z;
+  cw.style.filter=p.br>=1?'none':`brightness(${p.br})`;
+  if(card){const outerFrame=cw.dataset.outerShadow||'';const combined=[p.sh,outerFrame].filter(Boolean).join(', ');card.style.boxShadow=combined||'none';}
+  if(!anim)requestAnimationFrame(()=>cw.classList.remove('no-anim'));
 }
-
-function layoutAll(anim=true){cwEls.forEach((cw,i)=>applyPos(cw,posFor(i),anim));updateCounter();}
+function layoutAll(anim=true){cwEls.forEach((cw,i)=>applyPos(cw,posFor(i),anim));updateThumbCounter();}
 
 function refreshSlot(slot){
   const g=globalIdx+circDist(slot,curSlot());
@@ -866,31 +905,17 @@ function refreshSlot(slot){
   fresh.style.width=CW+'px';fresh.style.height=CW+'px';
 }
 
-/* ── [แก้ข้อ 4] IMG COUNTER แทน DOTS ───────────────────────────────── */
-const dotsEl=document.getElementById('dotsEl');
-function buildDots(){dotsEl.innerHTML='';}// ซ่อน dots เดิม ไม่ต้องสร้าง
-
-function updateCounter(){
-  const total=CARDS.length||1;
-  const idx=cardIndexFor(globalIdx)+1;
-  const el=document.getElementById('imgCounterEl');
-  if(el)el.textContent=`รูป ${idx} จาก ${total}`;
-}
-
 /* ── SWIPE ──────────────────────────────────────────────────────────── */
 function attachSwipe(){
   let sx=0,sy=0,dx=0,dragging=false,horiz=null,dragMoved=false;
   const THRESH=50;
   const lerp=(a,b,t)=>a+(b-a)*t;
-  // ── เปลี่ยนรูปแบบ "กดทีละก้าว" (ใช้ร่วมกับ ลูกศรกดได้ / ปุ่มลูกศรคีย์บอร์ด / กดการ์ดข้างๆ) ──
   function go(dir){
     if(!cwEls.length)return;
     if(dir>0){globalIdx++;refreshSlot(((globalIdx+2)%POOL+POOL)%POOL);}
-    else     {globalIdx--;refreshSlot(((globalIdx-2)%POOL+POOL)%POOL);}
-    track2('next');
-    layoutAll(true);
+    else{globalIdx--;refreshSlot(((globalIdx-2)%POOL+POOL)%POOL);}
+    track2('next');layoutAll(true);updateThumbHighlight();
   }
-
   function liveLayout(rawDx){
     const frac=Math.min(Math.abs(rawDx)/(CW*.55),1);
     const dir=rawDx<0?1:-1;
@@ -899,14 +924,7 @@ function attachSwipe(){
       const nc=(((curSlot()+dir)%POOL)+POOL)%POOL;
       const d2=circDist(i,nc);
       const fx2=SIDE_OFFSET+Math.abs(d2)*CW*.08;
-      const toP={
-        tx:d2===0?0:d2===1?SIDE_OFFSET:d2===-1?-SIDE_OFFSET:d2>0?fx2:-fx2,
-        ty:d2===0?0:Math.abs(d2)===1?SIDE_Y:SIDE_Y+12,
-        sc:d2===0?1:Math.abs(d2)===1?SIDE_SCALE:SIDE_SCALE*.84,
-        op:d2===0?1:Math.abs(d2)===1?.78:.22,
-        br:d2===0?1:Math.abs(d2)===1?.82:.55,
-        sh:d2===0?'0 28px 60px rgba(50,28,5,.42)':Math.abs(d2)===1?'0 8px 20px rgba(50,28,5,.14)':'none',
-      };
+      const toP={tx:d2===0?0:d2===1?SIDE_OFFSET:d2===-1?-SIDE_OFFSET:d2>0?fx2:-fx2,ty:d2===0?0:Math.abs(d2)===1?SIDE_Y:SIDE_Y+12,sc:d2===0?1:Math.abs(d2)===1?SIDE_SCALE:SIDE_SCALE*.84,op:d2===0?1:Math.abs(d2)===1?.78:.22,br:d2===0?1:Math.abs(d2)===1?.82:.55,sh:d2===0?'0 28px 60px rgba(50,28,5,.42)':Math.abs(d2)===1?'0 8px 20px rgba(50,28,5,.14)':'none'};
       const card=cw.querySelector('.card');
       const liveX=lerp(fromP.tx,toP.tx,frac)+(i===curSlot()?rawDx:0);
       cw.style.transform=`translate(${liveX}px,${lerp(fromP.ty,toP.ty,frac)}px) scale(${lerp(fromP.sc,toP.sc,frac)})`;
@@ -915,240 +933,98 @@ function attachSwipe(){
       if(card)card.style.boxShadow=frac>.5?toP.sh:fromP.sh;
     });
   }
-
   function onStart(x,y){sx=x;sy=y;dx=0;dragging=true;horiz=null;dragMoved=false;cwEls.forEach(cw=>cw.classList.add('no-anim'));}
-  function onMove(x,y){
-    if(!dragging)return;dx=x-sx;
-    const dy=y-sy;
-    if(horiz===null&&(Math.abs(dx)>6||Math.abs(dy)>6))horiz=Math.abs(dx)>=Math.abs(dy);
-    if(Math.abs(dx)>6||Math.abs(dy)>6)dragMoved=true;   // ขยับจริง = ไม่ใช่การ "กด" (tap)
-    if(!horiz)return;
-    liveLayout(dx);
-  }
-  function onEnd(){
-    if(!dragging)return;dragging=false;
-    cwEls.forEach(cw=>cw.classList.remove('no-anim'));
-    if(horiz&&Math.abs(dx)>=THRESH){
-      if(dx<0){globalIdx++;refreshSlot(((globalIdx+2)%POOL+POOL)%POOL);}
-      else{globalIdx--;refreshSlot(((globalIdx-2)%POOL+POOL)%POOL);}
-      track2('next');
-    }
-    layoutAll(true);
-  }
-
+  function onMove(x,y){if(!dragging)return;dx=x-sx;const dy=y-sy;if(horiz===null&&(Math.abs(dx)>6||Math.abs(dy)>6))horiz=Math.abs(dx)>=Math.abs(dy);if(Math.abs(dx)>6||Math.abs(dy)>6)dragMoved=true;if(!horiz)return;liveLayout(dx);}
+  function onEnd(){if(!dragging)return;dragging=false;cwEls.forEach(cw=>cw.classList.remove('no-anim'));if(horiz&&Math.abs(dx)>=THRESH){if(dx<0){globalIdx++;refreshSlot(((globalIdx+2)%POOL+POOL)%POOL);}else{globalIdx--;refreshSlot(((globalIdx-2)%POOL+POOL)%POOL);}track2('next');}layoutAll(true);updateThumbHighlight();}
   stage.addEventListener('mousedown',e=>{e.preventDefault();onStart(e.clientX,e.clientY);});
   window.addEventListener('mousemove',e=>{if(dragging)onMove(e.clientX,e.clientY);});
   window.addEventListener('mouseup',()=>{if(dragging)onEnd();});
   stage.addEventListener('touchstart',e=>onStart(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
   stage.addEventListener('touchmove',e=>{onMove(e.touches[0].clientX,e.touches[0].clientY);if(horiz)e.preventDefault();},{passive:false});
   stage.addEventListener('touchend',()=>onEnd());
-
-  // ── [แก้ "เลื่อนภาพยากบนคอม"] เพิ่มทางเลือกเปลี่ยนรูปนอกจากการปัด ──
-  // 1) ปุ่มลูกศรบนคีย์บอร์ด (← →)
-  window.addEventListener('keydown',e=>{
-    if(e.key==='ArrowLeft'){e.preventDefault();go(-1);}
-    else if(e.key==='ArrowRight'){e.preventDefault();go(1);}
-  });
-  // 2) แตะลูกศร ⬅️ ➡️ ใต้การ์ดเพื่อเปลี่ยนรูป (ดีทั้งบนคอมและผู้สูงอายุ)
-  document.querySelectorAll('.swipe-arrow').forEach(a=>{
-    a.style.cursor='pointer';
-    a.addEventListener('click',()=>go(a.classList.contains('left')?-1:1));
-  });
-  // 3) กดที่การ์ดข้างๆ (ซ้าย/ขวา) เพื่อเลื่อนมาดูใบนั้น — เฉพาะการ "กด" ไม่ใช่ลาก
-  cwEls.forEach((cw,slot)=>{
-    cw.style.cursor='pointer';
-    cw.addEventListener('click',()=>{
-      if(dragMoved)return;              // ถ้าเพิ่งลากอยู่ ไม่นับเป็นการกด
-      const d=circDist(slot,curSlot());
-      if(d===1)go(1); else if(d===-1)go(-1);
-    });
-  });
+  window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();go(-1);}else if(e.key==='ArrowRight'){e.preventDefault();go(1);}});
+  document.getElementById('arrowLeft').addEventListener('click',()=>go(-1));
+  document.getElementById('arrowRight').addEventListener('click',()=>go(1));
+  cwEls.forEach((cw,slot)=>{cw.style.cursor='pointer';cw.addEventListener('click',()=>{if(dragMoved)return;const d=circDist(slot,curSlot());if(d===1)go(1);else if(d===-1)go(-1);});});
 }
-
-/* ── (เดิมมีฟังก์ชัน drawFrameOnCanvas ที่วาดกรอบลง canvas เอง — ตัดออกแล้ว)
-   ปัจจุบัน snapshot() ใช้ html2canvas จับ DOM ของการ์ดโดยตรง และกรอบทุกแบบ
-   เป็น <div> ล้วน ๆ จึงได้ภาพ "เหมือนที่เห็นบนเว็บเป๊ะ" ทุกช่องทาง
-   (แสดงผล / คัดลอก / บันทึก / LINE) โดยไม่ต้องวาดซ้ำสองที่ให้เสี่ยงไม่ตรงกัน ── */
 
 /* ── SNAPSHOT ───────────────────────────────────────────────────────── */
-// กรอบเป็น border element จริง (ใน applyFrameToCard) → html2canvas render ได้ตรง
-// clone card → render → ได้ภาพเหมือนเว็บเป๊ะทุกช่องทาง
 async function snapshot(){
-  const slot     = curSlot();
-  const liveCard = cwEls[slot].querySelector('.card');
-  const liveImg  = liveCard.querySelector('img.bg');
-
-  const S = 2;
-
-  // clone card (มี bg, scrim, frame-border, frame-inner, corner, content)
-  const cloneCard = liveCard.cloneNode(true);
-  const sb=cloneCard.querySelector('.src-btn'); if(sb) sb.remove();   // ปุ่ม i เป็น overlay ไม่รวมในภาพ
-  cloneCard.style.transform = 'none';
-  cloneCard.style.boxShadow = 'none';   // outer glow ไม่เอา (อยู่บน .cw)
-  cloneCard.style.position  = 'absolute';
-  cloneCard.style.left = '0'; cloneCard.style.top = '0';
-  cloneCard.style.width  = CW + 'px';
-  cloneCard.style.height = CW + 'px';
-  // คง border-radius + overflow:hidden จาก CSS .card
-
-  // wrapper ซ่อนนอกจอ
-  const wrap = document.createElement('div');
-  wrap.style.cssText = `position:fixed;left:-${CW+300}px;top:0;width:${CW}px;height:${CW}px;overflow:hidden;z-index:-9999;opacity:0;pointer-events:none;background:#1a1208`;
-  wrap.appendChild(cloneCard);
-  document.body.appendChild(wrap);
-
-  // sync img
-  const cloneImg = cloneCard.querySelector('img.bg');
-  if(liveImg && cloneImg){
-    cloneImg.crossOrigin = 'anonymous';
-    cloneImg.style.opacity = '1';
-    if(cloneImg.src !== liveImg.src) cloneImg.src = liveImg.src;
-    if(!cloneImg.complete || cloneImg.naturalWidth === 0){
-      await new Promise(res => {
-        cloneImg.onload = res; cloneImg.onerror = res;
-        setTimeout(res, 8000);
-      });
-    }
-  }
-
-  // รอฟอนต์ทั้งหมดให้โหลดเสร็จก่อนจับภาพ (กันตัวอักษรเปลี่ยนขนาด/ขยับตำแหน่งในภาพที่บันทึก)
-  if(document.fonts && document.fonts.ready){
-    try{ await Promise.race([document.fonts.ready, new Promise(r=>setTimeout(r,3000))]); }catch(e){}
-  }
-
-  // render
+  const slot=curSlot();
+  const liveCard=cwEls[slot].querySelector('.card');
+  const liveImg=liveCard.querySelector('img.bg');
+  const S=2;
+  const cloneCard=liveCard.cloneNode(true);
+  const sb=cloneCard.querySelector('.src-btn');if(sb)sb.remove();
+  cloneCard.style.transform='none';cloneCard.style.boxShadow='none';
+  cloneCard.style.position='absolute';cloneCard.style.left='0';cloneCard.style.top='0';
+  cloneCard.style.width=CW+'px';cloneCard.style.height=CW+'px';
+  const wrap=document.createElement('div');
+  wrap.style.cssText=`position:fixed;left:-${CW+300}px;top:0;width:${CW}px;height:${CW}px;overflow:hidden;z-index:-9999;opacity:0;pointer-events:none;background:#1a1208`;
+  wrap.appendChild(cloneCard);document.body.appendChild(wrap);
+  const cloneImg=cloneCard.querySelector('img.bg');
+  if(liveImg&&cloneImg){cloneImg.crossOrigin='anonymous';cloneImg.style.opacity='1';
+    if(cloneImg.src!==liveImg.src)cloneImg.src=liveImg.src;
+    if(!cloneImg.complete||cloneImg.naturalWidth===0){await new Promise(res=>{cloneImg.onload=res;cloneImg.onerror=res;setTimeout(res,8000);});}}
+  if(document.fonts&&document.fonts.ready){try{await Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,3000))]);}catch(e){}}
   let canvas;
-  try {
-    canvas = await html2canvas(cloneCard, {
-      useCORS: true, allowTaint: false, scale: S,
-      backgroundColor: '#1a1208', logging: false,
-      width: CW, height: CW, x: 0, y: 0, scrollX: 0, scrollY: 0,
-    });
-  } finally {
-    document.body.removeChild(wrap);
-  }
-
+  try{canvas=await html2canvas(cloneCard,{useCORS:true,allowTaint:false,scale:S,backgroundColor:'#1a1208',logging:false,width:CW,height:CW,x:0,y:0,scrollX:0,scrollY:0});}
+  finally{document.body.removeChild(wrap);}
   return canvas;
 }
+
 /* ── ACTIONS ────────────────────────────────────────────────────────── */
+const IS_LINE_WV=/\bLine\b/i.test(navigator.userAgent);
+
+function triggerDownload(canvas){
+  const fname=`${M.headline||'สวัสดีวันนี้'}.png`;
+  if(IS_LINE||IS_LINE_WV){showImageViewer(canvas,fname);}
+  else{const a=document.createElement('a');a.download=fname;a.href=canvas.toDataURL('image/png');a.click();}
+  trackGC('download');track2('download');
+}
+
+function showImageViewer(canvas,fname){
+  document.getElementById('imgViewer')?.remove();
+  const dataUrl=canvas.toDataURL('image/png');
+  const ov=document.createElement('div');ov.id='imgViewer';
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:16px;';
+  const tip=document.createElement('div');
+  tip.style.cssText="font-family:'Sarabun';font-size:17px;font-weight:700;color:#fff;text-align:center;line-height:1.6;background:rgba(255,255,255,.12);padding:12px 20px;border-radius:14px;";
+  tip.innerHTML='📥 <strong>กดค้างที่รูปด้านล่าง</strong><br>แล้วเลือก "บันทึกรูปภาพ"';
+  const img=document.createElement('img');img.src=dataUrl;
+  img.style.cssText='max-width:100%;max-height:60vh;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.6);display:block;';img.setAttribute('alt',fname);
+  const closeBtn=document.createElement('button');closeBtn.textContent='✕ ปิด';
+  closeBtn.style.cssText="font-family:'Kanit';font-size:16px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.35);padding:11px 32px;border-radius:12px;cursor:pointer;";
+  closeBtn.onclick=()=>ov.remove();ov.append(tip,img,closeBtn);document.body.appendChild(ov);
+}
+
 document.getElementById('btnCopy').onclick=async()=>{
   const btn=document.getElementById('btnCopy');
   const orig=btn.textContent;btn.textContent='กำลังเตรียม…';btn.disabled=true;
-  try{
-    const c=await snapshot();
+  try{const c=await snapshot();
     const canClip=!!(window.ClipboardItem&&navigator.clipboard?.write);
-    if(canClip){
-      c.toBlob(async b=>{
-        try{
-          await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);
-          toast('คัดลอกแล้ว พร้อมแปะใน LINE ✓');trackGC('copy');track2('copy');
-        }catch{
-          triggerDownload(c);
-          toast('คัดลอกไม่ได้ — บันทึกรูปแล้วแทน แล้วแนบใน LINE');
-        }
-        btn.textContent=orig;btn.disabled=false;
-      },'image/png');
-    }else{
-      triggerDownload(c);
-      toast('เปิดใน LINE: กดค้างที่รูปเพื่อแชร์ได้เลย');trackGC('copy');track2('copy');
-      btn.textContent=orig;btn.disabled=false;
-    }
-  }catch{toast('ไม่สำเร็จ ลองกดบันทึกแทน');btn.textContent=orig;btn.disabled=false;}
+    if(canClip){c.toBlob(async b=>{try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);toast('คัดลอกแล้ว พร้อมแปะใน LINE ✓');trackGC('copy');track2('copy');}catch{triggerDownload(c);toast('คัดลอกไม่ได้ — บันทึกรูปแล้วแทน');}btn.textContent=orig;btn.disabled=false;},'image/png');}
+    else{triggerDownload(c);toast('เปิดใน LINE: กดค้างที่รูปเพื่อแชร์ได้เลย');trackGC('copy');track2('copy');btn.textContent=orig;btn.disabled=false;}}
+  catch{toast('ไม่สำเร็จ ลองกดบันทึกแทน');btn.textContent=orig;btn.disabled=false;}
 };
-
-// ── ตรวจ LINE WebView
-const IS_LINE_WV = /Line/i.test(navigator.userAgent);
-
-function triggerDownload(canvas){
-  const fname = `${M.headline||'สวัสดีวันนี้'}.png`;
-  if(IS_LINE || IS_LINE_WV){
-    // LINE บล็อก <a>.click() → เปิดรูปใน tab ใหม่ให้ user กดค้างบันทึกเอง
-    showImageViewer(canvas, fname);
-  } else {
-    const a = document.createElement('a');
-    a.download = fname;
-    a.href = canvas.toDataURL('image/png');
-    a.click();
-  }
-  trackGC('download'); track2('download');
-}
-
-// แสดง overlay รูปใหญ่พร้อมคำแนะนำ "กดค้างที่รูปเพื่อบันทึก"
-function showImageViewer(canvas, fname){
-  // ลบ overlay เก่าถ้ามี
-  document.getElementById('imgViewer')?.remove();
-
-  const dataUrl = canvas.toDataURL('image/png');
-  const ov = document.createElement('div');
-  ov.id = 'imgViewer';
-  ov.style.cssText = `
-    position:fixed;inset:0;z-index:9999;
-    background:rgba(0,0,0,.88);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:20px;gap:16px;
-  `;
-
-  const tip = document.createElement('div');
-  tip.style.cssText = `
-    font-family:'Sarabun';font-size:17px;font-weight:700;color:#fff;
-    text-align:center;line-height:1.6;
-    background:rgba(255,255,255,.12);padding:12px 20px;border-radius:14px;
-  `;
-  tip.innerHTML = '📥 <strong>กดค้างที่รูปด้านล่าง</strong><br>แล้วเลือก "บันทึกรูปภาพ"';
-
-  const img = document.createElement('img');
-  img.src = dataUrl;
-  img.style.cssText = `
-    max-width:100%;max-height:60vh;border-radius:16px;
-    box-shadow:0 8px 32px rgba(0,0,0,.6);display:block;
-  `;
-  img.setAttribute('alt', fname);
-
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = '✕ ปิด';
-  closeBtn.style.cssText = `
-    font-family:'Kanit';font-size:16px;font-weight:600;
-    background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.35);
-    padding:11px 32px;border-radius:12px;cursor:pointer;
-  `;
-  closeBtn.onclick = () => ov.remove();
-
-  ov.append(tip, img, closeBtn);
-  document.body.appendChild(ov);
-}
-
-// [แก้ข้อ 7] ชื่อปุ่มชัดขึ้น — ปุ่ม btnSave
 document.getElementById('btnSave').onclick=async()=>{
   const btn=document.getElementById('btnSave');
   const t=btn.textContent;btn.textContent='กำลังบันทึก…';btn.disabled=true;
-  try{
-    const c=await snapshot();
-    const fname=`${M.headline||'สวัสดีวันนี้'}.png`;
-    if(IS_LINE || IS_LINE_WV){
-      showImageViewer(c, fname);
-      toast('กดค้างที่รูปเพื่อบันทึก 👆');
-    } else {
-      const a=document.createElement('a');
-      a.download=fname; a.href=c.toDataURL('image/png'); a.click();
-      toast('บันทึกแล้ว ✓');
-    }
-    trackGC('download');track2('download');
-  }catch(e){
-    console.error(e);
-    toast('บันทึกไม่สำเร็จ ลองแคปหน้าจอแทน');
-  }
+  try{const c=await snapshot();const fname=`${M.headline||'สวัสดีวันนี้'}.png`;
+    if(IS_LINE||IS_LINE_WV){showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อบันทึก 👆');}
+    else{const a=document.createElement('a');a.download=fname;a.href=c.toDataURL('image/png');a.click();toast('บันทึกแล้ว ✓');}
+    trackGC('download');track2('download');}
+  catch(e){console.error(e);toast('บันทึกไม่สำเร็จ ลองแคปหน้าจอแทน');}
   finally{btn.textContent=t;btn.disabled=false;}
 };
 
-/* ── PRE-BAKED CARDS: โชว์ "รูปสำเร็จ" (รูป+กรอบ+ข้อความ ประกอบจากฝั่ง server) ──
-   รูปทุกใบผ่าน rubric 2 AI แล้ว ; เว็บแค่ "แสดง" ไม่ประกอบใหม่/ไม่สุ่มคำ
-   (buildCard/FRAMES/LAYOUTS ด้านบนคงไว้ เพราะ composite.mjs ดึงไปเรนเดอร์ฝั่ง server) */
+/* ── PRE-BAKED CARDS ─────────────────────────────────────────────────── */
 let CARDS=[], imgBase='';
 function cardIndexFor(g){const n=CARDS.length||1;return((g%n)+n)%n;}
 function cardFor(g){return CARDS[cardIndexFor(g)]||CARDS[0]||{file:'',src:null};}
-function esc(x){return String(x==null?'':x).replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));}
+function esc(x){return String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
-function buildFinishedCard(g, CW){
+function buildFinishedCard(g,CW){
   const c=cardFor(g);
   const cw=document.createElement('div');cw.className='cw';
   cw.style.width=CW+'px';cw.style.height=CW+'px';
@@ -1158,113 +1034,291 @@ function buildFinishedCard(g, CW){
   const img=document.createElement('img');img.className='bg';img.crossOrigin='anonymous';img.alt='';
   img.src=`${imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;
   card.appendChild(img);
-  if(c.src && (c.src.name||c.src.by||c.src.link)){      // ปุ่ม i เฉพาะรูปที่มีแหล่งที่มา (ภาพถ่ายจริง)
-    const ib=document.createElement('button');
-    ib.className='src-btn';ib.type='button';ib.textContent='i';
+  if(c.src&&(c.src.name||c.src.by||c.src.link)){
+    const ib=document.createElement('button');ib.className='src-btn';ib.type='button';ib.textContent='i';
     ib.setAttribute('aria-label','แหล่งที่มาของภาพ');
-    const stop=ev=>ev.stopPropagation();
-    ib.addEventListener('mousedown',stop);
-    ib.addEventListener('touchstart',stop,{passive:true});
-    ib.addEventListener('click',ev=>{ev.stopPropagation();showSource(c.src);});
-    card.appendChild(ib);
+    const stop=ev=>ev.stopPropagation();ib.addEventListener('mousedown',stop);ib.addEventListener('touchstart',stop,{passive:true});
+    ib.addEventListener('click',ev=>{ev.stopPropagation();showSource(c.src);});card.appendChild(ib);
   }
-  cw.appendChild(card);
-  return cw;
+  cw.appendChild(card);return cw;
 }
 
 function showSource(src){
-  const ex=document.getElementById('srcPop'); if(ex) ex.remove();
+  const ex=document.getElementById('srcPop');if(ex)ex.remove();
   const ov=document.createElement('div');ov.id='srcPop';
   ov.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(10,30,45,.55);display:flex;align-items:center;justify-content:center;padding:28px';
   const box=document.createElement('div');
-  box.style.cssText="max-width:340px;width:100%;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(45,156,219,.3);border-radius:18px;padding:18px;font-family:'Sarabun';color:#1c3a52;box-shadow:0 12px 40px rgba(10,40,70,.3)";
+  box.style.cssText="max-width:340px;width:100%;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(233,30,140,.2);border-radius:18px;padding:18px;font-family:'Sarabun';color:#2d1a2e;box-shadow:0 12px 40px rgba(10,40,70,.3)";
   const name=src.name?`<div style="font-size:16px;font-weight:700;margin-bottom:6px">${esc(src.name)}</div>`:'';
-  const by=src.by?`<div style="font-size:14px;color:#3a6480;margin-bottom:4px">ภาพโดย ${esc(src.by)}</div>`:'';
-  const link=src.link?`<a href="${esc(src.link)}" target="_blank" rel="noopener" style="font-size:13px;color:#2d9cdb;word-break:break-all">${esc(src.link)}</a>`:'';
-  box.innerHTML=`<div style="font-size:12px;letter-spacing:.05em;color:#6c97b3;margin-bottom:8px">แหล่งที่มาของภาพ</div>${name}${by}${link}<div style="margin-top:14px;text-align:right"><button id="srcClose" style="font-family:'Kanit';font-size:14px;font-weight:600;background:#2d9cdb;color:#fff;border:none;padding:9px 22px;border-radius:11px;cursor:pointer">ปิด</button></div>`;
-  ov.appendChild(box);
-  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
-  document.body.appendChild(ov);
-  const cl=document.getElementById('srcClose'); if(cl) cl.onclick=()=>ov.remove();
+  const by=src.by?`<div style="font-size:14px;color:#7a5a7a;margin-bottom:4px">ภาพโดย ${esc(src.by)}</div>`:'';
+  const link=src.link?`<a href="${esc(src.link)}" target="_blank" rel="noopener" style="font-size:13px;color:#e91e8c;word-break:break-all">${esc(src.link)}</a>`:'';
+  box.innerHTML=`<div style="font-size:12px;letter-spacing:.05em;color:#9a7a9a;margin-bottom:8px">แหล่งที่มาของภาพ</div>${name}${by}${link}<div style="margin-top:14px;text-align:right"><button id="srcClose" style="font-family:'Kanit';font-size:14px;font-weight:600;background:#e91e8c;color:#fff;border:none;padding:9px 22px;border-radius:11px;cursor:pointer">ปิด</button></div>`;
+  ov.appendChild(box);ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+  document.body.appendChild(ov);const cl=document.getElementById('srcClose');if(cl)cl.onclick=()=>ov.remove();
+}
+
+/* ── THUMBNAIL STRIP ─────────────────────────────────────────────────── */
+function buildThumbStrip(){
+  const row=document.getElementById('thumbRow');row.innerHTML='';
+  CARDS.forEach((c,i)=>{
+    const item=document.createElement('div');item.className='thumb-item'+(i===0?' active':'');
+    const img=document.createElement('img');img.src=`${imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;img.alt='';
+    item.appendChild(img);
+    item.addEventListener('click',()=>goToCard(i));
+    row.appendChild(item);
+  });
+  document.getElementById('thumbStrip').style.display='';
+  updateThumbCounter();
+}
+
+function goToCard(idx){
+  const cur=cardIndexFor(globalIdx);
+  const diff=idx-cur;
+  globalIdx+=diff;
+  // rebuild carousel pool around new globalIdx
+  for(let slot=0;slot<POOL;slot++){
+    const g=globalIdx+circDist(slot,curSlot());
+    combos[slot]=cardFor(g);
+    const cw=cwEls[slot];const old=cw.querySelector('.card');
+    const fresh=buildFinishedCard(g,CW).querySelector('.card');
+    cw.replaceChild(fresh,old);cw.style.width=CW+'px';cw.style.height=CW+'px';
+    cw.style.marginLeft=(-CW/2)+'px';cw.style.marginTop=(-CW/2)+'px';fresh.style.width=CW+'px';fresh.style.height=CW+'px';
+  }
+  layoutAll(true);updateThumbHighlight();
+}
+
+function updateThumbHighlight(){
+  const idx=cardIndexFor(globalIdx);
+  document.querySelectorAll('.thumb-item').forEach((el,i)=>el.classList.toggle('active',i===idx));
+  // scroll thumb into view
+  const row=document.getElementById('thumbRow');
+  const items=row.querySelectorAll('.thumb-item');
+  if(items[idx]){items[idx].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});}
+  updateThumbCounter();
+}
+
+function updateThumbCounter(){
+  const idx=cardIndexFor(globalIdx);
+  const el=document.getElementById('thumbCounter');
+  if(el)el.textContent=`รูป ${idx+1} จาก ${CARDS.length}`;
+}
+
+/* ── CATEGORIES ─────────────────────────────────────────────────────── */
+let catManifests={};
+let currentCatId=null;
+let selectedCatCardIdx=0;
+let selectedCatCard=null;        // {file, blessing, src} ของรูปที่เลือกใน category detail
+let _manifestCache=null;         // cache manifest เพื่อไม่ fetch ซ้ำ
+let _manifestFolder='';
+
+async function getManifest(){
+  if(_manifestCache)return{m:_manifestCache,folder:_manifestFolder};
+  const ict=new Date(Date.now()+7*3600*1000);
+  const todayISO=`${ict.getUTCFullYear()}-${String(ict.getUTCMonth()+1).padStart(2,'0')}-${String(ict.getUTCDate()).padStart(2,'0')}`;
+  let r=await fetch(`${BASE}/img/${todayISO}/manifest.json?v=${Date.now()}`,{cache:'no-store'}).catch(()=>null);
+  if(r&&r.ok){_manifestCache=await r.json();_manifestFolder=todayISO;return{m:_manifestCache,folder:todayISO};}
+  r=await fetch(`${BASE}/img/evergreen/manifest.json?v=${Date.now()}`,{cache:'no-store'}).catch(()=>null);
+  if(r&&r.ok){_manifestCache=await r.json();_manifestFolder='evergreen';return{m:_manifestCache,folder:'evergreen'};}
+  return null;
+}
+
+function buildCatGrid(){
+  const grid=document.getElementById('catGrid');grid.innerHTML='';
+  CATEGORIES.forEach(cat=>{
+    const card=document.createElement('div');card.className='cat-card';
+    card.style.background=cat.bg;
+    // placeholder color div ก่อน load manifest
+    const placeholder=document.createElement('div');
+    placeholder.style.cssText=`position:absolute;inset:0;background:${cat.bg};display:flex;align-items:center;justify-content:center;font-size:38px;`;
+    placeholder.textContent=cat.icon;
+    card.appendChild(placeholder);
+    const overlay=document.createElement('div');overlay.className='cat-card-overlay';
+    overlay.style.cssText='position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.55) 0%,transparent 80%);padding:8px 8px 10px;display:flex;align-items:flex-end;justify-content:center;';
+    const label=document.createElement('div');label.className='cat-card-label';
+    label.innerHTML=`<span>${cat.icon}</span><span>${cat.label}</span>`;
+    overlay.appendChild(label);card.appendChild(overlay);
+    card.addEventListener('click',()=>openCategory(cat));
+    grid.appendChild(card);
+    // โหลด thumbnail รูปแรกของหมวดนั้น (ถ้ามี)
+    loadCatThumbnail(cat,card,placeholder);
+  });
+}
+
+async function loadCatThumbnail(cat,card,placeholder){
+  try{
+    const res=await getManifest();if(!res)return;
+    const{m,folder}=res;
+    const catImages=(m.categories&&m.categories[cat.id])||[];
+    if(!catImages.length)return;
+    const img=document.createElement('img');img.className='cat-card-img';img.crossOrigin='anonymous';img.alt=cat.label;
+    img.src=`${BASE}/img/${folder}/${catImages[0].file}?v=${m.version||''}`;
+    img.onload=()=>{card.insertBefore(img,placeholder);card.removeChild(placeholder);};
+    img.onerror=()=>{};
+  }catch(e){}
+}
+
+async function openCategory(cat){
+  currentCatId=cat.id;selectedCatCardIdx=0;selectedCatCard=null;
+  document.getElementById('catdTitle').textContent=`${cat.icon} ${cat.label}`;
+  document.getElementById('catdCount').textContent='กำลังโหลด…';
+  document.getElementById('catdGrid').innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9a7a9a;font-size:14px">กำลังโหลด…</div>`;
+  document.getElementById('catdUseBtn').textContent='✨ ใช้รูปนี้';
+  switchTab('catdetail');
+  try{
+    const res=await getManifest();
+    if(!res){
+      document.getElementById('catdGrid').innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9a7a9a;font-size:14px">ยังไม่มีรูปวันนี้ 😴</div>`;
+      document.getElementById('catdCount').textContent='0 รูป';return;
+    }
+    const{m,folder}=res;
+    const allImgs=(m.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null}:{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null});
+    const catImages=(m.categories&&m.categories[cat.id]&&m.categories[cat.id].length>0)
+      ? m.categories[cat.id]
+      // fallback: กรองรูปจาก images ที่มี category ตรง
+      : allImgs.filter(x=>x.category===cat.id).slice(0,30);
+    // ถ้ายังไม่มีเลย ใช้ทั้งหมดไปก่อน (แสดงให้เห็นว่าระบบทำงาน)
+    const display = catImages.length>0 ? catImages : allImgs.slice(0,30);
+    document.getElementById('catdCount').textContent=`${display.length} รูป${catImages.length===0?' (ทั้งหมด)':''}`;
+    buildCatDetailGrid(display,`${BASE}/img/${folder}`,m.version||'');
+  }catch(e){
+    document.getElementById('catdGrid').innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9a7a9a;font-size:14px">โหลดข้อมูลไม่สำเร็จ</div>`;
+    document.getElementById('catdCount').textContent='0 รูป';
+  }
+}
+
+function buildCatDetailGrid(images,base,version){
+  const grid=document.getElementById('catdGrid');grid.innerHTML='';
+  // เลือกรูปแรกเป็น default
+  if(images.length>0){selectedCatCard=images[0];selectedCatCardIdx=0;}
+  images.forEach((c,i)=>{
+    const item=document.createElement('div');item.className='catd-item'+(i===0?' selected':'');
+    const check=document.createElement('div');check.className='catd-item-check';check.textContent='✓';
+    const img=document.createElement('img');img.crossOrigin='anonymous';img.alt='';
+    img.src=`${base}/${c.file}?v=${version}`;
+    // แสดง blessing ถ้ามี
+    if(c.blessing){const bl=document.createElement('div');bl.style.cssText='position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0,rgba(0,0,0,.55),transparent);color:#fff;font-size:11px;font-family:Sarabun;padding:6px 6px 8px;line-height:1.3;z-index:2;';bl.textContent=c.blessing.slice(0,30)+(c.blessing.length>30?'…':'');item.appendChild(bl);}
+    item.appendChild(img);item.appendChild(check);
+    item.addEventListener('click',()=>{
+      document.querySelectorAll('.catd-item').forEach(el=>el.classList.remove('selected'));
+      item.classList.add('selected');selectedCatCardIdx=i;selectedCatCard=c;
+      document.getElementById('catdUseBtn').textContent='✨ ใช้รูปนี้';
+    });
+    grid.appendChild(item);
+  });
+}
+
+document.getElementById('catdBack').addEventListener('click',()=>switchTab('category'));
+document.getElementById('catdUseBtn').addEventListener('click',async()=>{
+  if(!selectedCatCard){toast('กรุณาเลือกรูปก่อนนะคะ');return;}
+  const btn=document.getElementById('catdUseBtn');
+  btn.textContent='กำลังโหลด…';btn.disabled=true;
+  try{
+    const res=await getManifest();
+    if(!res){toast('โหลดข้อมูลไม่สำเร็จ');return;}
+    const{m,folder}=res;
+    const base=`${BASE}/img/${folder}`;
+    // เปลี่ยน CARDS ให้เอารูปที่เลือกมาแสดงก่อน
+    const newCard={file:selectedCatCard.file,blessing:selectedCatCard.blessing||'',src:selectedCatCard.src||null};
+    // วาง newCard ไว้ตำแหน่งแรก + คงรูปเดิมที่เหลือ
+    const existing=CARDS.filter(c=>c.file!==newCard.file);
+    CARDS.length=0;CARDS.push(newCard,...existing);
+    // อัพ imgBase ถ้า folder ต่างกัน
+    imgBase=base;
+    // reset carousel
+    globalIdx=0;cardPtr=0;cardOrder=[];
+    for(let slot=0;slot<POOL;slot++){
+      const g=globalIdx+circDist(slot,curSlot());
+      const cw=cwEls[slot];if(!cw)continue;
+      const old=cw.querySelector('.card');
+      const fresh=buildFinishedCard(g,CW).querySelector('.card');
+      cw.replaceChild(fresh,old);
+      cw.style.width=CW+'px';cw.style.height=CW+'px';
+      cw.style.marginLeft=(-CW/2)+'px';cw.style.marginTop=(-CW/2)+'px';
+      fresh.style.width=CW+'px';fresh.style.height=CW+'px';
+    }
+    layoutAll(true);buildThumbStrip();
+    switchTab('today');
+    toast(`✓ เปลี่ยนรูป${currentCatId?(' '+CATEGORIES.find(c=>c.id===currentCatId)?.label||''):''}แล้ว`);
+    track2('next');
+  }catch(e){toast('เกิดข้อผิดพลาด ลองใหม่นะคะ');}
+  finally{btn.textContent='✨ ใช้รูปนี้';btn.disabled=false;}
+});
+
+/* ── TAB NAVIGATION ─────────────────────────────────────────────────── */
+function switchTab(tab){
+  const pages={today:'pageToday',category:'pageCategory',catdetail:'pageCatDetail'};
+  Object.entries(pages).forEach(([k,id])=>{
+    const el=document.getElementById(id);
+    el.classList.toggle('active',k===tab);el.classList.toggle('hidden',k!==tab);
+  });
+  document.getElementById('tabToday').classList.toggle('active',tab==='today');
+  document.getElementById('tabCat').classList.toggle('active',tab==='category'||tab==='catdetail');
 }
 
 /* ── INIT CAROUSEL ──────────────────────────────────────────────────── */
 function initCarousel(){
-  // รอ 2 frames ให้ browser วัด layout เสร็จก่อน (สำคัญมากใน LINE WebView)
   requestAnimationFrame(()=>requestAnimationFrame(()=>_initCarouselInner()));
 }
 function _initCarouselInner(){
-  // [แก้ crop บนคอม] แสดงปุ่ม + trust ก่อน computeSizes เพื่อให้วัดความสูง stage ได้ตรงกับตอนใช้งานจริง
-  // (เดิมวัดตอนปุ่มยังซ่อน → stage สูงเกินจริง → การ์ดถูกตั้งใหญ่ไป → พอปุ่มโผล่ stage หด การ์ดเลยโดน overflow:hidden ตัดหัว)
   document.getElementById('actions').style.display='';
-  document.getElementById('trustEl').style.display=''; // [แก้ข้อ 8] แสดง trust badges
   computeSizes();
   globalIdx=0;
   combos=Array.from({length:POOL},(_,sl)=>cardFor(globalIdx+circDist(sl,curSlot())));
   cwEls=Array.from({length:POOL},(_,sl)=>buildFinishedCard(globalIdx+circDist(sl,curSlot()),CW));
-  stage.innerHTML='';
-  cwEls.forEach(cw=>stage.appendChild(cw));
+  stage.innerHTML='';cwEls.forEach(cw=>stage.appendChild(cw));
   layoutAll(false);
-  buildDots();
   attachSwipe();
-  updateCounter();
+  buildThumbStrip();
   CARDS.forEach(c=>{const im=new Image();im.crossOrigin='anonymous';im.src=`${imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;});
-  // ฟอนต์ไทย (Chonburi/Charm ฯลฯ) โหลดช้า → พอโหลดเสร็จ ความสูง header/ปุ่มอาจเปลี่ยน → คำนวณขนาดการ์ดใหม่กัน crop
   if(document.fonts&&document.fonts.ready){document.fonts.ready.then(()=>requestAnimationFrame(relayout));}
 }
 
 /* ── BOOT ───────────────────────────────────────────────────────────── */
 async function boot(){
   track2('open');
-  if(REPO.includes('REPO_NAME')){
-    stage.innerHTML=`<div class="msg">⚠️ ยังไม่ได้ตั้งค่า — แก้ <code>const REPO</code> ให้เป็นรีโปจริงก่อน</div>`;
-    document.getElementById('dateLine').textContent='';return;
-  }
-  // วันที่ไทย (ICT) -> โฟลเดอร์ของ "วันนี้"
+  if(REPO.includes('REPO_NAME')){stage.innerHTML=`<div class="msg">⚠️ ยังไม่ได้ตั้งค่า — แก้ <code>const REPO</code> ให้เป็นรีโปจริงก่อน</div>`;return;}
   const ict=new Date(Date.now()+7*3600*1000);
   const todayISO=`${ict.getUTCFullYear()}-${String(ict.getUTCMonth()+1).padStart(2,'0')}-${String(ict.getUTCDate()).padStart(2,'0')}`;
   const tryLoad=async folder=>{
     const r=await fetch(`${BASE}/img/${folder}/manifest.json?v=${Date.now()}`,{cache:'no-store'});
-    if(!r.ok)throw new Error('manifest '+r.status);
-    return r.json();
+    if(!r.ok)throw new Error('manifest '+r.status);return r.json();
   };
   let folder=todayISO;
-  try{ M=await tryLoad(todayISO); }
-  catch{
-    try{ M=await tryLoad('evergreen'); folder='evergreen'; }   // สำรอง: การ์ดกลาง ๆ (ไม่มีชื่อวัน)
-    catch{
-      stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen สักครู่ หรือไปที่ <b>Actions → Run workflow</b></div>`;
-      document.getElementById('dateLine').textContent='';return;
-    }
-  }
+  try{M=await tryLoad(todayISO);}
+  catch{try{M=await tryLoad('evergreen');folder='evergreen';}
+  catch{stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen สักครู่ หรือไปที่ <b>Actions → Run workflow</b></div>`;return;}}
   imgBase=`${BASE}/img/${folder}`;
-  CARDS=(M.images||[]).map(x=> typeof x==='string' ? {file:x,blessing:'',src:null}
-        : {file:x.file,blessing:x.blessing||'',src:x.src||null}).filter(c=>c.file);
-  if(!CARDS.length){
-    stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen สักครู่นะคะ</div>`;
-    document.getElementById('dateLine').textContent='';return;
-  }
-  document.getElementById('dateLine').textContent=M.dateThai||'';
-  document.getElementById('topTitle').textContent=M.headline||'สวัสดีวันนี้';
-  // propagate สีประจำวันจาก manifest → ใช้ใน buildCard (scrimCSS, text outline, frame)
-  // ถ้า manifest ไม่มี color ให้ใช้ค่า default ตามวันในเครื่อง client
+  CARDS=(M.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null}:{file:x.file,blessing:x.blessing||'',src:x.src||null}).filter(c=>c.file);
+  if(!CARDS.length){stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen สักครู่นะคะ</div>`;return;}
+
+  // propagate สีประจำวัน
   if(!M.color){
     const _dc=['#C0392B','#E1A100','#D6336C','#1E9E55','#E8730C','#1F73C4','#7E3FAE'];
     const _d2=['#7d1f17','#8a5d00','#8a1d44','#0f5e31','#9c4a05','#0f4677','#4a2069'];
     const _w=new Date(Date.now()+7*3600*1000).getUTCDay();
-    M.color=_dc[_w]; M.color2=_d2[_w];
+    M.color=_dc[_w];M.color2=_d2[_w];
   }
+
+  // อัปเดต header
+  const headline=M.headline||'สวัสดีวันนี้';
+  document.getElementById('dateLine').textContent=M.dateThai||'';
+  // แสดงวันพระ/เทศกาล ใน date sub
+  if(M.wanPhra){document.getElementById('dateSubLine').textContent='🕯️ วันพระ';}
+  else if(M.wanPhraSpecial){document.getElementById('dateSubLine').textContent=`🛕 ${M.wanPhraSpecial}`;}
+  else{document.getElementById('dateSubLine').style.display='none';}
+  // day badge
+  const badge=document.getElementById('dayBadge');
+  if(M.isFestival&&M.festival){badge.textContent=`🌸 ${M.festival}`;badge.style.display='';}
+  else if(M.wanPhra){badge.innerHTML='🕯️ วันพระ';badge.style.background='#ce9a38';}
+  else if(M.wanPhraSpecial){badge.innerHTML=`🛕 ${M.wanPhraSpecial}`;badge.style.background='#ce9a38';}
+  else{badge.textContent=`🌸 ${M.dayTh||''}`;badge.style.background='var(--pink)';}
+
   initCarousel();
+  buildCatGrid();
 }
 
-window.addEventListener('resize',()=>{
-  requestAnimationFrame(relayout);
-});
-
-// LINE WebView บางครั้ง viewport เปลี่ยนหลัง load — recompute อีกครั้งเมื่อ fonts/images โหลดเสร็จ
-window.addEventListener('load',()=>{
-  if(CW>0) requestAnimationFrame(relayout);
-});
+window.addEventListener('resize',()=>{requestAnimationFrame(relayout);});
+window.addEventListener('load',()=>{if(CW>0)requestAnimationFrame(relayout);});
 
 boot();
 </script>
