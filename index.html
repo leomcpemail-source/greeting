@@ -1148,8 +1148,16 @@ async function loadCatThumbnail(cat,card,placeholder){
   try{
     const res=await getManifest();if(!res)return;
     const{m,folder}=res;
-    const catImages=(m.categories&&m.categories[cat.id])||[];
-    if(!catImages.length)return;
+    const allImgs=(m.images||[]).map(x=>typeof x==='string'?{file:x,category:null}:{file:x.file,category:x.category||null});
+    const fromCat=(m.categories&&m.categories[cat.id])||[];
+    const fromImgCat=allImgs.filter(x=>x.category===cat.id);
+    const catImages=fromCat.length>0?fromCat:fromImgCat;
+    const count=catImages.length;
+    const badge=document.createElement('div');
+    badge.style.cssText='position:absolute;top:7px;right:7px;background:rgba(0,0,0,.52);color:#fff;font-family:Sarabun;font-size:11px;font-weight:700;padding:3px 7px;border-radius:10px;z-index:5;pointer-events:none;';
+    badge.textContent=count>0?count+' รูป':'ยังไม่มี';
+    card.appendChild(badge);
+    if(!count)return;
     const img=document.createElement('img');img.className='cat-card-img';img.crossOrigin='anonymous';img.alt=cat.label;
     img.src=`${BASE}/img/${folder}/${catImages[0].file}?v=${m.version||''}`;
     img.onload=()=>{card.insertBefore(img,placeholder);card.removeChild(placeholder);};
@@ -1161,42 +1169,56 @@ async function openCategory(cat){
   currentCatId=cat.id;selectedCatCardIdx=0;selectedCatCard=null;
   document.getElementById('catdTitle').textContent=`${cat.icon} ${cat.label}`;
   document.getElementById('catdCount').textContent='กำลังโหลด…';
-  document.getElementById('catdGrid').innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9a7a9a;font-size:14px">กำลังโหลด…</div>`;
+  document.getElementById('catdGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:#9a7a9a;font-size:14px">กำลังโหลด…</div>';
   document.getElementById('catdUseBtn').textContent='✨ ใช้รูปนี้';
+  document.getElementById('catdUseBtn').disabled=true;
+  document.getElementById('catdUseBtn').style.opacity='0.5';
   switchTab('catdetail');
   try{
     const res=await getManifest();
-    if(!res){
-      document.getElementById('catdGrid').innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9a7a9a;font-size:14px">ยังไม่มีรูปวันนี้ 😴</div>`;
-      document.getElementById('catdCount').textContent='0 รูป';return;
-    }
+    if(!res){showCatEmpty(cat,'ยังไม่มีรูปของวันนี้เลย');return;}
     const{m,folder}=res;
-    const allImgs=(m.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null}:{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null});
-    const catImages=(m.categories&&m.categories[cat.id]&&m.categories[cat.id].length>0)
-      ? m.categories[cat.id]
-      // fallback: กรองรูปจาก images ที่มี category ตรง
-      : allImgs.filter(x=>x.category===cat.id).slice(0,30);
-    // ถ้ายังไม่มีเลย ใช้ทั้งหมดไปก่อน (แสดงให้เห็นว่าระบบทำงาน)
-    const display = catImages.length>0 ? catImages : allImgs.slice(0,30);
-    document.getElementById('catdCount').textContent=`${display.length} รูป${catImages.length===0?' (ทั้งหมด)':''}`;
-    buildCatDetailGrid(display,`${BASE}/img/${folder}`,m.version||'');
-  }catch(e){
-    document.getElementById('catdGrid').innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9a7a9a;font-size:14px">โหลดข้อมูลไม่สำเร็จ</div>`;
-    document.getElementById('catdCount').textContent='0 รูป';
-  }
+    const allImgs=(m.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null}:{file:x.file,blessing:x.blessing||''  ,src:x.src||null,category:x.category||null});
+    const fromCatField=(m.categories&&m.categories[cat.id]&&m.categories[cat.id].length>0)?m.categories[cat.id]:null;
+    const fromImgCat=allImgs.filter(x=>x.category===cat.id);
+    const catImages=fromCatField||(fromImgCat.length>0?fromImgCat:null);
+    if(!catImages){showCatEmpty(cat,`ยังไม่มีรูป${cat.label}วันนี้`);return;}
+    document.getElementById('catdCount').textContent=`${catImages.length} รูป`;
+    document.getElementById('catdUseBtn').disabled=false;
+    document.getElementById('catdUseBtn').style.opacity='1';
+    buildCatDetailGrid(catImages,`${BASE}/img/${folder}`,m.version||'');
+  }catch(e){showCatEmpty(cat,'โหลดไม่สำเร็จ ลองใหม่นะคะ');}
+}
+
+function showCatEmpty(cat,reason){
+  document.getElementById('catdCount').textContent='0 รูป';
+  document.getElementById('catdUseBtn').disabled=true;
+  document.getElementById('catdUseBtn').style.opacity='0.5';
+  const icon=cat?cat.icon:'🌸';
+  const label=cat?cat.label:'';
+  document.getElementById('catdGrid').innerHTML=
+    '<div style="grid-column:1/-1;text-align:center;padding:44px 20px;">'
+    +'<div style="font-size:52px;margin-bottom:14px">'+icon+'</div>'
+    +'<div style="font-family:Chonburi;font-size:17px;color:#2d1a2e;margin-bottom:10px">'+label+'</div>'
+    +'<div style="font-size:14px;color:#9a7a9a;line-height:1.8;margin-bottom:22px">'+reason+'<br>รูปจะเพิ่มขึ้นในวันถัดไปค่ะ</div>'
+    +'<button onclick="switchTab(\'category\')" style="background:var(--pink);color:#fff;border:none;border-radius:14px;padding:12px 28px;font-family:Kanit;font-size:15px;font-weight:600;cursor:pointer;">← กลับเลือกหมวดอื่น</button>'
+    +'</div>';
 }
 
 function buildCatDetailGrid(images,base,version){
   const grid=document.getElementById('catdGrid');grid.innerHTML='';
-  // เลือกรูปแรกเป็น default
   if(images.length>0){selectedCatCard=images[0];selectedCatCardIdx=0;}
   images.forEach((c,i)=>{
     const item=document.createElement('div');item.className='catd-item'+(i===0?' selected':'');
     const check=document.createElement('div');check.className='catd-item-check';check.textContent='✓';
     const img=document.createElement('img');img.crossOrigin='anonymous';img.alt='';
     img.src=`${base}/${c.file}?v=${version}`;
-    // แสดง blessing ถ้ามี
-    if(c.blessing){const bl=document.createElement('div');bl.style.cssText='position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0,rgba(0,0,0,.55),transparent);color:#fff;font-size:11px;font-family:Sarabun;padding:6px 6px 8px;line-height:1.3;z-index:2;';bl.textContent=c.blessing.slice(0,30)+(c.blessing.length>30?'…':'');item.appendChild(bl);}
+    if(c.blessing){
+      const bl=document.createElement('div');
+      bl.style.cssText='position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0,rgba(0,0,0,.55),transparent);color:#fff;font-size:11px;font-family:Sarabun;padding:6px 6px 8px;line-height:1.3;z-index:2;';
+      bl.textContent=c.blessing.slice(0,30)+(c.blessing.length>30?'…':'');
+      item.appendChild(bl);
+    }
     item.appendChild(img);item.appendChild(check);
     item.addEventListener('click',()=>{
       document.querySelectorAll('.catd-item').forEach(el=>el.classList.remove('selected'));
@@ -1217,14 +1239,10 @@ document.getElementById('catdUseBtn').addEventListener('click',async()=>{
     if(!res){toast('โหลดข้อมูลไม่สำเร็จ');return;}
     const{m,folder}=res;
     const base=`${BASE}/img/${folder}`;
-    // เปลี่ยน CARDS ให้เอารูปที่เลือกมาแสดงก่อน
     const newCard={file:selectedCatCard.file,blessing:selectedCatCard.blessing||'',src:selectedCatCard.src||null};
-    // วาง newCard ไว้ตำแหน่งแรก + คงรูปเดิมที่เหลือ
     const existing=CARDS.filter(c=>c.file!==newCard.file);
     CARDS.length=0;CARDS.push(newCard,...existing);
-    // อัพ imgBase ถ้า folder ต่างกัน
     imgBase=base;
-    // reset carousel
     globalIdx=0;cardPtr=0;cardOrder=[];
     for(let slot=0;slot<POOL;slot++){
       const g=globalIdx+circDist(slot,curSlot());
@@ -1238,10 +1256,11 @@ document.getElementById('catdUseBtn').addEventListener('click',async()=>{
     }
     layoutAll(true);buildThumbStrip();
     switchTab('today');
-    toast(`✓ เปลี่ยนรูป${currentCatId?(' '+CATEGORIES.find(c=>c.id===currentCatId)?.label||''):''}แล้ว`);
+    const catLabel=CATEGORIES.find(c=>c.id===currentCatId)?.label||'';
+    toast(`✓ เปลี่ยนรูป${catLabel?(' '+catLabel):''}แล้ว`);
     track2('next');
   }catch(e){toast('เกิดข้อผิดพลาด ลองใหม่นะคะ');}
-  finally{btn.textContent='✨ ใช้รูปนี้';btn.disabled=false;}
+  finally{btn.textContent='✨ ใช้รูปนี้';btn.disabled=false;btn.style.opacity='1';}
 });
 
 /* ── TAB NAVIGATION ─────────────────────────────────────────────────── */
@@ -1287,11 +1306,12 @@ async function boot(){
   try{M=await tryLoad(todayISO);}
   catch{try{M=await tryLoad('evergreen');folder='evergreen';}
   catch{stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen สักครู่ หรือไปที่ <b>Actions → Run workflow</b></div>`;return;}}
+  // set manifest cache ด้วย เพื่อให้ category ใช้ข้อมูลเดียวกันได้ทันที
+  _manifestCache=M; _manifestFolder=folder;
   imgBase=`${BASE}/img/${folder}`;
   CARDS=(M.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null}:{file:x.file,blessing:x.blessing||'',src:x.src||null}).filter(c=>c.file);
   if(!CARDS.length){stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen สักครู่นะคะ</div>`;return;}
 
-  // propagate สีประจำวัน
   if(!M.color){
     const _dc=['#C0392B','#E1A100','#D6336C','#1E9E55','#E8730C','#1F73C4','#7E3FAE'];
     const _d2=['#7d1f17','#8a5d00','#8a1d44','#0f5e31','#9c4a05','#0f4677','#4a2069'];
@@ -1299,14 +1319,10 @@ async function boot(){
     M.color=_dc[_w];M.color2=_d2[_w];
   }
 
-  // อัปเดต header
-  const headline=M.headline||'สวัสดีวันนี้';
   document.getElementById('dateLine').textContent=M.dateThai||'';
-  // แสดงวันพระ/เทศกาล ใน date sub
   if(M.wanPhra){document.getElementById('dateSubLine').textContent='🕯️ วันพระ';}
   else if(M.wanPhraSpecial){document.getElementById('dateSubLine').textContent=`🛕 ${M.wanPhraSpecial}`;}
   else{document.getElementById('dateSubLine').style.display='none';}
-  // day badge
   const badge=document.getElementById('dayBadge');
   if(M.isFestival&&M.festival){badge.textContent=`🌸 ${M.festival}`;badge.style.display='';}
   else if(M.wanPhra){badge.innerHTML='🕯️ วันพระ';badge.style.background='#ce9a38';}
