@@ -13,16 +13,25 @@ export const WEIGHTS = {
   quality: 0.15,        // คุณภาพภาพ / ข้อผิดพลาด AI
 };
 
-export const RUBRIC_PROMPT = `คุณเป็นกรรมการประเมิน "การ์ดสวัสดี" ภาษาไทย สำหรับส่งใน LINE ให้กลุ่มผู้ใหญ่/ผู้สูงอายุ
-ให้คะแนนภาพนี้เป็น "จำนวนเต็ม 0-10" ในแต่ละหัวข้อ (0 = แย่สุด, 5 = กลาง ๆ, 10 = ดีมาก):
+export const RUBRIC_PROMPT = `You are judging a FINISHED Thai "good morning" greeting card (สวัสดีวันนี้) that already has a background photo/illustration, a decorative frame, and Thai greeting text composited together as one image. This card will be shared on LINE by Thai elderly users (age 55–80).
 
-1. clarity — ความชัดของข้อความ: อ่านได้ภายใน 2 วินาทีไหม ตัวอักษรตัดกับพื้นหลังไหม คนอายุ 60+ อ่านออกไหม
-2. appropriateness — ความเหมาะสมของข้อความอวยพร: เชิงบวก สุภาพ ไม่มีคำแปลก ไม่สะกดผิด ไม่มีคำไม่เหมาะสม
-3. beauty — ความสวยแบบผู้ใหญ่ไทยนิยม: มีดอกไม้/ธรรมชาติ/พระ/เด็กน่ารัก/สีสว่าง ตรงรสนิยมกลุ่มเป้าหมาย
-4. warmth — ความอบอุ่นเป็นมิตร: เห็นแล้วรู้สึกดี อยากแชร์ต่อ
-5. quality — คุณภาพภาพ/ข้อผิดพลาด AI: ตัวอักษรเพี้ยน ดอกไม้เบี้ยว นิ้วเกิน วัตถุผิดรูป (10 = ไม่มีข้อผิดพลาดเลย)
+Score each criterion as an INTEGER 0–10 (0 = worst, 5 = mediocre, 10 = excellent). Be honest — use the full 0–10 range, do NOT cluster around 7.
 
-ตอบกลับเป็น JSON อย่างเดียว ห้ามมีข้อความอื่น ห้ามใส่ markdown:
+1. clarity — Can the Thai greeting text be read clearly in under 2 seconds? Does it contrast well against the background? Would someone aged 65+ with average eyesight read it without effort? (0 = completely unreadable; 10 = crystal clear, large, high-contrast text)
+
+2. appropriateness — Is the greeting text positive, polite, and culturally suitable for Thai elderly? No spelling errors, no strange words, no inappropriate content, no awkward English mixed in. (0 = offensive or unsuitable; 10 = perfectly warm Thai blessing)
+
+3. beauty — Does the image match the aesthetic preferences of Thai elderly users (age 55–80)?
+   HIGH score (8–10): serene Buddha statues, Thai/Chinese temples, golden pagodas, lotus flowers, orchids, marigolds, vibrant tropical flowers, auspicious golden imagery, peaceful morning nature, soft warm light.
+   MEDIUM score (5–7): pleasant generic flowers, cute landscapes, 3D cartoon animals.
+   LOW score (1–4): dark/gloomy mood, cold abstract design, overly modern minimal, foreign-looking content.
+   CRITICAL RULE: Buddhist and temple imagery (Buddha statues, Thai temples, pagodas, lotus) scores HIGH (8–10) for this audience — these users actively seek and prefer this content.
+
+4. warmth — Does viewing this card feel joyful, peaceful, and shareable? Would a Thai grandmother be proud to send it to family on LINE? (0 = cold, unwelcoming; 10 = immediately warm and joyful)
+
+5. quality — Is the image technically clean with no AI generation errors? Check: no garbled phantom text baked into the photo, no deformed anatomy, no broken/melted religious figures, clean composition. A slightly imperfect statue is fine if the overall impression is respectful. (0 = severely broken; 10 = flawless)
+
+Reply ONLY with valid JSON — no markdown, no explanation, nothing else:
 {"clarity":0,"appropriateness":0,"beauty":0,"warmth":0,"quality":0}`;
 
 const KEYS = ["clarity", "appropriateness", "beauty", "warmth", "quality"];
