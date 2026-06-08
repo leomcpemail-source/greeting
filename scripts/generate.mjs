@@ -190,6 +190,431 @@ function pickSubject(t) {
   return SUBJECTS[_subjectQueue.pop()](t);
 }
 
+
+// ── CATEGORY_SUBJECTS — prompt ตามหมวด สำหรับระบบ category ──────────────
+const CATEGORY_SUBJECTS = {
+  flowers: [
+    'a gorgeous photographic arrangement of pink roses and peonies with soft bokeh, morning light',
+    'macro photograph of a vibrant sunflower with dewdrops, bright golden center, soft background',
+    'a beautiful photographic bouquet of mixed wildflowers in soft pastel tones, natural light',
+    'elegant white orchid on dark background, macro, soft studio lighting',
+    'a field of lavender in full bloom stretching to the horizon, purple haze, golden hour',
+    'cherry blossom branch full of pink petals against soft blue sky, spring morning',
+    'a colorful photographic garden with tulips and daisies in pastel morning light',
+    'a single perfect red rose with water droplets, dark bokeh background, macro',
+    'lotus flowers blooming in a calm pond, pink and white, morning light reflection',
+    'a rustic vase of garden flowers on a white marble surface, natural window light',
+    'close-up of a dahlia with many intricate petals, vibrant color, macro photography',
+    'a dreamy field of daisies at golden hour, soft focus, warm sunlight',
+    'tropical plumeria frangipani flowers on green leaves, fresh and vibrant, close-up',
+    'a bouquet of pastel hydrangeas in soft morning light, romantic mood',
+    'marigold flowers in warm orange and gold tones, festive, closeup',
+    'delicate jasmine flowers with green leaves, fresh and pure, soft natural light',
+    'a photographic flower crown of mixed blooms, flat lay on white, elegant',
+    'morning glory flowers climbing a garden fence, blue purple, dewy morning',
+    'a cascading arrangement of wisteria blossoms, purple and soft, dreamy light',
+    'bird of paradise flower in vibrant orange and blue, tropical, dramatic light',
+    'sweet peas in soft pink and purple tones, flowing petals, bright garden light',
+    'a beautiful flat lay of dried flowers and herbs on white linen, minimalist',
+    'chrysanthemum flowers in various colors, traditional Thai festive style',
+    'a close-up of passion flower with intricate purple details, macro photography',
+    'yellow mimosa flowers in soft spring light, golden and cheerful',
+    'a bunch of peonies in full bloom, lush and soft, pastel tones',
+    'water lily floating on a still pond, pink and white, serene reflection',
+    'sunflowers in a summer field, bright yellow, blue sky, joyful',
+    'purple irises with golden stamens, elegant and refined, natural light',
+    'a heart-shaped arrangement of rose petals on white, romantic, overhead view',
+  ],
+  dharma: [
+    'serene golden Buddha statue glowing softly, lotus flowers, temple garden, morning mist, no text',
+    'ancient Thai Buddhist temple with golden pagoda at sunrise, still water reflection, no people',
+    'a glowing Buddhist altar with candles, lotus flowers, and incense smoke, peaceful temple',
+    'Buddhist dharma wheel symbol in golden light on a temple wall, ornate, respectful',
+    'rows of golden Buddha amulet pendants, warm light, devotional, close-up',
+    'a serene Buddha footprint shrine with flower offerings and candles, no people',
+    'tall golden chedi stupa with blue sky and clouds, Thai Buddhist temple, morning',
+    'lotus bud offering on a golden temple floor, morning light, devotional, no people',
+    'a monk meditating under a Bodhi tree at dawn, silhouette, peaceful',
+    'Thai temple monks receiving alms in early morning golden light, serene street scene',
+    'majestic golden reclining Buddha statue in a temple hall, soft light, no people',
+    'Buddhist monks walking with umbrellas in a Thai temple courtyard, serene, morning',
+    'a beautiful lotus in full bloom floating on still water, golden light, serene',
+    'an old wooden Buddhist shrine with candles and flowers, rustic, warm glow',
+    'a row of temple bells with ornate decorations, golden morning light, no people',
+    'white sacred stupa surrounded by tropical trees, golden light, peaceful sky',
+    'Thai temple gate with golden naga serpent decorations, morning light, grand',
+    'a simple monk bowl with a single lotus flower, minimalist, serene',
+    'lanterns floating upward at a temple festival, bokeh lights, magical night',
+    'an ornate golden Buddhist manuscript book with decorations, cultural, respectful',
+    'a Buddha statue hands in dhyana mudra, close-up, golden, peaceful',
+    'incense sticks burning with smoke curling upward, golden temple background, bokeh',
+    'a golden Buddha image seated on a lotus with flower garlands, soft divine light',
+    'symmetrical Thai temple facade with golden spires at dawn, majestic, no people',
+    'a handmade merit boat with candles and lotus, floating on water at night',
+    'morning alms round of monks in orange robes, street lined with devotees, soft light',
+    'a prayer book and lotus flowers on a temple floor, simple, devotional',
+    'monk feet in orange sandals on a temple path with fallen petals, contemplative',
+    'a serene Buddha face in meditation, golden sculpture, soft backlight, respectful',
+    'a Thai temple mural painting depicting Jataka stories, vibrant colors, artistic',
+  ],
+  inspire: [
+    'a sunrise breaking over mountains with vibrant golden colors, new beginning, hopeful',
+    'a single tree on a hill in golden morning light, strength and solitude, majestic',
+    'a road stretching into the horizon through autumn leaves, journey, photographic',
+    'a lighthouse standing tall against stormy waves, strength, determination, dramatic',
+    'a butterfly emerging from a cocoon, transformation, hope, macro photography',
+    'a young green sprout breaking through dry soil, life and resilience, macro',
+    'a lone eagle soaring above mountain peaks in golden light, freedom, power',
+    'a sunrise over a calm sea with warm pastel colors, hope and new beginnings',
+    'a dandelion seed head with seeds drifting on the wind, wishes, soft light, macro',
+    'a candle flame burning bright in darkness, hope, warmth, close-up bokeh',
+    'a path winding through a beautiful forest in autumn colors, journey of life',
+    'a sunrise between two mountains with a river below, new day, fresh start',
+    'wildflowers pushing through cracks in a stone wall, resilience and beauty',
+    'a rainbow after rain over green fields, hope and beauty after difficulty',
+    'a hot air balloon ascending over misty morning valleys, adventure, freedom',
+    'a stream of light entering a dark cave opening, hope, finding your way',
+    'stones stacked in a balanced cairn by a river, harmony and patience',
+    'a sunrise mirrored in still water, symmetry, peace and reflection',
+    'a kite soaring high against a blue sky with clouds, freedom, uplifting mood',
+    'morning sunlight filtering through forest leaves, hope and warmth',
+    'a starfield above a mountain silhouette, vast possibilities, wonder',
+    'a boat setting sail on calm morning waters, new journey, adventurous',
+    'lotus flowers rising from muddy water into sunlight, overcoming adversity',
+    'an open book with flowers growing from the pages, knowledge and growth',
+    'footprints in sand leading toward the ocean sunrise, journey, hope',
+    'bamboo grove in morning mist, strength and flexibility, serene mood',
+    'a compass on an old map, guidance and direction, warm light, adventurous',
+    'a child reaching up toward a floating balloon, dreams and aspirations',
+    'a majestic sunrise over rice fields, golden light, rural Thailand, inspiring',
+    'a single candle in vast darkness, small light, huge hope, minimalist',
+  ],
+  miss: [
+    'a beautiful heart made of rose petals on white, love and affection, overhead',
+    'two mugs of coffee side by side on a cozy table, companionship, warm morning',
+    'a handwritten letter with a dried flower pressed inside, nostalgia, warmth',
+    'a bouquet of red and pink roses tied with ribbon, love, romantic light',
+    'two rocking chairs on a porch at sunset, togetherness, warmth',
+    'a window with rain outside and a cozy lamp glowing inside, missing someone',
+    'two trees with intertwining branches, together forever, golden light',
+    'a pair of hands holding a small heart figurine, affection, warm tone',
+    'pink tulips in a soft morning window, tender feelings, pastel mood',
+    'a love letter envelope with wax seal and dried flowers, longing, vintage',
+    'a sunset reflection in a still pond, golden and nostalgic, peaceful',
+    'hearts shaped in foam latte art in two mugs, coffee love',
+    'a red rose in a vase by a rainy window, longing and warmth',
+    'a pair of small bird figurines perched together, companionship, cute',
+    'a photo album open with flowers beside it, memories and nostalgia',
+    'a romantic garden path with roses on either side at sunset',
+    'pastel pink roses with soft morning bokeh, gentle feelings, romantic',
+    'a single red thread tied around a pinky finger, fate and connection',
+    'two teacups with matching patterns side by side, comfort, warm tone',
+    'a message in a bottle on a beach at sunrise, longing, poetic',
+    'friendship bracelets woven together in bright colors, bond and togetherness',
+    'two sparrows on a telephone wire against sunrise sky, together',
+    'a butterfly landing on a flower, delicate connection, soft light',
+    'a starry sky above a field with one glowing lantern, missing at night',
+    'lavender sachets tied with ribbon, fragrance and memory, soft pastel',
+    'a moonlit night with flowers on a windowsill, longing, romantic mood',
+    'a small gift wrapped in pretty paper with a bow, anticipation, warm tones',
+    'an old telephone with dried roses beside it, nostalgia, missing someone',
+    'a couple initials carved in a tree, love, warm forest light',
+    'a sunrise viewed from a window with a coffee cup, waiting for someone',
+  ],
+  birthday: [
+    'a beautiful birthday cake with lit candles on a pastel background, celebration',
+    'colorful balloons floating against a pastel sky, festive birthday mood',
+    'a festive birthday table spread with cake, flowers and gifts, celebration',
+    'a cheerful birthday banner with flowers and bokeh lights, party atmosphere',
+    'a whimsical birthday cupcake with sprinkles and a candle, kawaii style',
+    'colorful confetti falling in soft golden light, festive celebration',
+    'a pastel birthday flat lay with macarons, flowers, and ribbon, elegant',
+    'birthday sparklers with golden sparks on a dark background, magical',
+    'a stack of prettily wrapped gift boxes tied with ribbon, birthday gifts',
+    'a festive garland of bunting flags in pastel colors, birthday decoration',
+    'a birthday cake with flowers and gold drizzle, sophisticated, flat lay',
+    'balloons in heart shape against blue sky, birthday love, joyful',
+    'a close-up of birthday candles burning, warm glow, bokeh background',
+    'a giant number balloon in gold against a marble background, stylish birthday',
+    'a donut tower with sprinkles and candles, fun birthday treat',
+    'rainbow macarons arranged in a circle, colorful birthday treat',
+    'a letter board with birthday message surrounded by flowers, celebration',
+    'an elegant champagne flute with sparklers, birthday toast, golden',
+    'a surprise confetti box opening with confetti flying, birthday surprise',
+    'a birthday wreath of flowers and ribbons, whimsical and charming',
+    'a 3D cartoon birthday scene with cute characters celebrating, kawaii Pixar',
+    'birthday fireworks over a park at night, festive, colorful',
+    'a beautiful birthday cake with edible flowers, elegant, pastel tones',
+    'a collection of birthday cards and flowers, warm and sentimental',
+    'a birthday picnic setup in a garden with flowers and food, joyful',
+    'gold foil balloon letters, festive birthday, on white minimal background',
+    'birthday candles reflected in mirror, golden glow, artistic',
+    'a big beautiful birthday gift with a bow, anticipation and joy',
+    'a cheerful 3D cartoon child blowing birthday candles, kawaii wholesome',
+    'flowers and sparkly birthday decorations on a pastel table, dreamy',
+  ],
+  elderly: [
+    'a pair of elderly hands gently holding a cup of tea, warm and tender, macro',
+    'an elderly couple walking hand in hand in a garden at sunrise, golden light',
+    'a serene older woman tending to her garden of flowers, peaceful morning',
+    'grandparents with grandchildren in a sunlit garden, joyful family moment',
+    'an elderly person meditating peacefully in nature, serenity and calm',
+    'a cozy reading corner with a rocking chair, warm lamp, and books',
+    'an older couple sharing tea at sunrise on a wooden porch, contentment',
+    'a gardening hat and gloves beside flowering plants, gentle morning gardening',
+    'a temple where an elderly devotee offers flowers at dawn, reverent, peaceful',
+    'a wisdom tree an ancient gnarled tree with lush canopy, majestic',
+    'a shelf with family photos and flowers, warm nostalgic atmosphere',
+    'hands clasped in prayer near golden candlelight, devotion and peace',
+    'an older couple dancing slowly in a golden-lit garden, romance',
+    'a grandmother kitchen with fresh herbs, warmth and nourishment',
+    'a pot of jasmine tea and jasmine flowers, Thai elder lifestyle, gentle',
+    'grandchildren bringing flowers to grandparents, silhouette at sunrise',
+    'a golden path through autumn trees, representing life journey',
+    'a peaceful hammock in a garden with flowers, restful afternoon',
+    'an elder hands arranging fresh flowers in a vase, caring and artistic',
+    'a golden sunset walk silhouette of elderly couple, serene beach',
+    'morning tai chi silhouettes in a misty park, health and longevity',
+    'a bowl of traditional Thai desserts prepared with love, nourishing',
+    'a senior-friendly flower garden with easy paths, beautiful and serene',
+    'a joyful elder laughing softly in a sunlit garden, candid, not too close',
+    'elder hands writing calligraphy with ink brush, wisdom and skill',
+    'a family gathering with multiple generations under a tree, warm light',
+    'a pair of reading glasses beside books and flowers, intellectual elder',
+    'a rocking chair with a knitting basket on a sunny porch, peaceful',
+    'jasmine garlands made with elder hands, Thai culture, morning ritual',
+    'a couple of seniors watching sunrise from a hilltop, life milestone',
+  ],
+  health: [
+    'a healthy breakfast bowl with colorful fruits and granola, fresh morning',
+    'a glass of water with lemon slices and mint, fresh and refreshing',
+    'yoga pose at sunrise outdoors, wellness, peaceful morning practice',
+    'fresh green vegetables and herbs arranged on white surface, healthy eating',
+    'a stethoscope with a heart shape, health and care, soft background',
+    'running shoes on a sunny path, fitness motivation, morning light',
+    'a colorful smoothie bowl with fruits and seeds, healthy food photography',
+    'a serene nature walk path with trees and morning light, healthy life',
+    'meditation hands on lap in nature, mental health and calm, close-up',
+    'a beautiful herbal tea cup with flowers, wellness and self-care',
+    'fresh fruits in a basket in morning light, abundant and nourishing',
+    'a person stretching in morning sunlight, flexibility, wellbeing',
+    'a bowl of traditional Thai herbal medicine soup, wellness',
+    'green juice and vegetables, morning health ritual, vibrant colors',
+    'a spa setting with flowers and candles, relaxation and rejuvenation',
+    'Thai herbal compress ball with flowers and herbs, wellness treatment',
+    'a bicycle leaning against a tree on a sunny path, active lifestyle',
+    'fresh ginger, lemon and honey in a mug, natural remedy, warm',
+    'lavender essential oil with flowers, aromatherapy, calm mood',
+    'a morning walk footprints in dew-covered grass, fresh start',
+    'hands cupping a small green plant sprout, nurturing life and health',
+    'a doctor white coat with a stethoscope, care and dedication',
+    'healthy Thai food on a beautiful wooden table, fresh and balanced',
+    'a morning run silhouette against a sunrise, determination and health',
+    'fresh herbs growing in pots on a sunny windowsill, natural pharmacy',
+    'a peaceful swimming pool at sunrise, exercise and relaxation',
+    'lotus root and vegetables in a Thai herbal market, traditional wellness',
+    'colorful vitamin supplements on white, health consciousness',
+    'Thai traditional massage oil and spa accessories, wellness and care',
+    'a clear sunrise over a calm lake, metaphor for health and clarity',
+  ],
+  festival: [
+    'colorful Songkran water festival with splashing water and flowers, joyful Thai new year',
+    'lanterns floating in the sky at Loy Krathong festival, magical night',
+    'a beautiful Thai New Year decoration with jasmine garlands, festive',
+    'Chinese New Year red lanterns and gold ingots, festive and lucky',
+    'a Christmas tree decorated with lights and ornaments, festive warmth',
+    'fireworks over a city skyline on New Year Eve, celebration',
+    'a candlelit Buddhist merit ceremony at a temple, solemn and beautiful',
+    'colorful confetti and party streamers, general festival celebration',
+    'a Thai temple fair at night with colorful lights and stalls, festive',
+    'Mid-Autumn Festival mooncakes with lanterns, warm golden glow',
+    'festival flowers and silk fabric with golden light, Thai festive decor',
+    'a traditional Thai khantoke dinner setting with flowers, cultural',
+    'Diwali oil lamps glowing in a colorful pattern, festival of lights',
+    'golden marigold garlands for Thai ceremony, auspicious and vibrant',
+    'a night market with colorful food stalls and fairy lights, festive',
+    'a Visakha Bucha candle procession, glowing in the dark, peaceful',
+    'a Songkran water fight scene, splashing fun, colorful',
+    'a beautifully lit stage at a cultural festival, dramatic atmosphere',
+    'wax drip candles at a Buddhist ceremony, golden and spiritual',
+    'a golden floating krathong on dark water, Loy Krathong night',
+    'Thai traditional dance performance in full costume, cultural festival',
+    'a Makha Bucha candle-lit procession around a white temple, sacred',
+    'flower garlands at a Thai wedding ceremony, auspicious, fragrant',
+    'Chinese dragon decoration at a festival, red and gold, vibrant',
+    'a Halloween friendly pumpkin with autumn leaves, playful, not scary',
+    'Mother Day jasmine flowers in blue and white tones, Thai celebration',
+    'a red and gold Thai ceremonial decoration, traditional regal',
+    'an Asanha Bucha Dhamma wheel with candles, sacred and golden',
+    'a beautiful Khanom Chin and Thai festival food on a banana leaf',
+    'Valentine Day roses and hearts, festive romantic celebration',
+  ],
+  family: [
+    'a warm family silhouette at sunset on a hilltop, togetherness, golden light',
+    'a cozy family breakfast at a sunny table, happiness and togetherness',
+    'grandparents and grandchildren playing together in a garden, joy',
+    'a mother and child looking at stars, tender moment, night sky',
+    'a family picnic in a park with flowers, joy and connection',
+    'a parent reading a book to a child by a window, heartwarming',
+    'a family cooking together in a warm kitchen, togetherness',
+    'hands of three generations stacked together, family love, macro',
+    'a family planting flowers in a garden, care and nurturing',
+    'silhouettes of a family flying kites at sunset, carefree and happy',
+    'a warm family dinner table with candles and flowers, celebration',
+    'a father carrying child on his shoulders at the beach, joy',
+    'grandmother teaching grandchild to bake, knowledge and love',
+    'a family looking at photo albums together, nostalgia and warmth',
+    'a couple holding a newborn baby wrapped in white, new life, tender',
+    'children playing in fallen autumn leaves with parents, seasonal joy',
+    'a family home exterior with flowers and warm window light, comfort',
+    'children running toward parents in a sunny meadow, love and reunion',
+    'siblings holding hands walking down a path, bond and solidarity',
+    'a family watching a sunrise from a porch, contemplation together',
+    'family cultural event in Thai traditional ceremony, respect and unity',
+    'parents and adult children reunion at a family home, homecoming',
+    'a Thai family offering food to monks at dawn, merit making, cultural',
+    'a big extended family gathering under a large tree, community',
+    'a mother and daughter picking flowers in a garden, warm bond',
+    'a grandfather teaching grandchild fishing by a river, patience',
+    'family faces around a birthday cake with candles, celebration',
+    'a family morning yoga session on a porch, healthy lifestyle together',
+    'a family crafting together, creativity and togetherness',
+    'a family watching sunset from a hilltop, peace and belonging',
+  ],
+  pets: [
+    'an adorable fluffy cat napping in morning sunlight, cozy and peaceful',
+    'a golden retriever puppy playing in a flower field, joyful and cute',
+    'a tiny kitten with big blue eyes peeking out of a basket, kawaii',
+    'a cat sitting on a window sill watching rain, cozy and contemplative',
+    'a bunny rabbit nibbling on a carrot in a garden, cute and charming',
+    'a dog and cat sleeping together, friendship, warm and fuzzy',
+    'a colorful parrot on a branch in morning light, vibrant and cheerful',
+    'a hamster holding a tiny flower, close-up, adorable kawaii style',
+    'a golden fortune cat statue with coins, Thai auspicious, shiny',
+    'a pair of goldfish in a clear bowl with water plants, serene and colorful',
+    'a Shiba Inu puppy sitting in autumn leaves, photogenic and cute',
+    'a puppy wearing a flower crown, cute portrait, soft pastel background',
+    'a lazy cat stretching in a sunbeam, contentment, photographic',
+    'baby turtles on a sandy beach at sunrise, new life and hope',
+    'a white fluffy cat in a flower garden, dreamy and beautiful',
+    'a dog looking out a car window, adventure and joy, motion blur',
+    'baby ducks following their mother by a pond, family and nature',
+    'a colorful betta fish in clear water with bubbles, vibrant and graceful',
+    'a sleepy puppy in a soft blanket nest, warm and cozy, close-up',
+    'a playful kitten chasing a butterfly, youth and wonder',
+    'a tiny dog on a big fluffy bed, contrast and cuteness',
+    'a cat resting on a Thai temple step, cultural and serene',
+    'a parrot eating fresh fruit, colorful and lively, tropical',
+    'a dog in a sunflower field, joy and nature, vibrant colors',
+    'a sleeping kitten with one paw on a book, adorable',
+    'a rabbit in a field of clover, pastoral and sweet',
+    'pet pawprint in clay with a flower, memory and love',
+    'a silhouette of a dog running on a beach at sunset, freedom and joy',
+    'a cat and dog touching noses, inter-species friendship, cute',
+    'a fluffy white cat surrounded by pink flower petals, dreamy',
+  ],
+  coffee: [
+    'a cozy cup of coffee on a window sill with morning mist outside, peaceful',
+    'beautiful latte art in a ceramic cup, warm morning light, close-up',
+    'coffee beans spilling from a burlap sack on wood, rustic and aromatic',
+    'a flat white in a minimalist cup with saucer, clean aesthetic',
+    'a glass of iced coffee with milk swirling, refreshing summer morning',
+    'coffee and a croissant on a marble table, Parisian cafe morning',
+    'a Thai iced coffee in a plastic bag with condensation, street food authentic',
+    'steam rising from a hot espresso in the morning light, aromatic',
+    'a pour-over coffee setup with goose-neck kettle, artisan brewing',
+    'coffee and cinnamon sticks with autumn leaves, cozy fall morning',
+    'a cafe window with rain outside and a warm latte inside, cozy mood',
+    'a breakfast spread with coffee, eggs, and flowers, morning joy',
+    'Vietnamese egg coffee in a glass, golden and creamy',
+    'a cold brew coffee with ice cubes in a mason jar, summer vibes',
+    'coffee and a book on a cozy blanket, perfect morning',
+    'a vintage coffee grinder with beans, rustic and nostalgic',
+    'two mugs of hot coffee side by side on a wooden table, companionship',
+    'coffee foam art a heart in a flat white, barista craft',
+    'a Korean dalgona whipped coffee, photogenic and trending',
+    'a coffee plantation at sunrise, rows of coffee trees, peaceful',
+    'a barista hands carefully pouring steamed milk, craft and care',
+    'coffee and flowers in the same frame, morning beauty, flat lay',
+    'a spiced chai tea with star anise and cinnamon, aromatic morning',
+    'a rooftop cafe at sunrise with a coffee cup, urban and dreamy',
+    'a cozy coffee corner with soft fairy lights, warm atmosphere',
+    'traditional Thai drip coffee with cloth bag filter, heritage drink',
+    'an overhead shot of a coffee cup and flower arrangements, flat lay',
+    'moka pot on a gas stove with morning light, Italian-style coffee',
+    'a retro cafe interior with plants and warm light, vintage cozy atmosphere',
+    'Vietnamese ca phe sua da and tropical fruits, cafe culture',
+  ],
+  nature: [
+    'a majestic sunrise over rolling mountain ranges, layers of mist, golden',
+    'a waterfall cascading into a crystal clear pool in a tropical forest',
+    'a crystal clear mountain lake reflecting surrounding peaks, mirror image',
+    'morning mist floating through a bamboo forest, zen and ethereal',
+    'a red-orange canyon at golden hour, dramatic geological landscape',
+    'stars and milky way over a dark mountain landscape, universe wonder',
+    'a tropical beach with turquoise water and white sand at sunrise',
+    'autumn maple leaves in vibrant red and orange, seasonal beauty',
+    'a rice terrace landscape in Thailand at dawn, misty green valleys',
+    'a vast sunflower field under a blue sky, joyful nature',
+    'sea of clouds from a mountain summit, aerial dreamlike view',
+    'a tropical rainforest with shafts of light, lush and green',
+    'a peaceful river with smooth stones and clear water, flowing life',
+    'a dramatic cliff above the ocean at sunset, power and beauty',
+    'spring flowers blooming in a meadow, wildflower diversity',
+    'a deep blue ocean horizon at sunrise, vastness and calm',
+    'cherry blossom petals falling on a still garden pond, Japan spring',
+    'a coastal village at sunrise with fishing boats, tranquil morning',
+    'golden wheat fields with red poppies, summer landscape',
+    'a panorama of a Thai national park with karst limestone peaks',
+    'fog-filled valley viewed from a mountaintop, mysterious morning',
+    'a rainforest waterfall with rainbow in the mist, magical atmosphere',
+    'a blooming sakura tunnel, pink archway, spring delight',
+    'wooden bridge over a lotus pond at sunrise, tranquil Thai countryside',
+    'aerial view of green tea terraces at sunrise, mist in valleys, serene',
+    'a calm beach at low tide with starfish and shells, peaceful',
+    'mangrove roots in clear shallow water, coastal nature',
+    'northern Thailand mountains and mist at golden hour, stunning landscape',
+    'a firefly-lit forest at night, magical glowing insects, enchanted',
+    'a frost-covered meadow at dawn, delicate and ethereal light',
+  ],
+};
+
+// ── ระบุหมวดหมู่ของรูปแต่ละใบจาก subject/prompt ──────────────────────
+function guessCategory(subject, src) {
+  const p = (subject || '').toLowerCase();
+  const pName = src ? (src.name || '').toLowerCase() : '';
+  const txt = p + ' ' + pName;
+
+  if (/flower|rose|lotus.*flower|orchid|dahlia|lily|blossom|bloom|bouquet|petal|tulip|lavender|frangipani|hydrangea|sunflower|jasmine.*flower|marigold/.test(txt)) return 'flowers';
+  if (/buddha|temple|pagoda|stupa|monk|dharma|prayer|sacred|shrine|altar|incense|merit|alms|buddhist/.test(txt)) return 'dharma';
+  if (/lighthouse|sprout.*soil|eagle.*soar|rainbow.*hope|hot.*air.*balloon|footprint.*sand|candle.*darkness|resilience|overcome|new.*beginning.*sunrise|inspiration/.test(txt)) return 'inspire';
+  if (/heart.*rose|love.*letter|missing|longing|romance|two.*chair|two.*mug|two.*tree|message.*bottle|anniversary|two sparrows/.test(txt)) return 'miss';
+  if (/birthday|cake.*candle|balloon.*party|confetti|cupcake.*sprinkle|gift.*wrap|birthday.*cake/.test(txt)) return 'birthday';
+  if (/elderly|grandparent|grandchild|silver.*hair|older.*couple|tai.*chi|senior|elder/.test(txt)) return 'elderly';
+  if (/yoga|breakfast.*bowl.*fruit|smoothie|stethoscope|fitness|herbal.*tea|wellness|medicine|doctor|health|stretching/.test(txt)) return 'health';
+  if (/songkran|loy.*krathong|krathong|festival|firework|new year.*celeb|christmas tree|diwali|makha|visakha|asalha|cultural.*festival|temple.*fair/.test(txt)) return 'festival';
+  if (/family.*silhouette|family.*together|family.*dinner|three.*generation|father.*child|mother.*child|grandchild|sibling|family.*picnic/.test(txt)) return 'family';
+  if (/kitten|puppy|dog|cat|hamster|pet|bunny|rabbit|parrot|fish.*bowl|betta|turtle.*beach|golden.*retriever|shiba|corgi/.test(txt)) return 'pets';
+  if (/coffee|latte|espresso|cafe|cappuccino|drip.*coffee|cold brew|barista|mug.*cozy/.test(txt)) return 'coffee';
+  if (/mountain.*mist|waterfall|ocean.*horizon|canyon|aurora|rice.*terrace|mangrove|beach.*sunrise|bamboo.*forest|cherry.*blossom.*pond|sea.*cloud/.test(txt)) return 'nature';
+  // fallback ตาม SUBJECTS เดิม
+  if (/lotus|flower|bloom|ดอก/.test(txt)) return 'flowers';
+  if (/mountain|landscape|forest|nature|sunrise.*sea|sunset.*cliff/.test(txt)) return 'nature';
+  return null;
+}
+
+// สร้าง categories map จาก images array
+function buildCategoryMap(images) {
+  const map = {};
+  for (const img of images) {
+    const cat = img.category;
+    if (!cat) continue;
+    if (!map[cat]) map[cat] = [];
+    map[cat].push({ file: img.file, blessing: img.blessing || '', src: img.src || null });
+  }
+  return map;
+}
+
 // seed ไม่ซ้ำกันในวันเดียว
 const _usedSeeds = new Set();
 function uniqueSeed() {
@@ -264,6 +689,9 @@ const FX = {
   khaopansa: { color:'#C79A3A', c2:'#6e5215', tone:'serene candlelight gold', headline:'วันเข้าพรรษา', ownBlessings:true,
     subjects:['lit candles and white lotus in a peaceful temple, golden serene glow, no text','rows of glowing yellow candle offerings, Buddhist lent, tranquil','golden temple hall with soft candlelight and lotus, sacred peaceful'],
     blessings:['วันเข้าพรรษา ขอให้จิตใจสงบ ตั้งมั่นในความดี','ช่วงเข้าพรรษา ลด ละ เลิก สิ่งไม่ดี เพื่อใจที่ผ่องใส','ขอบุญรักษา ให้ชีวิตร่มเย็นเป็นสุข'] },
+  okpansa: { color:'#C79A3A', c2:'#6e5215', tone:'serene candlelight gold', headline:'วันออกพรรษา', ownBlessings:true,
+    subjects:['lanterns and floating lights at night near a serene Thai temple, peaceful, no people, no text','a row of golden Buddhist monk alms bowls with flowers and candles, end of lent offering, tranquil temple, no text','glowing candlelight offerings on a lotus leaf at a temple pond at night, tranquil, respectful, no text','Thai temple with thousand candles at dusk for ok phansa ceremony, golden glow, peaceful, no people, no text'],
+    blessings:['วันออกพรรษา ขอให้จิตใจผ่องใส เปี่ยมด้วยบุญกุศล','ออกพรรษาแล้ว ขอให้ชีวิตสว่างใสดั่งประทีป','ขอบุญกุศลที่ทำในพรรษาหนุนนำให้ชีวิตร่มเย็น'] },
   queen: { color:'#5B3FA0', c2:'#33215e', tone:'elegant royal purple', headline:'วันเฉลิมพระชนมพรรษา สมเด็จพระนางเจ้าฯ พระบรมราชินี', ownBlessings:true,
     subjects:['elegant purple orchids and royal violet flowers with soft golden light, graceful, respectful, no people, no text','graceful purple iris and lavender bouquet, regal gentle mood','soft royal purple flowers with gold accents, refined elegant'],
     blessings:['ทรงพระเจริญ','๓ มิถุนายน ขอพระองค์ทรงพระเจริญยิ่งยืนนาน','ด้วยเกล้าด้วยกระหม่อม ขอเดชะ'] },
@@ -305,6 +733,7 @@ const FX_DATED = {
   '2026-05-31': FX.visakha,      // วิสาขบูชา
   '2026-07-29': FX.asalha,       // อาสาฬหบูชา
   '2026-07-30': FX.khaopansa,    // เข้าพรรษา
+  '2026-10-28': FX.okpansa,      // ออกพรรษา
   '2026-09-25': FX.midautumn,    // ไหว้พระจันทร์
   '2026-11-25': FX.loykrathong,  // ลอยกระทง
   // ปีถัดไปเติมที่นี่
@@ -312,6 +741,35 @@ const FX_DATED = {
 function getFestival(iso) {
   const mmdd = iso.slice(5);
   return FX_DATED[iso] || FX_FIXED[mmdd] || null;
+}
+
+// ── วันพระ: คำนวณจากปฏิทินจันทรคติ ──────────────────────────────────────
+// วันพระ = ขึ้น 8 ค่ำ, 15 ค่ำ (วันเพ็ญ), แรม 8 ค่ำ, แรม 14/15 ค่ำ (วันดับ)
+// ใช้ epoch อ้างอิง Julian Day Number สำหรับประมาณ lunar phase
+function isWanPhra(dateObj) {
+  const synodic = 29.53058867;
+  // knownNewMoon = วันเดือนดับที่รู้จาก reference: 6 ม.ค. 2543 = JD 2451550.1
+  const knownNewMoon = 2451550.1;
+  // คำนวณ JD ของวันนั้น (เที่ยงคืน UTC)
+  const jd = Math.floor(dateObj.getTime() / 86400000) + 2440587.5 + 0.5;
+  const daysSince = jd - knownNewMoon;
+  let phase = ((daysSince % synodic) + synodic) % synodic;
+  // วันพระ = ขึ้น 8 (7.38), 15 (14.77), แรม 8 (22.15), แรม 15/ดับ (29.53≈0)
+  const WAN_PHRA_PHASES = [0.0, 7.38, 14.77, 22.15];
+  const tolerance = 0.9; // ±0.9 วัน
+  return WAN_PHRA_PHASES.some(p => {
+    const diff = Math.abs(phase - p);
+    return diff < tolerance || Math.abs(diff - synodic) < tolerance;
+  });
+}
+
+// ตรวจวันพระพิเศษ (วันพระใหญ่ที่เป็นวันสำคัญทางพุทธศาสนา)
+const WAN_PHRA_SPECIAL_DATES = {
+  // วันมาฆบูชา วันวิสาขบูชา วันอาสาฬหบูชา เข้า/ออกพรรษา อยู่ใน FX_DATED แล้ว
+  // ใส่เฉพาะที่ไม่ได้อยู่ใน FX
+};
+function checkWanPhraSpecial(iso) {
+  return WAN_PHRA_SPECIAL_DATES[iso] || null;
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -527,14 +985,14 @@ function parseAssess(raw) {
   return { ok, score, textSafe };
 }
 
-async function genBlessingsGemini({ dayTh, headline, isFestival, n }) {
+async function genBlessingsGemini({ dayTh, headline, isFestival, n, extraContext }) {
   const context = isFestival
     ? `วันนี้เป็น "${headline}"`
     : `วันนี้เป็นวัน${dayTh}`;
 
   const prompt =
     `คุณเป็นนักเขียนคำอวยพรภาษาไทยที่เข้าใจจิตใจคนไทยดี\n`
-  + `${context}\n\n`
+  + `${context}\n${extraContext ? extraContext + '\n' : ''}\n`
   + `แต่งคำอวยพรทักทายตอนเช้าภาษาไทย จำนวน ${n} ประโยค โดย:\n`
   + `- คละความยาว: ราวครึ่งหนึ่งให้ "สั้น กระชับ" (3-8 คำ เช่น "โชคดีมีสุข สมปรารถนา", "มั่งมี มั่งคั่ง สุขภาพดี") ที่เหลือยาวปานกลางได้ (ไม่เกิน ~20 คำ)\n`
   + `- ไม่ต้องยาวทุกประโยค ประโยคสั้น ๆ ที่ฟังดูเป็นมงคลก็ดีมาก\n`
@@ -738,8 +1196,10 @@ function loadManifest(dir, meta) {
 function saveManifest(dir, st) {
   fs.mkdirSync(dir, { recursive: true });
   const images = [...st.images].sort((a, b) => (b.score || 0) - (a.score || 0)); // เว็บโชว์คะแนนสูงก่อน
+  // สร้าง categories map จากรูปที่มี category field
+  const categories = buildCategoryMap(images);
   fs.writeFileSync(path.join(dir, 'manifest.json'),
-    JSON.stringify({ ...st, images, count: images.length, version: String(Date.now()) }, null, 2));
+    JSON.stringify({ ...st, images, categories, count: images.length, version: String(Date.now()) }, null, 2));
 }
 function loadBank() {
   const f = path.join(EVERGREEN_DIR, 'bank.json');
@@ -782,6 +1242,10 @@ async function main() {
   const headline = fest ? fest.headline : `สวัสดีวัน${dayTheme.th}`;
   const dateThai = `วัน${dayTheme.th} ที่ ${tgt.getUTCDate()} ${THAI_MONTHS[tgt.getUTCMonth()]} ${tgt.getUTCFullYear() + 543}`;
 
+  // ── ตรวจวันพระ (ถ้าไม่ใช่วันเทศกาลใหญ่) ──
+  const wanPhra = !fest && isWanPhra(tgt);
+  const wanPhraSpecial = !fest && checkWanPhraSpecial(targetISO);
+
   fs.mkdirSync(IMG_DIR, { recursive: true });
 
   // prune: เก็บแค่ liveISO (วันนี้, live) + targetISO (พรุ่งนี้, กำลังสร้าง) + evergreen
@@ -799,9 +1263,10 @@ async function main() {
   const st = loadManifest(dir, {
     date: targetISO, dateThai, dayTh: dayTheme.th, dayEn: dayTheme.en, headline,
     isFestival: !!fest, festival: fest ? fest.headline : null, color: theme.color, color2: theme.c2,
+    wanPhra, wanPhraSpecial: wanPhraSpecial || null,
   });
 
-  console.log(`=== [rolling] ICT ${liveISO} -> target ${targetISO} (${dayTheme.th})${fest ? ' [เทศกาล]' : ''} | มี ${st.images.length}/${TARGET} ค้างตรวจ ${st.pending.length} ===`);
+  console.log(`=== [rolling] ICT ${liveISO} -> target ${targetISO} (${dayTheme.th})${fest ? ' [เทศกาล]' : ''}${wanPhra ? ' [วันพระ]' : ''}${wanPhraSpecial ? ` [${wanPhraSpecial}]` : ''} | มี ${st.images.length}/${TARGET} ค้างตรวจ ${st.pending.length} ===`);
 
   // คลังคำอวยพร: gen ครั้งเดียวต่อวัน เก็บใน manifest แล้วใช้ซ้ำข้ามรอบ
   if (fest && fest.ownBlessings && fest.blessings && fest.blessings.length) {
@@ -809,14 +1274,20 @@ async function main() {
     saveManifest(dir, st);
     console.log(`✓ ใช้คำของ ${headline} ${st.blessings.length} คำ`);
   } else if (!st.blessings || st.blessings.length < TARGET) {
+    // วันพระ: เพิ่ม context ให้ Gemini gen คำอวยพรที่เกี่ยวกับการทำบุญ
+    const wanPhraContext = wanPhra
+      ? ' วันนี้เป็น "วันพระ" ซึ่งเป็นวันสำคัญทางพุทธศาสนา ผู้ใช้หลายคนจะไปทำบุญใส่บาตรตอนเช้า ขอให้คำอวยพรส่วนหนึ่ง (ราว 30-40%) สะท้อนถึงการทำบุญ ความเป็นมงคล หรือธรรมะ ใส่ตัวอย่างเช่น "วันพระนี้ ขอให้อิ่มบุญอิ่มใจ" หรือ "ใส่บาตรสร้างบุญวันพระ ขอให้สมหวัง"'
+      : '';
     try {
-      const bl = await genBlessingsGemini({ dayTh: dayTheme.th, headline, isFestival: !!fest, n: TARGET });
+      const bl = await genBlessingsGemini({ dayTh: dayTheme.th, headline, isFestival: !!fest, n: TARGET, extraContext: wanPhraContext });
       if (bl && bl.length) st.blessings = bl;
     } catch (e) { console.log('blessings gen fail:', e.message); }
     if (!st.blessings || !st.blessings.length)
-      st.blessings = ['ขอให้เป็นวันที่สดใส', 'ขอให้มีความสุขทุกวัน', 'สุขภาพแข็งแรงนะคะ', 'โชคดีมีสุข สมปรารถนา'];
+      st.blessings = wanPhra
+        ? ['วันพระนี้ ขอให้อิ่มบุญอิ่มใจ','ใส่บาตรวันพระ ขอให้ชีวิตร่มเย็นเป็นสุข','ทำบุญวันพระ ขอให้สมหวังดั่งตั้งใจ','ขอให้เป็นวันที่ดี มีแต่สิ่งมงคล']
+        : ['ขอให้เป็นวันที่สดใส', 'ขอให้มีความสุขทุกวัน', 'สุขภาพแข็งแรงนะคะ', 'โชคดีมีสุข สมปรารถนา'];
     saveManifest(dir, st);
-    console.log(`✓ คำอวยพร ${st.blessings.length} คำ`);
+    console.log(`✓ คำอวยพร ${st.blessings.length} คำ${wanPhra ? ' (วันพระ)' : ''}`);
   }
   const pickBl = (i) => st.blessings[i % st.blessings.length];
 
@@ -869,7 +1340,8 @@ async function main() {
     if (!fs.existsSync(fp)) continue;
     const r = await panel(fs.readFileSync(fp));
     if (r.decision === 'keep') {
-      st.images.push({ file: it.file, score: r.score, blessing: it.blessing, baseId: it.baseId || null, src: it.src || null });
+      const rcat = guessCategory(it.subject || it.file, it.src);
+      st.images.push({ file: it.file, score: r.score, blessing: it.blessing, baseId: it.baseId || null, src: it.src || null, category: rcat, subject: it.subject || null });
       console.log(`  ✓ recheck keep ${it.file} (${r.score})`);
     } else if (r.decision === 'pending' && (it.tries || 0) + 1 < MAX_PENDING_TRIES) {
       stillPending.push({ ...it, tries: (it.tries || 0) + 1 });
@@ -908,8 +1380,15 @@ async function main() {
         } catch (e) { console.log('  (photo fail):', e.message); }
       }
       if (!raw) {
-        if (fest && Math.random() < FEST_SUBJECT_RATIO) subject = fest.subjects[Math.floor(Math.random() * fest.subjects.length)];
-        else subject = pickSubject(theme);
+        if (fest && Math.random() < FEST_SUBJECT_RATIO) {
+          subject = fest.subjects[Math.floor(Math.random() * fest.subjects.length)];
+        // วันพระ: เพิ่มสัดส่วนภาพพระพุทธ/วัด/ธรรมะ 50% (ใช้ CATEGORY_SUBJECTS.dharma ที่ curate มาเฉพาะ)
+        } else if (wanPhra && Math.random() < 0.50) {
+          const dharmaSubs = CATEGORY_SUBJECTS.dharma;
+          subject = dharmaSubs[Math.floor(Math.random() * dharmaSubs.length)];
+        } else {
+          subject = pickSubject(theme);
+        }
         if ((st.subjectCount[subject] || 0) >= MAX_SUBJECT_REPEAT) continue;
         do { seed = Math.floor(Math.random() * 1e9); } while (st.usedSeeds.includes(seed));
         const prompt = `${subject}, ${theme.tone} color palette, soft golden morning light, dreamy, elegant, highly detailed, beautiful, no text, no letters, no numbers, no watermark, no signature`;
@@ -941,14 +1420,16 @@ async function main() {
     if (subject) st.subjectCount[subject] = (st.subjectCount[subject] || 0) + 1;
 
     if (r.decision === 'keep') {
-      st.images.push({ file: fname, score: r.score, blessing, baseId, src });
+      const imgCat = guessCategory(subject, src);
+      st.images.push({ file: fname, score: r.score, blessing, baseId, src, category: imgCat, subject: subject || null });
       if (baseId) { baseUsed++; const b = bank.bases.find(x => x.id === baseId); if (b) { b.lastUsed = targetISO; b.uses = (b.uses || 0) + 1; } }
       const scoreBreak = (r.perAI||[]).filter(a=>a.scores).map(a=>`${a.name}:c${a.scores.clarity}b${a.scores.beauty}w${a.scores.warmth}q${a.scores.quality}`).join(' | ');
       console.log(`  ✓ keep ${fname} (${r.score}) [${scoreBreak}]`);
     } else if (r.decision === 'pending' && src && PHOTO_TRUST_NOVOTE && (r.perAI||[]).every(a => !a.scores)) {
       // รูปถ่าย royalty-free + AI ล่มหมด → trust (กัน keyword กรองที่ photos.mjs แทน ไม่เพิ่ม Gemini call)
-      st.images.push({ file: fname, score: 60, blessing, baseId, src });
-      console.log(`  ✓ keep(photo-trust) ${fname} [${src.name}]`);
+      const ptCat = guessCategory(subject || fname, src);
+      st.images.push({ file: fname, score: 60, blessing, baseId, src, category: ptCat, subject: subject || null });
+      console.log(`  ✓ keep(photo-trust) ${fname} [${src.name}] cat=${ptCat||'?'}`);
     } else if (r.decision === 'pending') {
       st.pending.push({ file: fname, blessing, baseId, seed, src, tries: 0 });
       console.log(`  … pending ${fname} (${r.reason}) [${(r.perAI||[]).map(a=>`${a.name}:${a.error?('ERR '+a.error):(a.scores?'ok':'no-json')}`).join(' | ')}]`);
