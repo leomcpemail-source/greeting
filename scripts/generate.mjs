@@ -22,7 +22,7 @@ const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || '';
 const POLLINATIONS_MODEL   = process.env.POLLINATIONS_MODEL   || 'flux';
 // vetting: ผ่านเมื่อมี AI ตอบ >= ค่านี้ (1 = ให้ AI ตัวเดียวตัดสินได้ถ้าอีกตัวล่ม กันรูปกอง pending)
 const MIN_VOTERS = Number(process.env.MIN_VOTERS || 1);
-const PHOTO_SHARE = Number(process.env.PHOTO_SHARE || 0.92);          // สัดส่วนใช้รูปถ่าย Pexels (Pollen หมด -> พึ่ง Pexels เป็นหลัก)
+const PHOTO_SHARE = Number(process.env.PHOTO_SHARE || 0.50);          // สัดส่วนใช้รูปถ่าย Pexels — ลดลง (Pollen กลับมาแล้ว มิ.ย.2569: 0.92→0.50 ให้ AI gen มากขึ้น)
 const PHOTO_TRUST_NOVOTE = (process.env.PHOTO_TRUST_NOVOTE || '1') !== '0'; // รูปถ่าย curated: ถ้า AI ล่มหมด (0 โหวต) ให้ผ่านได้ (กันหน้าว่าง)
 const USE_POLL_VISION = (process.env.USE_POLL_VISION || '0') === '1';   // vision ฝั่ง Pollinations (ปิดไว้: Pollen หมด+ติด gate 15.5วิ/ใบ = ช้ามาก) เปิดเมื่อ Pollen กลับมา
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
@@ -131,6 +131,11 @@ const SUBJECTS = [
   t => `a lotus pond in front of a golden Thai temple at sunrise, reflections, peaceful, no people`,
   t => `row of golden Buddha statues in a temple corridor, soft morning light, reverent atmosphere, no text`,
   t => `Thai temple bell tower surrounded by tropical trees, warm golden light, serene, no people`,
+  t => `majestic golden chedi stupa with blue sky and clouds, Thai Buddhist temple, serene morning, no people, no text`,
+  t => `beautiful Thai temple entrance gate with intricate golden decorations, sunlight, peaceful, no text`,
+  t => `a serene Buddha footprint shrine with flower offerings and golden light, temple courtyard, no people, no text`,
+  t => `tall golden standing Buddha statue in a peaceful Thai temple garden at sunrise, surrounded by trees, no text`,
+  t => `Thai temple with ornate mosaic walls reflecting morning sunlight, lush garden, peaceful, no people`,
   // ── เทพจีน ────────────────────────────────────────────────────────────
   t => `serene smiling Guanyin Bodhisattva statue in garden, surrounded by white lotuses, soft golden light, peaceful, respectful, no text`,
   t => `ornate Chinese temple with red lanterns glowing at dawn, dragon roof detail, koi pond reflection, no people`,
@@ -142,6 +147,8 @@ const SUBJECTS = [
   t => `a serene minimalist Buddha bust portrait with calm downcast eyes and golden robe, centered on a clean solid ${t.tone} background, lots of empty negative space, soft even studio lighting, devotional, respectful, no text`,
   t => `a golden Buddha statue seated on a lotus with an intricate ornate golden aura halo behind, white lotus flowers beside, on a rich solid ${t.tone} background, symmetrical, devotional, soft divine glow, respectful, no text`,
   t => `a serene smiling Guanyin Bodhisattva statue centered on a clean solid ${t.tone} background, soft golden glow, a few white lotus flowers, minimalist devotional, generous empty space, respectful, no text`,
+  t => `a tall golden standing Buddha statue in front of a white Thai temple, centered on a clean ${t.tone} toned background, symmetrical, generous sky space, soft morning glow, respectful, no text`,
+  t => `a gilded Thai Buddha image with intricate golden patterns on an ornate throne, centered on a rich ${t.tone} background, divine soft glow, no text`,
   t => `a single elegant ${t.flower} stem on a clean solid pastel ${t.tone} background, minimalist, large empty negative space, soft studio light, calm, no text`,
   t => `two adorable round chubby smiling 3D characters together with a cozy coffee cup and daisies, on a clean warm ${t.tone} background, kawaii minimalist, lots of empty space, cheerful, soft lighting, no text`,
   t => `one adorable baby animal in cute 3D Pixar style, centered on a clean solid pastel ${t.tone} background, big sparkling eyes, chubby wholesome, lots of empty space, soft lighting, no text`,
