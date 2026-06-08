@@ -22,6 +22,10 @@ const QUERIES = [
   'sunflower yellow close up',
   'frangipani plumeria white flower',
   'red rose bloom close up',
+  'yellow chrysanthemum flower macro',
+  'pink peony bloom close up',
+  'blue morning glory flower',
+  'purple lavender field macro',
   // ── ธรรมชาติ/ภูมิทัศน์ (ไม่มีสัตว์/คน) ──
   'morning mist mountain landscape',
   'green rice field sunrise',
@@ -31,14 +35,20 @@ const QUERIES = [
   'golden sky sunset clouds',
   'zen garden stones water',
   'autumn maple leaves red',
-  // ── สถานที่/วัด ──
+  // ── วัด/พระพุทธรูป/สถานที่ศักดิ์สิทธิ์ (เพิ่มมากขึ้น) ──
   'thai buddhist temple golden',
   'chinese temple red lanterns',
   'thai temple roof ornate',
   'pagoda misty mountain',
-  // ── มงคล/ของไหว้ (ตรงรสนิยมผู้ใหญ่) ──
+  'golden buddhist pagoda stupa',
+  'thai temple spire golden sky',
+  'white stupa pagoda sunrise',
+  'ancient thai temple architecture',
+  // ── มงคล/พระ/ของไหว้ ──
   'gold buddha statue serene',
   'incense candle temple offering',
+  'lotus flower temple offering',
+  'golden buddha lotus pedestal',
 ];
 
 // keyword ที่ห้ามมีในชื่อไฟล์/alt text ของรูป Pexels (กรองรูปไม่เหมาะ)
@@ -75,8 +85,9 @@ export function dayFlowerQueries(flowerDesc, tone) {
 // fetchT: fetch helper, ms: timeout, preferQueries: query list ตามสีวัน (ถ้ามีจะสุ่มจากชุดนี้ก่อน)
 export async function fetchStockPhoto(fetchT, ms = 45000, preferQueries = null) {
   if (!KEY) throw new Error('no PEXELS_API_KEY');
-  // ถ้ามี preferQueries (สีดอกไม้วัน) ใช้ก่อน 70% เพื่อให้โทนสีตรงวัน; ที่เหลือสุ่มจาก QUERIES กลาง
-  const usePrefer = preferQueries && preferQueries.length && Math.random() < 0.4;
+  // ถ้ามี preferQueries (สีดอกไม้วัน) ใช้ก่อน 55% เพื่อให้โทนสีตรงวัน; ที่เหลือสุ่มจาก QUERIES กลาง
+  // (เพิ่มจาก 0.4 → 0.55 มิ.ย.2569: เพื่อให้สีรูปตรงกับวันมากขึ้น)
+  const usePrefer = preferQueries && preferQueries.length && Math.random() < 0.55;
   const pool = usePrefer ? preferQueries : QUERIES;
   const q = pool[Math.floor(Math.random() * pool.length)];
   const page = 1 + Math.floor(Math.random() * 8);
