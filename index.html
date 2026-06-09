@@ -777,7 +777,7 @@ function buildCard(cb,CW){
   }).join('');
   const h=document.createElement('div');h.className='hello';
   h.style.cssText=`font-family:'${L.font}',sans-serif;font-size:${hs}px`;
-  const _hl=M.headline||('สวัสดีวัน'+M.dayTh);
+  const _hl=M.headline||(M.dayTh?('สวัสดีวัน'+M.dayTh):'');
   // วันพระ: headline 2 บรรทัด "วันนี้วันพระ" + "สวัสดีวัน..." (ตรวจจากตัวข้อความ เพื่อให้ทำงานทั้งบนเว็บและตอน bake ฝั่ง server)
   if(_hl.startsWith('วันนี้วันพระ')){
     const rest=_hl.replace('วันนี้วันพระ','').trim();

@@ -75,6 +75,10 @@ const DAYS = [
   { th:'เสาร์',     en:'Saturday',  color:'#7E3FAE', c2:'#4a2069', tone:'royal purple',  flower:'purple orchids and lavender' },
 ];
 
+// สีกลาง (ไร้วัน) สำหรับรูปคลังหมวด/evergreen — ห้ามผูกกับสีประจำวัน ไม่งั้นหน้าหมวดจะดูเหมือน "ภาพวันพุธ"
+const NEUTRAL_COLOR  = '#3a2a34';
+const NEUTRAL_COLOR2 = '#241820';
+
 // หัวข้อหลากหลาย — สุ่มต่อรูป (สไตล์ฝังในแต่ละหัวข้อ: ของจริง/3D/การ์ตูน)
 // ยิ่งมีมาก ยิ่งลดซ้ำใน 100 รูป/วัน
 const SUBJECTS = [
@@ -1739,8 +1743,9 @@ async function main() {
       ovIdx: Math.floor(Math.random() * rCounts.overlays),
       headline: hl,                                 // evergreen: '' = ไม่ใส่บรรทัด "สวัสดีวัน..."
       blessing, dateThai: withDay ? dateThai : '',
-      color: (withDay ? theme.color : dayTheme.color),
-      color2: (withDay ? theme.c2 : dayTheme.c2),
+      // คลังหมวด/evergreen (withDay:false) ใช้สีกลาง ไม่ใช้สีประจำวัน เพื่อไม่ให้ดูเหมือนการ์ดของวันใดวันหนึ่ง
+      color: (withDay ? theme.color : NEUTRAL_COLOR),
+      color2: (withDay ? theme.c2 : NEUTRAL_COLOR2),
       dayTh: withDay ? dayTheme.th : '', size: 800, vp: band || null,
     });
   };
