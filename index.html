@@ -4,6 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>สวัสดีทุกวัน ☀️</title>
+<script>
+/* ตัวดัก error เงียบ ๆ — ถ้าแอป "ไม่ขึ้นรูปเลย" (หน้าว่าง) ค่อยโชว์สาเหตุบนจอ
+   เพื่อช่วย debug iPad/Safari โดยไม่รบกวนเครื่องที่ใช้งานได้ปกติ */
+(function(){
+  var errs=[];
+  function esc(s){return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  window.addEventListener('error',function(e){errs.push((e.message||'error')+' @ '+((e.filename||'').split('/').pop())+':'+(e.lineno||''));});
+  window.addEventListener('unhandledrejection',function(e){errs.push('Promise: '+esc((e.reason&&(e.reason.message||e.reason))||'rejected'));});
+  function check(){
+    var stage=document.getElementById('stage');
+    var rendered=stage&&(stage.querySelector('.card')||stage.querySelector('.msg'));
+    if(rendered)return;            // แอปขึ้นรูปแล้ว → ไม่ต้องทำอะไร
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;inset:0;z-index:99999;background:#fff;color:#7a2540;font-family:-apple-system,Sarabun,sans-serif;padding:24px;overflow:auto;font-size:15px;line-height:1.7;';
+    d.innerHTML='<b style="font-size:18px">เปิดไม่สำเร็จ 😢</b><br>กรุณาแคปหน้าจอนี้ส่งให้ผู้พัฒนา<br><br>'
+      +'<span style="font-family:monospace;font-size:12px;color:#b00;word-break:break-word">'
+      +(errs.length?esc(errs.join(' | ')):'ไม่มี error แต่โหลดรูปไม่ขึ้น (อาจเป็นเน็ต/CDN)')+'</span>';
+    (document.body||document.documentElement).appendChild(d);
+  }
+  window.addEventListener('load',function(){setTimeout(check,5000);});
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Charm:wght@400;700&family=Mitr:wght@400;500;600&family=Kanit:wght@400;500;600;700&family=Itim&family=Mali:wght@400;600&family=Sriracha&family=Pattaya&family=Bai+Jamjuree:wght@600&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,7 +43,7 @@
   --tab-h:62px;
 }
 html,body{
-  height:100%;height:100dvh;overflow:hidden;
+  height:100%;height:100vh;height:100dvh;overflow:hidden;
   font-family:'Sarabun',sans-serif;color:var(--text);
   background:#f0f0f3;
   overscroll-behavior:none;
@@ -29,14 +51,14 @@ html,body{
 /* phone frame บน desktop */
 .app{
   display:flex;flex-direction:column;
-  height:100%;height:100dvh;
+  height:100%;height:100vh;height:100dvh;
   max-width:440px;margin:0 auto;
   position:relative;overflow:hidden;
   background:var(--bg);
 }
 @media(min-width:480px){
   body{display:flex;align-items:center;justify-content:center;padding:16px;}
-  .app{height:min(920px,96dvh);border-radius:28px;box-shadow:0 12px 48px rgba(120,40,90,.18);border:1px solid #eee;}
+  .app{height:min(920px,96vh);height:min(920px,96dvh);border-radius:28px;box-shadow:0 12px 48px rgba(120,40,90,.18);border:1px solid #eee;}
 }
 
 /* ── PAGES ── */
