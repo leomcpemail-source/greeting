@@ -610,7 +610,7 @@ function buildCategoryMap(images) {
     const cat = img.category;
     if (!cat) continue;
     if (!map[cat]) map[cat] = [];
-    map[cat].push({ file: img.file, blessing: img.blessing || '', src: img.src || null });
+    map[cat].push({ file: img.file, blessing: img.blessing || '', src: img.src || null, headline: img.headline || '' });
   }
   return map;
 }
@@ -1298,6 +1298,97 @@ async function genBlessingsGemini({ dayTh, headline, isFestival, n, extraContext
     return arr;
   } catch (e) { console.log('Pollinations error:', e.message); return []; }
 }
+
+// ── เรียก LLM (chain เดียวกับคำอวยพร) คืน "ข้อความดิบ" — ใช้ซ้ำได้หลายงาน ──
+async function llmText(prompt) {
+  if (GEMINI_API_KEY) {
+    for (const model of ['gemini-2.5-flash', 'gemini-2.5-flash-lite']) {
+      try {
+        const res = await fetchT(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+          { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) },
+          TXT_TIMEOUT_MS);
+        if (!res.ok) throw new Error('http ' + res.status);
+        const data = await res.json();
+        const t = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (t.trim()) return t;
+      } catch (e) { console.log(`llmText ${model}: ${e.message}`); }
+    }
+  }
+  if (GROQ_API_KEY) {
+    try {
+      const res = await fetchT('https://api.groq.com/openai/v1/chat/completions',
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+          body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], temperature: 0.9 }) },
+        60000);
+      if (res.ok) { const d = await res.json(); const t = d?.choices?.[0]?.message?.content || ''; if (t.trim()) return t; }
+    } catch (e) { console.log('llmText groq:', e.message); }
+  }
+  if (OPENROUTER_API_KEY) {
+    try {
+      const res = await fetchT('https://openrouter.ai/api/v1/chat/completions',
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENROUTER_API_KEY}` },
+          body: JSON.stringify({ model: 'google/gemma-3-27b-it:free', messages: [{ role: 'user', content: prompt }] }) },
+        90000);
+      if (res.ok) { const d = await res.json(); const t = d?.choices?.[0]?.message?.content || ''; if (t.trim()) return t; }
+    } catch (e) { console.log('llmText openrouter:', e.message); }
+  }
+  try {
+    await gate();
+    const res = await fetchT('https://text.pollinations.ai/openai',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'openai', messages: [{ role: 'user', content: prompt }] }) }, 90000);
+    if (res.ok) { const d = await res.json(); return d?.choices?.[0]?.message?.content || ''; }
+  } catch (e) { console.log('llmText pollinations:', e.message); }
+  return '';
+}
+
+// ── คำขึ้นต้นการ์ด (headline) แยกตามหมวด ────────────────────────────────────
+// หมวดที่มี "คำเฉพาะ" ของตัวเอง จะไม่ใช้ "สวัสดีวัน..." ของวัน แต่ขึ้นคำของหมวดก่อน
+// (เช่น วันเกิด → "สุขสันต์วันเกิด", คิดถึง → "คิดถึงนะ") — AI คิดใหม่ทุกวัน, มี fallback สำรอง
+const CAT_GREETING_FALLBACK = {
+  birthday: ['สุขสันต์วันเกิด', 'สุขสันต์วันเกิดนะ', 'สุขสันต์วันเกิดค่ะ', 'Happy Birthday', 'สุขสันต์วันเกิดจ้า'],
+  miss:     ['คิดถึงนะ', 'คิดถึงเสมอ', 'คิดถึงจังเลย', 'คิดถึงกันบ้างนะ', 'คิดถึงนะคนดี'],
+  inspire:  ['เป็นกำลังใจให้นะ', 'สู้ๆ นะ', 'ส่งกำลังใจให้', 'ขอให้มีกำลังใจ', 'เธอทำได้แน่นอน'],
+  health:   ['รักษาสุขภาพนะ', 'สุขภาพแข็งแรงนะ', 'ดูแลสุขภาพด้วยนะ', 'ขอให้สุขภาพดี', 'หายไวๆ นะ'],
+  elderly:  ['สุขภาพแข็งแรงนะคะ', 'ขอให้สุขกายสบายใจ', 'รักและห่วงใยเสมอ', 'ขอให้อายุยืนยาว', 'คิดถึงและห่วงใย'],
+};
+const CAT_GREETING_CATS = Object.keys(CAT_GREETING_FALLBACK);
+
+// AI แต่งคำขึ้นต้นของแต่ละหมวด (คืน object: { birthday:[...], miss:[...], ... })
+async function genCatHeadlines() {
+  const out = {};
+  for (const c of CAT_GREETING_CATS) out[c] = [...CAT_GREETING_FALLBACK[c]];
+  const labelTh = { birthday: 'อวยพรวันเกิด', miss: 'คิดถึง/ห่างไกล', inspire: 'ให้กำลังใจ', health: 'ดูแลสุขภาพ', elderly: 'ทักทายผู้สูงวัย' };
+  const prompt =
+      `คุณเป็นนักเขียนคำทักทายภาษาไทยที่อบอุ่นและเข้าใจคนไทย\n`
+    + `ช่วยแต่ง "คำขึ้นต้นการ์ด" (headline สั้น ๆ) ภาษาไทยสำหรับแต่ละหมวดต่อไปนี้ หมวดละ 5 แบบ:\n`
+    + CAT_GREETING_CATS.map(c => `- ${c}: ${labelTh[c]}`).join('\n') + '\n'
+    + `กติกา:\n`
+    + `- สั้น กระชับ 1-4 คำ เหมาะเป็นหัวการ์ด (เช่น "สุขสันต์วันเกิด", "คิดถึงนะ", "เป็นกำลังใจให้")\n`
+    + `- หมวด birthday ต้องสื่อถึง "วันเกิด" เสมอ (เช่น สุขสันต์วันเกิด)\n`
+    + `- ห้ามมีอิโมจิ ห้ามมีเลขลำดับ ห้ามยาวเกิน 4 คำ\n`
+    + `- ตอบกลับเป็น JSON object เท่านั้น รูปแบบ {"birthday":["..."],"miss":["..."],"inspire":["..."],"health":["..."],"elderly":["..."]} ห้ามมี markdown หรือ backtick`;
+  const text = await llmText(prompt).catch(() => '');
+  if (text) {
+    try {
+      const m = text.match(/\{[\s\S]*\}/);
+      if (m) {
+        const obj = JSON.parse(m[0]);
+        for (const c of CAT_GREETING_CATS) {
+          const arr = Array.isArray(obj[c])
+            ? obj[c].filter(x => typeof x === 'string' && x.trim().length > 1 && x.trim().length <= 24).map(x => x.trim())
+            : [];
+          if (arr.length >= 2) out[c] = arr;
+        }
+        console.log(`✓ cat headlines: ${CAT_GREETING_CATS.map(c => c + '(' + out[c].length + ')').join(' ')}`);
+      }
+    } catch (e) { console.log('cat headline parse fail:', e.message); }
+  }
+  return out;
+}
+
 /* ============================================================================
  * REWRITE (มิ.ย. 2569): Rolling pipeline + รูปสำเร็จ (pre-baked) + Rubric 2-AI
  * - main() ใหม่แทนของเดิม ; ฟังก์ชันช่วยทั้งหมดด้านบนคงไว้ (genImage, FX, SUBJECTS,
@@ -1357,13 +1448,13 @@ function getCatBankDeficit(cb) {
 }
 
 // เพิ่มรูปลง cat_bank ของหมวดนั้น (copy ไฟล์ + อัพ index)
-function addToCatBank(cb, catId, srcFile, srcDir, score, blessing, src) {
+function addToCatBank(cb, catId, srcFile, srcDir, score, blessing, src, headline) {
   const catDir = path.join(CAT_BANK_DIR, catId);
   fs.mkdirSync(catDir, { recursive: true });
   const fname = `cat_${catId}_${Date.now()}.jpg`;
   const dest = path.join(catDir, fname);
   fs.copyFileSync(path.join(srcDir, srcFile), dest);
-  cb[catId].images.push({ file: fname, score, blessing: blessing||'', src: src||null });
+  cb[catId].images.push({ file: fname, score, blessing: blessing||'', src: src||null, headline: headline||'' });
   cb[catId].count = cb[catId].images.length;
   return fname;
 }
@@ -1581,6 +1672,20 @@ async function main() {
   }
   const pickBl = (i) => st.blessings[i % st.blessings.length];
 
+  // คำขึ้นต้นแยกหมวด (AI คิดใหม่ทุกวัน) — เก็บใน manifest ใช้ซ้ำข้ามรอบ
+  if (!st.catHeadlines || !Object.keys(st.catHeadlines).length) {
+    try { st.catHeadlines = await genCatHeadlines(); }
+    catch (e) { st.catHeadlines = {}; console.log('cat headlines fail:', e.message); }
+    saveManifest(dir, st);
+  }
+  // คืนคำขึ้นต้นของหมวด (วนตาม index ให้รูปในหมวดเดียวกันไม่ซ้ำคำ) — null = ใช้ "สวัสดีวัน..." ตามปกติ
+  const catHeadlineFor = (cat, i) => {
+    if (!cat) return null;
+    const pool = (st.catHeadlines && st.catHeadlines[cat]) || CAT_GREETING_FALLBACK[cat];
+    if (!pool || !pool.length) return null;
+    return pool[((i >= 0 ? i : Math.floor(Math.random() * pool.length)) % pool.length)];
+  };
+
   // composite = ทางหลัก (รูปสำเร็จ) — ถ้าเปิดไม่ได้ จบรอบนี้ (ไม่มีรูปสำเร็จให้ส่งมอบ)
   let renderer, rCounts;
   try {
@@ -1604,15 +1709,17 @@ async function main() {
   console.log(`  ✦ voters: ${voters.map(v=>v.name).join('+')} | passScore=${PASS_SCORE} minClarity=${MIN_CLARITY} minVoters=${MIN_VOTERS}`);
   const panel = (cardBuf) => scorePanel(cardBuf, voters, { passScore: PASS_SCORE, minClarity: MIN_CLARITY, minVoters: MIN_VOTERS });
 
-  const renderCard = async ({ raw, blessing, withDay }) => {
+  const renderCard = async ({ raw, blessing, withDay, headlineOverride }) => {
     const band = await bestTextBand(raw);
+    // headlineOverride = คำขึ้นต้นเฉพาะหมวด (เช่น "สุขสันต์วันเกิด"); ถ้าไม่ส่งมา ใช้ค่าเริ่มต้นของวัน
+    const hl = headlineOverride != null ? headlineOverride : (withDay ? headline : '');
     return renderer.render({
       imgDataUrl: `data:image/jpeg;base64,${raw.toString('base64')}`,
       frameIdx: Math.floor(Math.random() * rCounts.frames),
       layoutIdx: Math.floor(Math.random() * rCounts.layouts),
       txIdx: Math.floor(Math.random() * rCounts.texts),
       ovIdx: Math.floor(Math.random() * rCounts.overlays),
-      headline: withDay ? headline : '',           // evergreen: ไม่ใส่บรรทัด "สวัสดีวัน..."
+      headline: hl,                                 // evergreen: '' = ไม่ใส่บรรทัด "สวัสดีวัน..."
       blessing, dateThai: withDay ? dateThai : '',
       color: (withDay ? theme.color : dayTheme.color),
       color2: (withDay ? theme.c2 : dayTheme.c2),
@@ -1631,7 +1738,7 @@ async function main() {
     const r = await panel(fs.readFileSync(fp));
     if (r.decision === 'keep') {
       const rcat = guessCategory(it.subject || it.file, it.src);
-      st.images.push({ file: it.file, score: r.score, blessing: it.blessing, baseId: it.baseId || null, src: it.src || null, category: rcat, subject: it.subject || null });
+      st.images.push({ file: it.file, score: r.score, blessing: it.blessing, baseId: it.baseId || null, src: it.src || null, category: rcat, subject: it.subject || null, headline: it.headline || headline });
       console.log(`  ✓ recheck keep ${it.file} (${r.score})`);
     } else if (r.decision === 'pending' && (it.tries || 0) + 1 < MAX_PENDING_TRIES) {
       stillPending.push({ ...it, tries: (it.tries || 0) + 1 });
@@ -1695,9 +1802,14 @@ async function main() {
       continue;
     }
 
+    // หมวดของรูปนี้ → เลือกคำขึ้นต้นให้ตรงหมวด (วันเทศกาล/วันพระ คงคำของวันไว้ก่อน)
+    const preCat = guessCategory(subject, src);
+    const catHl = (fest || wanPhra) ? null : catHeadlineFor(preCat, st.images.length);
+    const cardHeadline = catHl || headline;
+
     // composite = การ์ดสำเร็จ
     let card;
-    try { card = await renderCard({ raw, blessing, withDay: true }); }
+    try { card = await renderCard({ raw, blessing, withDay: true, headlineOverride: catHl || undefined }); }
     catch (e) { console.log('  ! render:', e.message); continue; } // render พัง = ข้ามรูปนี้ (ไม่ fallback รูปดิบ)
     if (!card || card.length < 2000) { console.log('  ! render เล็กผิดปกติ'); continue; }
 
@@ -1712,17 +1824,17 @@ async function main() {
 
     if (r.decision === 'keep') {
       const imgCat = guessCategory(subject, src);
-      st.images.push({ file: fname, score: r.score, blessing, baseId, src, category: imgCat, subject: subject || null });
+      st.images.push({ file: fname, score: r.score, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline });
       if (baseId) { baseUsed++; const b = bank.bases.find(x => x.id === baseId); if (b) { b.lastUsed = targetISO; b.uses = (b.uses || 0) + 1; } }
       const scoreBreak = (r.perAI||[]).filter(a=>a.scores).map(a=>`${a.name}:c${a.scores.clarity}b${a.scores.beauty}w${a.scores.warmth}q${a.scores.quality}`).join(' | ');
       console.log(`  ✓ keep ${fname} (${r.score}) [${scoreBreak}]`);
     } else if (r.decision === 'pending' && src && PHOTO_TRUST_NOVOTE && (r.perAI||[]).every(a => !a.scores)) {
       // รูปถ่าย royalty-free + AI ล่มหมด → trust (กัน keyword กรองที่ photos.mjs แทน ไม่เพิ่ม Gemini call)
       const ptCat = guessCategory(subject || fname, src);
-      st.images.push({ file: fname, score: 60, blessing, baseId, src, category: ptCat, subject: subject || null });
+      st.images.push({ file: fname, score: 60, blessing, baseId, src, category: ptCat, subject: subject || null, headline: cardHeadline });
       console.log(`  ✓ keep(photo-trust) ${fname} [${src.name}] cat=${ptCat||'?'}`);
     } else if (r.decision === 'pending') {
-      st.pending.push({ file: fname, blessing, baseId, seed, src, tries: 0 });
+      st.pending.push({ file: fname, blessing, baseId, seed, src, tries: 0, headline: cardHeadline });
       console.log(`  … pending ${fname} (${r.reason}) [${(r.perAI||[]).map(a=>`${a.name}:${a.error?('ERR '+a.error):(a.scores?'ok':'no-json')}`).join(' | ')}]`);
     } else {
       fs.rmSync(path.join(dir, fname), { force: true });
@@ -1744,7 +1856,7 @@ async function main() {
       if (!catData || catData.count >= CAT_BANK_TARGET) continue;
       // ตรวจ dedup ด้วย filename (กัน copy ซ้ำข้ามรอบ)
       if (catData.images.some(x => x.file.endsWith(img.file))) continue;
-      addToCatBank(cb, img.category, img.file, dir, img.score||0, img.blessing||'', img.src||null);
+      addToCatBank(cb, img.category, img.file, dir, img.score||0, img.blessing||'', img.src||null, img.headline||'');
       catCopied++;
     }
     if (catCopied > 0) {
@@ -1799,8 +1911,10 @@ async function main() {
       } else {
         blessing = pickCatBlessing(cat) || NEUTRAL_BLESSINGS[Math.floor(Math.random() * NEUTRAL_BLESSINGS.length)];
       }
+      // คำขึ้นต้นเฉพาะหมวด (เช่น "สุขสันต์วันเกิด") — หมวดทั่วไปคืน null → ภาพสะอาดไม่มีหัว
+      const catHl = catHeadlineFor(cat, cb[cat].count);
       let card;
-      try { card = await renderCard({ raw, blessing, withDay: false }); } catch (e) { defIdx++; continue; }
+      try { card = await renderCard({ raw, blessing, withDay: false, headlineOverride: catHl || '' }); } catch (e) { defIdx++; continue; }
       if (!card || card.length < 2000) { defIdx++; continue; }
       const r = await panel(card);
       if (r.decision !== 'keep') { defIdx++; continue; }
@@ -1812,7 +1926,7 @@ async function main() {
       fs.writeFileSync(path.join(catDir, fname), card);
       if (!cb[cat].hashes) cb[cat].hashes = [];
       cb[cat].hashes.push(hashToStr(h));
-      cb[cat].images.push({ file: fname, score: r.score, blessing, src: null });
+      cb[cat].images.push({ file: fname, score: r.score, blessing, src: null, headline: catHl || '' });
       cb[cat].count = cb[cat].images.length;
       saveCatBank(cb);
       console.log(`  ✓ cat_bank[${cat}] +1 (${cb[cat].count}/${CAT_BANK_TARGET})`);

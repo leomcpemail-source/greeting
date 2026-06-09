@@ -399,7 +399,7 @@ function buildFinishedCard(g,size){
   const card=document.createElement('div');card.className='card';
   card.style.width=size+'px';card.style.height=size+'px';
   const img=document.createElement('img');img.className='bg';img.crossOrigin='anonymous';img.alt='';
-  img.src=`${imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;
+  img.src=`${c.base||imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;
   card.appendChild(img);
   if(c.src&&(c.src.name||c.src.by||c.src.link)){
     const ib=document.createElement('button');ib.className='src-btn';ib.type='button';ib.textContent='i';
@@ -498,9 +498,9 @@ function buildThumbStrip(){
   const headline=M&&(M.headline||('สวัสดี'+(M.dayTh||'')));
   CARDS.forEach((c,i)=>{
     const t=document.createElement('div');t.className='thumb'+(i===0?' active':'');
-    const img=document.createElement('img');img.src=`${imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;img.alt='';
+    const img=document.createElement('img');img.src=`${c.base||imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;img.alt='';
     t.appendChild(img);
-    const cap=document.createElement('div');cap.className='thumb-cap';cap.textContent=headline||'สวัสดีวันนี้';
+    const cap=document.createElement('div');cap.className='thumb-cap';cap.textContent=c.headline||headline||'สวัสดีวันนี้';
     t.appendChild(cap);
     t.addEventListener('click',()=>{showCard(i,i>curIdx?1:-1);});
     row.appendChild(t);
@@ -778,8 +778,8 @@ function buildCard(cb,CW){
   const h=document.createElement('div');h.className='hello';
   h.style.cssText=`font-family:'${L.font}',sans-serif;font-size:${hs}px`;
   const _hl=M.headline||('สวัสดีวัน'+M.dayTh);
-  // วันพระ: headline 2 บรรทัด "วันนี้วันพระ" + "สวัสดีวัน..."
-  if(M.wanPhra && _hl.startsWith('วันนี้วันพระ')){
+  // วันพระ: headline 2 บรรทัด "วันนี้วันพระ" + "สวัสดีวัน..." (ตรวจจากตัวข้อความ เพื่อให้ทำงานทั้งบนเว็บและตอน bake ฝั่ง server)
+  if(_hl.startsWith('วันนี้วันพระ')){
     const rest=_hl.replace('วันนี้วันพระ','').trim();
     h.innerHTML=_wrap(['วันนี้','วันพระ'])+'<br>'+(rest?_segHTML(rest):'');
   } else {
@@ -1009,8 +1009,11 @@ async function openCategory(cat){
       const all=(m.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null}:{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null});
       const fc=(m.categories&&m.categories[cat.id]&&m.categories[cat.id].length)?m.categories[cat.id]:null;
       const fi=all.filter(x=>x.category===cat.id);fromManifest=fc||(fi.length?fi:null);}
-    const imgs=fromBank||fromManifest;
-    if(!imgs||!imgs.length){showCatEmpty(cat,`ยังไม่มีรูป${cat.label}`);return;}
+    const rawImgs=fromBank||fromManifest;
+    if(!rawImgs||!rawImgs.length){showCatEmpty(cat,`ยังไม่มีรูป${cat.label}`);return;}
+    // กันรูปซ้ำในหมวดเดียวกัน (ตัดไฟล์ชื่อเดียวกันออก)
+    const _seen=new Set();
+    const imgs=rawImgs.filter(x=>{const k=x&&x.file;if(!k||_seen.has(k))return false;_seen.add(k);return true;});
     const isBank=!!fromBank;
     const baseUrl=isBank?`${BASE}/img/cat_bank/${cat.id}`:(res?`${BASE}/img/${res.folder}`:`${BASE}/img/evergreen`);
     const ver=res&&res.m?res.m.version||'':'';
@@ -1049,9 +1052,8 @@ function buildCatDetailGrid(images,base,version){
 document.getElementById('catdBack').addEventListener('click',()=>switchTab('category'));
 document.getElementById('catdUse').addEventListener('click',()=>{
   if(!selectedCatCard){toast('กรุณาเลือกรูปก่อนนะคะ');return;}
-  const newCard={file:selectedCatCard.file,blessing:selectedCatCard.blessing||'',src:selectedCatCard.src||null};
-  // ใช้ base ของรูปที่เลือก (อาจเป็น cat_bank)
-  imgBase=selectedCatCard._base||imgBase;
+  // เก็บ base ไว้ "ต่อใบ" (ไม่แก้ imgBase ทั้งระบบ) เพื่อให้ thumbnail ใบอื่นไม่พัง
+  const newCard={file:selectedCatCard.file,blessing:selectedCatCard.blessing||'',src:selectedCatCard.src||null,base:selectedCatCard._base||imgBase,headline:selectedCatCard.headline||''};
   const existing=CARDS.filter(c=>c.file!==newCard.file);
   CARDS.length=0;CARDS.push(newCard,...existing);
   // สลับไปหน้าแรกก่อน เพื่อให้หน้าอยู่ในจอจริงก่อนค่อย build/เลื่อน thumbnail
@@ -1082,7 +1084,7 @@ async function boot(){
   _manifestCache=M;_manifestFolder=folder;imgBase=`${BASE}/img/${folder}`;
   getCatBank().catch(()=>{});
 
-  CARDS=(M.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null}:{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null}).filter(c=>c.file);
+  CARDS=(M.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null,base:imgBase,headline:M.headline||''}:{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null,base:imgBase,headline:x.headline||M.headline||''}).filter(c=>c.file);
   // หน้าแรกแสดงคละหมวด แต่ถ้าวันนี้เกี่ยวกับหมวดใด ให้หมวดนั้นมาก่อน
   // วันพระ → ธรรมะมาก่อน, เทศกาล → เทศกาลมาก่อน
   (function sortHomeCards(){
@@ -1120,7 +1122,7 @@ async function boot(){
   document.getElementById('actions').style.display='';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     showCard(0,0);attachSwipe();buildThumbStrip();
-    CARDS.forEach(c=>{const im=new Image();im.crossOrigin='anonymous';im.src=`${imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;});
+    CARDS.forEach(c=>{const im=new Image();im.crossOrigin='anonymous';im.src=`${c.base||imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;});
     if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>requestAnimationFrame(relayout));
   }));
   buildCatGrid();
