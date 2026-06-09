@@ -340,6 +340,16 @@ const BASE   = `https://raw.githubusercontent.com/${REPO}/${BRANCH}`;
 const SB_URL = "https://bbtmcwydwscjjoxydbfp.supabase.co";
 const SB_ANON= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJidG1jd3lkd3NjampveHlkYmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzUyNDIsImV4cCI6MjA5NTY1MTI0Mn0.q_rVvMWenYI_dkc1JhSiXWgwWBqtGtgLYEVMqwBSZX0";
 const SID    = 's_'+Math.random().toString(36).slice(2);
+/* โหลด manifest/index ผ่าน Edge Function (gate ตามโดเมน) แทนการยิง raw ตรง
+   เว็บที่ลอกไป deploy บนโดเมนอื่นจะได้ข้อมูลเปล่า → หน้าว่าง */
+const MF_FN  = `${SB_URL}/functions/v1/manifest`;
+function _okHost(){try{const h=location.hostname;return h==='leomcpemail-source.github.io'||h==='localhost'||h==='127.0.0.1';}catch(e){return false;}}
+function mfFetch(path){
+  // ชั้นที่สอง (client): ถ้าไม่ได้รันบนโดเมนจริง ก็ไม่ต้องยิงไป function เลย คืนค่าว่าง
+  if(!_okHost())return Promise.resolve(new Response('{}',{status:200,headers:{'Content-Type':'application/json'}}));
+  return fetch(`${MF_FN}?path=${encodeURIComponent(path)}&v=${Date.now()}`,
+    {cache:'no-store',headers:{apikey:SB_ANON,Authorization:'Bearer '+SB_ANON}});
+}
 
 /* ── CATEGORIES (สี + ไอคอนตามภาพ) ── */
 const CATEGORIES = [
@@ -373,15 +383,15 @@ async function getManifest(){
   if(_manifestCache)return{m:_manifestCache,folder:_manifestFolder};
   const ict=new Date(Date.now()+7*3600*1000);
   const todayISO=`${ict.getUTCFullYear()}-${String(ict.getUTCMonth()+1).padStart(2,'0')}-${String(ict.getUTCDate()).padStart(2,'0')}`;
-  let r=await fetch(`${BASE}/img/${todayISO}/manifest.json?v=${Date.now()}`,{cache:'no-store'}).catch(()=>null);
+  let r=await mfFetch(`img/${todayISO}/manifest.json`).catch(()=>null);
   if(r&&r.ok){_manifestCache=await r.json();_manifestFolder=todayISO;return{m:_manifestCache,folder:todayISO};}
-  r=await fetch(`${BASE}/img/evergreen/manifest.json?v=${Date.now()}`,{cache:'no-store'}).catch(()=>null);
+  r=await mfFetch(`img/evergreen/manifest.json`).catch(()=>null);
   if(r&&r.ok){_manifestCache=await r.json();_manifestFolder='evergreen';return{m:_manifestCache,folder:'evergreen'};}
   return null;
 }
 async function getCatBank(){
   if(_catBankCache)return _catBankCache;
-  const r=await fetch(`${BASE}/img/cat_bank/index.json?v=${Date.now()}`,{cache:'no-store'}).catch(()=>null);
+  const r=await mfFetch(`img/cat_bank/index.json`).catch(()=>null);
   if(r&&r.ok){_catBankCache=await r.json();return _catBankCache;}
   return null;
 }
@@ -1071,7 +1081,7 @@ async function boot(){
   track2('open');
   const ict=new Date(Date.now()+7*3600*1000);
   const todayISO=`${ict.getUTCFullYear()}-${String(ict.getUTCMonth()+1).padStart(2,'0')}-${String(ict.getUTCDate()).padStart(2,'0')}`;
-  const tryLoad=async f=>{const r=await fetch(`${BASE}/img/${f}/manifest.json?v=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw new Error('m'+r.status);return r.json();};
+  const tryLoad=async f=>{const r=await mfFetch(`img/${f}/manifest.json`);if(!r.ok)throw new Error('m'+r.status);return r.json();};
   let folder=todayISO;
   try{M=await tryLoad(todayISO);}
   catch{try{M=await tryLoad('evergreen');folder='evergreen';}
