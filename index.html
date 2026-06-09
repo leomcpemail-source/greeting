@@ -1134,6 +1134,14 @@ async function boot(){
 }
 window.addEventListener('resize',()=>requestAnimationFrame(relayout));
 window.addEventListener('load',()=>{if(CW>0)requestAnimationFrame(relayout);});
+// iOS Safari: ความสูง viewport เปลี่ยนหลัง paint แรก (toolbar ยุบ/โผล่) → computeSize()
+// รอบแรกได้ค่าผิด การ์ดเลยใหญ่เกินจอ จับการเปลี่ยนขนาดของ stage แล้ว relayout ใหม่ทันที
+// (ไม่ต้องรอ user เลื่อน) — relayout พอ เพราะรูป .bg เป็น 100% ของการ์ดอยู่แล้ว
+if('ResizeObserver' in window){
+  let _rt=0;
+  new ResizeObserver(()=>{cancelAnimationFrame(_rt);_rt=requestAnimationFrame(relayout);}).observe(stage);
+}
+if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>requestAnimationFrame(relayout));
 boot();
 </script>
 </body>
