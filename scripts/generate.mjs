@@ -1425,6 +1425,15 @@ const CAT_BANK_DIR      = path.join(IMG_DIR, 'cat_bank');
 const CAT_BANK_TARGET   = Number(process.env.CAT_BANK_TARGET || 30); // รูปต่อหมวด
 // หมวดทั้งหมด — ตรงกับ CATEGORIES ใน index.html
 const ALL_CATEGORIES    = ['flowers','dharma','inspire','miss','birthday','elderly','health','festival','family','pets','coffee','nature'];
+// หมวดที่เหมาะกับรูปถ่าย Pexels (ของจริง ไม่มีคน) → ใช้ดึงรูปก่อนเพื่อกัน Pollinations 429
+// หมวดเชิงความคิด (birthday/miss/inspire/dharma/festival/family/elderly) ไม่อยู่ในนี้ → ใช้ AI gen อย่างเดียว
+const CAT_PHOTO_QUERIES = {
+  flowers: ['flower macro closeup', 'blooming flowers garden', 'rose flower close up', 'lotus flower water', 'orchid flower bloom', 'sunflower field bright'],
+  nature:  ['mountain landscape sunrise', 'green forest morning mist', 'waterfall nature', 'sea beach sunrise', 'green rice field', 'lake reflection morning'],
+  coffee:  ['coffee cup on table morning', 'latte art coffee', 'roasted coffee beans', 'hot coffee steam cup'],
+  pets:    ['cute cat kitten', 'cute dog puppy', 'fluffy kitten closeup', 'golden retriever puppy'],
+  health:  ['fresh green tea cup', 'fresh fruits bowl', 'fresh vegetables healthy', 'green smoothie healthy'],
+};
 
 function loadCatBank() {
   const f = path.join(CAT_BANK_DIR, 'index.json');
@@ -1944,12 +1953,23 @@ async function main() {
         ? catSubs[catSubIdx % catSubs.length]
         : pickSubject(dayTheme);
 
-      const seed = Math.floor(Math.random() * 1e9);
-      let raw;
-      try {
-        const prompt = `${catSubject}, ${dayTheme.tone} color palette, soft morning light, elegant, highly detailed, beautiful, no text, no letters, no numbers, no watermark, no signature`;
-        raw = await genImage(prompt, seed);
-      } catch (e) { defIdx++; continue; }
+      // หมวดที่เหมาะกับรูปถ่าย → ลอง Pexels ก่อน (เสถียร+ฟรี กัน Pollinations 429) แล้ว fallback AI gen
+      let raw, src = null, seed = null;
+      const photoQs = CAT_PHOTO_QUERIES[cat];
+      if (photoQs && photosEnabled()) {
+        try {
+          const ph = await fetchStockPhoto(fetchT, TXT_TIMEOUT_MS, photoQs);
+          raw = ph.buffer; src = ph.src;
+          console.log(`  [cat ${cat}] photo "${src.name}" by ${src.by}`);
+        } catch (e) { /* รูปถ่ายล่ม → ตก AI gen ข้างล่าง */ }
+      }
+      if (!raw) {
+        seed = Math.floor(Math.random() * 1e9);
+        try {
+          const prompt = `${catSubject}, ${dayTheme.tone} color palette, soft morning light, elegant, highly detailed, beautiful, no text, no letters, no numbers, no watermark, no signature`;
+          raw = await genImage(prompt, seed);
+        } catch (e) { defIdx++; continue; }
+      }
 
       let h; try { h = dhash(raw); } catch (e) { defIdx++; continue; }
       // dedup กับรูปใน cat_bank ของหมวดนั้น
@@ -1982,7 +2002,7 @@ async function main() {
       fs.writeFileSync(path.join(catDir, fname), card);
       if (!cb[cat].hashes) cb[cat].hashes = [];
       cb[cat].hashes.push(hashToStr(h));
-      cb[cat].images.push({ file: fname, score: keepScore, blessing, src: null, headline: catHl || '' });
+      cb[cat].images.push({ file: fname, score: keepScore, blessing, src: src || null, headline: catHl || '' });
       cb[cat].count = cb[cat].images.length;
       saveCatBank(cb);
       console.log(`  ✓ cat_bank[${cat}] +1 (${cb[cat].count}/${CAT_BANK_TARGET})${visionDown ? ' [vision down→trust]' : ''}`);
