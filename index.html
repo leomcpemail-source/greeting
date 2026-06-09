@@ -343,7 +343,10 @@ const SID    = 's_'+Math.random().toString(36).slice(2);
 /* โหลด manifest/index ผ่าน Edge Function (gate ตามโดเมน) แทนการยิง raw ตรง
    เว็บที่ลอกไป deploy บนโดเมนอื่นจะได้ข้อมูลเปล่า → หน้าว่าง */
 const MF_FN  = `${SB_URL}/functions/v1/manifest`;
+function _okHost(){try{const h=location.hostname;return h==='leomcpemail-source.github.io'||h==='localhost'||h==='127.0.0.1';}catch(e){return false;}}
 function mfFetch(path){
+  // ชั้นที่สอง (client): ถ้าไม่ได้รันบนโดเมนจริง ก็ไม่ต้องยิงไป function เลย คืนค่าว่าง
+  if(!_okHost())return Promise.resolve(new Response('{}',{status:200,headers:{'Content-Type':'application/json'}}));
   return fetch(`${MF_FN}?path=${encodeURIComponent(path)}&v=${Date.now()}`,
     {cache:'no-store',headers:{apikey:SB_ANON,Authorization:'Bearer '+SB_ANON}});
 }

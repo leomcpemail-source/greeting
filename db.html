@@ -172,7 +172,10 @@ $('datePicker').addEventListener('change', () => {
 });
 
 /* ── fetch ── */
+function _okHost(){try{const h=location.hostname;return h==='leomcpemail-source.github.io'||h==='localhost'||h==='127.0.0.1';}catch(e){return false;}}
 async function rpc(){
+  // dashboard ที่ถูกลอกไป deploy โดเมนอื่น → ทำเหมือนรหัสผ่านผิดเสมอ
+  if(!_okHost())return{error:'unauthorized'};
   // day mode: ส่ง days=1 เพื่อให้ SQL filter เฉพาะวันนั้นจริงๆ
   const body = { pass: PASS, days: DATE_FILTER ? 1 : DAYS };
   if(DATE_FILTER) body.target_date = DATE_FILTER;
