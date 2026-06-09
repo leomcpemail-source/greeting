@@ -128,7 +128,8 @@ html,body{
 .btn.save{background:var(--green);color:#fff;box-shadow:0 4px 14px rgba(42,157,63,.3);}
 .btn.line{background:var(--line);color:#fff;box-shadow:0 4px 14px rgba(45,184,74,.3);}
 .btn .line-logo{background:#fff;color:var(--line);font-weight:700;font-size:11px;border-radius:6px;padding:2px 5px;font-family:'Kanit';}
-.line-browser #btnSave{grid-column:1/-1;}
+/* ในเบราว์เซอร์ LINE: ปุ่มทั้งสองเรียงเต็มความกว้าง (ไม่เหลือช่องว่างข้างขวา) */
+.line-browser #btnSave,.line-browser #btnLine{grid-column:1/-1;}
 .line-browser #btnLine .bt-main{font-size:17px;}
 
 /* Thumbnail strip */
