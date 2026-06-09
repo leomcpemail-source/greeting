@@ -1447,16 +1447,34 @@ function getCatBankDeficit(cb) {
     .sort((a, b) => a.have - b.have);
 }
 
-// เพิ่มรูปลง cat_bank ของหมวดนั้น (copy ไฟล์ + อัพ index)
-function addToCatBank(cb, catId, srcFile, srcDir, score, blessing, src, headline) {
-  const catDir = path.join(CAT_BANK_DIR, catId);
-  fs.mkdirSync(catDir, { recursive: true });
-  const fname = `cat_${catId}_${Date.now()}.jpg`;
-  const dest = path.join(catDir, fname);
-  fs.copyFileSync(path.join(srcDir, srcFile), dest);
-  cb[catId].images.push({ file: fname, score, blessing: blessing||'', src: src||null, headline: headline||'' });
-  cb[catId].count = cb[catId].images.length;
-  return fname;
+// ── ล้างการ์ดรายวันที่หลุดเข้าคลังหมวด ────────────────────────────────────────
+// คลังหมวด (cat_bank) ต้องเป็นรูป "ไร้วัน" เท่านั้น เพราะหน้าหมวดไม่ได้ผูกกับวันใดวันหนึ่ง
+// รูปที่ระบบ gen เองมาจะมี suffix _<n> ต่อท้าย (เช่น cat_flowers_<ts>_<n>.jpg)
+// แต่รูปที่เคยถูก copy มาจากการ์ด "วันนี้/พรุ่งนี้" จะเป็น cat_<cat>_<ts>.jpg (ไม่มี suffix)
+// ซึ่งมีตัวอักษร "สวัสดีวัน<วัน>" + วันที่ฝังในรูป → ทำให้หน้าหมวดโชว์ "สวัสดีวันพุธ" ทั้งที่วันนี้วันอังคาร
+// ฟังก์ชันนี้ตัดรูปเหล่านั้นทิ้ง (และลบ index ที่ซ้ำกัน) ทุกรอบ จึงค่อย ๆ ทำความสะอาดคลังให้เอง
+function pruneCopiedDayCards(cb) {
+  const COPY_RE = /^cat_[a-z]+_\d+\.jpg$/i; // การ์ดรายวันที่ถูก copy เข้ามา (ไม่มี suffix _<n>)
+  let removed = 0;
+  for (const cat of ALL_CATEGORIES) {
+    const data = cb[cat];
+    if (!data || !Array.isArray(data.images)) continue;
+    const kept = [], seen = new Set();
+    for (const img of data.images) {
+      const base = (img && img.file ? img.file : '').split('/').pop();
+      if (!base) continue;
+      if (COPY_RE.test(base)) {
+        try { fs.rmSync(path.join(CAT_BANK_DIR, cat, base), { force: true }); } catch (e) {}
+        removed++;
+      } else if (!seen.has(base)) {
+        seen.add(base); kept.push(img);
+      }
+    }
+    data.images = kept;
+    data.count = kept.length;
+  }
+  if (removed > 0) console.log(`  🧹 cat_bank: ตัดการ์ดรายวันที่หลุดเข้าคลัง ${removed} รูป (คลังหมวดต้องไร้วัน)`);
+  return removed;
 }
 
 
@@ -1846,23 +1864,12 @@ async function main() {
   saveBank(bank);
   saveManifest(dir, st);
 
-  // 3a) copy รูปวันนี้ที่ tag category ได้ → ลง cat_bank (ฟรี ไม่เสีย gen)
+  // 3a) ทำความสะอาดคลังหมวด: ตัดการ์ดรายวันที่เคยถูก copy เข้ามา (มีข้อความ "สวัสดีวัน..." + วันที่ฝังในรูป)
+  // เดิมระบบ copy การ์ดของ "วันนี้/พรุ่งนี้" เข้าคลังหมวดเพื่อประหยัด gen แต่การ์ดพวกนี้มีตัวอักษรวัน/วันที่ฝังอยู่
+  // ทำให้หน้าหมวดโชว์ "สวัสดีวันพุธ" ทั้งที่วันนี้วันอังคาร — คลังหมวดต้องเติมจากรูปไร้วัน (gen, withDay:false) เท่านั้น
   {
     const cb = loadCatBank();
-    let catCopied = 0;
-    for (const img of st.images) {
-      if (!img.category) continue;
-      const catData = cb[img.category];
-      if (!catData || catData.count >= CAT_BANK_TARGET) continue;
-      // ตรวจ dedup ด้วย filename (กัน copy ซ้ำข้ามรอบ)
-      if (catData.images.some(x => x.file.endsWith(img.file))) continue;
-      addToCatBank(cb, img.category, img.file, dir, img.score||0, img.blessing||'', img.src||null, img.headline||'');
-      catCopied++;
-    }
-    if (catCopied > 0) {
-      saveCatBank(cb);
-      console.log(`  ✓ cat_bank copy ${catCopied} รูปจาก today (blessing คงไว้ตามหมวด)`);
-    }
+    if (pruneCopiedDayCards(cb) > 0) saveCatBank(cb);
   }
 
   // 3) ฉวยโอกาสเติม cat_bank + evergreen (ใช้เวลาที่เหลือหลัง Today ครบ)
