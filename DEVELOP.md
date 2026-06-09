@@ -31,20 +31,17 @@ git push origin dev
 
 ### 2. Preview หน้า dev โดยไม่กระทบ user
 
-**วิธี A — เปิดบนเครื่องตัวเอง (แม่นยำสุด แนะนำสำหรับเทสจริง):**
+**เปิดบนเครื่องตัวเอง (วิธีเดียวที่ใช้ได้แล้วตอนนี้):**
 ```bash
 git checkout dev
 python3 -m http.server 8080     # หรือ  npx serve
 # เปิดเบราว์เซอร์ที่ http://localhost:8080
 ```
 
-**วิธี B — เปิดผ่านเว็บเลย (ดูเร็ว ๆ ไม่ต้อง clone):**
-เปิดลิงก์นี้ (มันคือ index.html บน branch dev โดยตรง):
-```
-https://htmlpreview.github.io/?https://raw.githubusercontent.com/leomcpemail-source/greeting/dev/index.html
-```
-> หมายเหตุ: วิธี B โหลดรูป/manifest จริงจาก branch `daily-images` ได้ปกติ
-> เหมาะกับเช็คหน้าตา/ข้อความ ส่วนการเทสปุ่ม/แชร์ ให้ใช้วิธี A
+> ❌ **htmlpreview ใช้ไม่ได้แล้ว** (จอว่าง ไม่ขึ้นรูป) — เพราะ manifest ถูกล็อกด้วย
+> domain-lock (เช็ค Origin ฝั่ง Edge Function + เช็ค hostname ฝั่ง client) ให้โหลด
+> ได้เฉพาะ `leomcpemail-source.github.io` / `localhost` / `127.0.0.1` เพื่อกันคน
+> clone เว็บไปใช้ → preview ดู dev ให้ใช้ localhost แทน
 
 ### 3. พอพร้อมแล้ว — "สั่งให้หน้าจริงเปลี่ยน" (promote dev → main)
 
@@ -82,5 +79,5 @@ GitHub Actions (`.github/workflows/daily.yml`) ดึงโค้ดเรนเ
 |---|---|
 | แก้โค้ด ทดลอง หา bug | branch `dev` |
 | ให้ user เห็นของใหม่ | merge `dev` → `main` |
-| ดูหน้า dev ก่อน | localhost หรือ htmlpreview |
+| ดูหน้า dev ก่อน | localhost (`python3 -m http.server`) |
 | ห้ามเด็ดขาด | แก้ `index.html` ตรง ๆ บน `main` |
