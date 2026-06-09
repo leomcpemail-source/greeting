@@ -1447,32 +1447,6 @@ function saveCatBank(cb) {
   fs.writeFileSync(path.join(CAT_BANK_DIR, 'index.json'), JSON.stringify(cb, null, 2));
 }
 
-// harvest: เก็บ "สำเนาไร้วัน" ของรูป deck ที่ผ่าน vision แล้ว ลง cat_bank ตามหมวด
-// ใช้ raw + ผลตรวจ vision ที่จ่ายไปแล้วซ้ำ → ไม่เรียก genImage/vision เพิ่ม แค่ render การ์ดไร้วันอีกใบ
-// (render ด้วย withDay:false จึงไม่มีตัวอักษร "สวัสดีวัน..." + วันที่ ที่จะเพี้ยนบนหน้าหมวด)
-async function harvestToCatBank(cb, cat, raw, hash, blessing, src) {
-  if (!cat || !cb[cat]) return false;
-  if (cb[cat].count >= CAT_BANK_TARGET) return false;
-  if (isDuplicate(hash, cb[cat].hashes || [], PHASH_THRESHOLD)) return false;
-  const catHl = catHeadlineFor(cat, cb[cat].count);
-  let card;
-  try { card = await renderCard({ raw, blessing, withDay: false, headlineOverride: catHl || '' }); }
-  catch (e) { return false; }
-  if (!card || card.length < 2000) return false;
-  const catDir = path.join(CAT_BANK_DIR, cat);
-  fs.mkdirSync(catDir, { recursive: true });
-  // ชื่อมี suffix _h<n> → ไม่เข้า COPY_RE ของ pruneCopiedDayCards จึงไม่ถูกลบ
-  const fname = `cat_${cat}_${Date.now()}_h${cb[cat].count}.jpg`;
-  fs.writeFileSync(path.join(catDir, fname), card);
-  if (!cb[cat].hashes) cb[cat].hashes = [];
-  cb[cat].hashes.push(hashToStr(hash));
-  cb[cat].images.push({ file: fname, score: 70, blessing, src: src || null, headline: catHl || '' });
-  cb[cat].count = cb[cat].images.length;
-  saveCatBank(cb);
-  console.log(`  ↳ harvest cat_bank[${cat}] +1 (${cb[cat].count}/${CAT_BANK_TARGET})`);
-  return true;
-}
-
 // คืนรายการหมวดที่ยังไม่ครบ เรียงจากน้อยไปมาก (เติมหมวดที่ขาดมากที่สุดก่อน)
 function getCatBankDeficit(cb) {
   return ALL_CATEGORIES
@@ -1778,6 +1752,32 @@ async function main() {
       color2: (withDay ? theme.c2 : NEUTRAL_COLOR2),
       dayTh: withDay ? dayTheme.th : '', size: 800, vp: band || null,
     });
+  };
+
+  // harvest: เก็บ "สำเนาไร้วัน" ของรูป deck ที่ผ่าน vision แล้ว ลง cat_bank ตามหมวด
+  // ใช้ raw + ผลตรวจ vision ที่จ่ายไปแล้วซ้ำ → ไม่เรียก genImage/vision เพิ่ม แค่ render การ์ดไร้วันอีกใบ
+  // (เป็น closure ใน main เพราะต้องใช้ renderCard + catHeadlineFor ที่นิยามในนี้)
+  const harvestToCatBank = async (cb, cat, raw, hash, blessing, src) => {
+    if (!cat || !cb[cat]) return false;
+    if (cb[cat].count >= CAT_BANK_TARGET) return false;
+    if (isDuplicate(hash, cb[cat].hashes || [], PHASH_THRESHOLD)) return false;
+    const catHl = catHeadlineFor(cat, cb[cat].count);
+    let card;
+    try { card = await renderCard({ raw, blessing, withDay: false, headlineOverride: catHl || '' }); }
+    catch (e) { return false; }
+    if (!card || card.length < 2000) return false;
+    const catDir = path.join(CAT_BANK_DIR, cat);
+    fs.mkdirSync(catDir, { recursive: true });
+    // ชื่อมี suffix _h<n> → ไม่เข้า COPY_RE ของ pruneCopiedDayCards จึงไม่ถูกลบ
+    const fname = `cat_${cat}_${Date.now()}_h${cb[cat].count}.jpg`;
+    fs.writeFileSync(path.join(catDir, fname), card);
+    if (!cb[cat].hashes) cb[cat].hashes = [];
+    cb[cat].hashes.push(hashToStr(hash));
+    cb[cat].images.push({ file: fname, score: 70, blessing, src: src || null, headline: catHl || '' });
+    cb[cat].count = cb[cat].images.length;
+    saveCatBank(cb);
+    console.log(`  ↳ harvest cat_bank[${cat}] +1 (${cb[cat].count}/${CAT_BANK_TARGET})`);
+    return true;
   };
 
   let gens = 0;
