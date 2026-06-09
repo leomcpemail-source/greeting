@@ -1109,6 +1109,21 @@ async function boot(){
       CARDS.length=0;CARDS.push(...mixed);
     }
   })();
+  // ช่วงต้นวันที่ pipeline ยังเติมรูปของวันนี้ไม่ครบ (บางทีเหลือ 1-2 รูป) เติมจาก
+  // evergreen ให้ deck ไม่โล่ง — รูปวันนี้มาก่อน แล้วต่อท้ายด้วย evergreen ที่ไม่ซ้ำ
+  const MIN_DECK=8;
+  if(folder!=='evergreen'&&CARDS.length<MIN_DECK){
+    try{
+      const eg=await tryLoad('evergreen');
+      const egBase=`${BASE}/img/evergreen`;
+      const have=new Set(CARDS.map(c=>c.file));
+      const egCards=(eg.images||[]).map(x=>typeof x==='string'
+        ?{file:x,blessing:'',src:null,category:null,base:egBase,headline:eg.headline||''}
+        :{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null,base:egBase,headline:x.headline||eg.headline||''})
+        .filter(c=>c.file&&!have.has(c.file));
+      for(const c of egCards){if(CARDS.length>=MIN_DECK)break;CARDS.push(c);}
+    }catch(e){}
+  }
   if(!CARDS.length){stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴</div>`;return;}
 
   if(!M.color){const _dc=['#C0392B','#E1A100','#D6336C','#1E9E55','#E8730C','#1F73C4','#7E3FAE'];const _d2=['#7d1f17','#8a5d00','#8a1d44','#0f5e31','#9c4a05','#0f4677','#4a2069'];const w=ict.getUTCDay();M.color=_dc[w];M.color2=_d2[w];}
