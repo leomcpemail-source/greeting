@@ -170,8 +170,6 @@ html,body{
 .thumb.active{border-color:var(--pink);}
 .thumb:active{transform:scale(.94)}
 .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-.thumb-cap{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.55),transparent);
-  padding:14px 3px 4px;font-family:'Chonburi';font-size:9px;color:#fff;text-align:center;line-height:1.15;}
 
 /* LINE notice */
 .line-notice{display:none;padding:0 16px 8px;flex-shrink:0;}
@@ -495,13 +493,10 @@ function attachSwipe(){
 /* ── THUMBNAIL STRIP ── */
 function buildThumbStrip(){
   const row=document.getElementById('thumbRow');row.innerHTML='';
-  const headline=M&&(M.headline||('สวัสดี'+(M.dayTh||'')));
   CARDS.forEach((c,i)=>{
     const t=document.createElement('div');t.className='thumb'+(i===0?' active':'');
     const img=document.createElement('img');img.src=`${c.base||imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;img.alt='';
     t.appendChild(img);
-    const cap=document.createElement('div');cap.className='thumb-cap';cap.textContent=c.headline||headline||'สวัสดีวันนี้';
-    t.appendChild(cap);
     t.addEventListener('click',()=>{showCard(i,i>curIdx?1:-1);});
     row.appendChild(t);
   });
