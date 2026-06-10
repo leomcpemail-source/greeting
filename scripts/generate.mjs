@@ -991,6 +991,24 @@ async function fetchT(url, opts = {}, ms = 60000) {
   finally { clearTimeout(t); }
 }
 
+// ── ส่งสถิติ pipeline เข้า Supabase (anon insert — ดูใน db.html ไม่ต้องเปิด GitHub) ──
+// แถวของ pipeline ใช้ visitor_id='pipeline' ; dashboard_stats2 แยกออกจากสถิติคนใช้จริง
+const SB_URL  = 'https://bbtmcwydwscjjoxydbfp.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJidG1jd3lkd3NjampveHlkYmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzUyNDIsImV4cCI6MjA5NTY1MTI0Mn0.q_rVvMWenYI_dkc1JhSiXWgwWBqtGtgLYEVMqwBSZX0';
+const PX_SESSION = 'run_' + String(process.env.GITHUB_RUN_ID || Date.now());
+const _pxQueue = [];
+function supaLog(type, meta) {
+  try {
+    _pxQueue.push(fetch(`${SB_URL}/rest/v1/events`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, Prefer: 'return=minimal' },
+      body: JSON.stringify({ visitor_id: 'pipeline', session_id: PX_SESSION, type,
+        tz: '', lang: '', ua: '', ref: JSON.stringify(meta || {}).slice(0, 900), is_returning: false }),
+    }).catch(() => {}));
+  } catch (e) {}
+}
+const supaFlush = () => Promise.allSettled(_pxQueue);
+
 function nowICT() { return new Date(Date.now() + 7 * 3600 * 1000); }
 function isoDate(d) {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
@@ -1706,7 +1724,15 @@ async function main() {
   const voters = [{ name: 'gemini', fn: visionGemRubric }];
   if (USE_POLL_VISION) voters.unshift({ name: 'pollinations', fn: visionPollRubric });
   console.log(`  ✦ voters: ${voters.map(v=>v.name).join('+')} | passScore=${PASS_SCORE} minClarity=${MIN_CLARITY} minVoters=${MIN_VOTERS}`);
-  const panel = (cardBuf) => scorePanel(cardBuf, voters, { passScore: PASS_SCORE, minClarity: MIN_CLARITY, minVoters: MIN_VOTERS });
+  const aiStat = { pol: { ok: 0, fail: 0 }, gem: { ok: 0, fail: 0 } };
+  const panel = async (cardBuf) => {
+    const r = await scorePanel(cardBuf, voters, { passScore: PASS_SCORE, minClarity: MIN_CLARITY, minVoters: MIN_VOTERS });
+    for (const a of (r.perAI || [])) {
+      const k = a.name === 'gemini' ? 'gem' : 'pol';
+      if (a.scores) aiStat[k].ok++; else aiStat[k].fail++;
+    }
+    return r;
+  };
 
   const renderCard = async ({ raw, blessing, withDay, headlineOverride }) => {
     const band = await bestTextBand(raw);
@@ -1740,11 +1766,13 @@ async function main() {
       const rcat = it.category || guessCategory(it.subject || it.file, it.src);
       st.images.push({ file: it.file, score: r.score, blessing: it.blessing, baseId: it.baseId || null, src: it.src || null, category: rcat, subject: it.subject || null, headline: it.headline || headline });
       console.log(`  ✓ recheck keep ${it.file} (${r.score})`);
+      supaLog('px_keep', { d: targetISO, cat: rcat, score: r.score, src: it.src ? 1 : 0, recheck: 1 });
     } else if (r.decision === 'pending' && (it.tries || 0) + 1 < MAX_PENDING_TRIES) {
       stillPending.push({ ...it, tries: (it.tries || 0) + 1 });
     } else {
       fs.rmSync(fp, { force: true });
       console.log(`  ✗ recheck drop ${it.file} (${r.reason})`);
+      supaLog('px_reject', { d: targetISO, cat: it.category || null, reason: String(r.reason || '').slice(0, 120), recheck: 1 });
     }
   }
   st.pending = stillPending;
@@ -1866,18 +1894,21 @@ async function main() {
       catFails[cat] = 0;
       const scoreBreak = (r.perAI||[]).filter(a=>a.scores).map(a=>`${a.name}:c${a.scores.clarity}b${a.scores.beauty}w${a.scores.warmth}q${a.scores.quality}`).join(' | ');
       console.log(`  ✓ keep ${fname} (${r.score}) [${scoreBreak}] ${imgCat}=${catCount[imgCat]||0}/${CAT_TARGET}`);
+      supaLog('px_keep', { d: targetISO, cat: imgCat, score: r.score, src: src ? 1 : 0 });
     } else if (r.decision === 'pending' && src && PHOTO_TRUST_NOVOTE && (r.perAI||[]).every(a => !a.scores)) {
       // รูปถ่าย royalty-free + AI ล่มหมด → trust (กัน keyword กรองที่ photos.mjs แทน ไม่เพิ่ม Gemini call)
       st.images.push({ file: fname, score: 60, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline });
       if (imgCat && catCount[imgCat] != null) catCount[imgCat]++;
       catFails[cat] = 0;
       console.log(`  ✓ keep(photo-trust) ${fname} [${src.name}] ${imgCat}=${catCount[imgCat]||0}/${CAT_TARGET}`);
+      supaLog('px_keep', { d: targetISO, cat: imgCat, score: 60, src: 1, trust: 1 });
     } else if (r.decision === 'pending') {
       st.pending.push({ file: fname, blessing, baseId, seed, src, tries: 0, headline: cardHeadline, subject: subject || null, category: imgCat || null });
       console.log(`  … pending ${fname} (${r.reason}) [${(r.perAI||[]).map(a=>`${a.name}:${a.error?('ERR '+a.error):(a.scores?'ok':'no-json')}`).join(' | ')}]`);
     } else {
       fs.rmSync(path.join(dir, fname), { force: true });
       console.log(`  ✗ reject ${fname} (${r.reason}) [${(r.perAI||[]).map(a=>`${a.name}:${a.error?('ERR '+a.error):(a.scores?'ok':'no-json')}`).join(' | ')}]`);
+      supaLog('px_reject', { d: targetISO, cat: imgCat, reason: String(r.reason || '').slice(0, 120) });
     }
     saveManifest(dir, st);
   }
@@ -1930,6 +1961,9 @@ async function main() {
     console.log(`  หมวด: ${ALL_CATEGORIES.map(c => `${c}=${cc[c]}/${CAT_TARGET}`).join(' ')}`);
   }
   console.log(`=== [done] target ${targetISO} เก็บ ${st.images.length}/${TARGET} ค้าง ${st.pending.length} gens ${gens} เหลือเวลา ${Math.round(timeLeft() / 1000)}s ===`);
+  supaLog('px_run', { d: targetISO, kept: st.images.length, target: TARGET, pending: st.pending.length, gens,
+    min: Math.round((Date.now() - start) / 60000), ai: aiStat });
+  await supaFlush();
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

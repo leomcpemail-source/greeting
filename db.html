@@ -122,7 +122,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
     </div>
 
     <div class="note">
-      visitor_id เป็นรหัสสุ่มใน localStorage • ประเทศประมาณจาก timezone<br>
+      visitor_id เป็นรหัสสุ่มใน localStorage (incognito นับแยก) • เครื่องโดยประมาณ = fingerprint ua+ภาษา+timezone (นับ incognito รวมเครื่องเดิม) • ประเทศประมาณจาก timezone<br>
       <span id="updated2"></span>
     </div>
   </div>
@@ -173,17 +173,21 @@ $('datePicker').addEventListener('change', () => {
 
 /* ── fetch ── */
 function _okHost(){try{const h=location.hostname;return h==='leomcpemail-source.github.io'||h==='localhost'||h==='127.0.0.1';}catch(e){return false;}}
+let V2=true;  // false = ยังไม่ได้รัน analytics-schema-v2.sql ใน Supabase → ใช้ RPC เดิม
 async function rpc(){
   // dashboard ที่ถูกลอกไป deploy โดเมนอื่น → ทำเหมือนรหัสผ่านผิดเสมอ
   if(!_okHost())return{error:'unauthorized'};
   // day mode: ส่ง days=1 เพื่อให้ SQL filter เฉพาะวันนั้นจริงๆ
   const body = { pass: PASS, days: DATE_FILTER ? 1 : DAYS };
   if(DATE_FILTER) body.target_date = DATE_FILTER;
-  const res = await fetch(`${SB_URL}/rest/v1/rpc/dashboard_stats`, {
+  const call = async (fn)=>fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
     method:'POST',
     headers:{'Content-Type':'application/json','apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON},
     body: JSON.stringify(body)
   });
+  let res = await call('dashboard_stats2');
+  if(res.status===404){V2=false;res=await call('dashboard_stats');}   // ยังไม่ติดตั้ง v2
+  else V2=true;
   if(!res.ok) throw new Error('http '+res.status);
   return res.json();
 }
@@ -249,7 +253,8 @@ function render(d){
     <div style="font-family:'Kanit';font-size:15px;color:var(--accent);margin-bottom:12px">${title}</div>
     <div class="kpis">
       ${kpi(N(t.opens).toLocaleString(), 'เปิดใช้', true)}
-      ${kpi(N(t.unique_visitors).toLocaleString(), 'ผู้ใช้ไม่ซ้ำ')}
+      ${kpi(N(t.unique_visitors).toLocaleString(), 'ผู้ใช้ไม่ซ้ำ (visitor id)')}
+      ${t.approx_devices!=null?kpi(N(t.approx_devices).toLocaleString(), 'เครื่องโดยประมาณ (รวม incognito)', true):''}
       ${kpi(N(d.returning_visitors).toLocaleString(), 'กลับมาซ้ำ', true)}
       ${kpi(d.avg_events_per_visitor||0, 'กดเฉลี่ย/คน')}
       ${kpi(N(t.downloads).toLocaleString(), 'ดาวน์โหลด', true)}
@@ -274,6 +279,14 @@ function render(d){
         <h3>🌏 ประเทศ (ประมาณจาก timezone)</h3>
         <div class="geo-sum" id="geoSum"></div>
         <div id="tmGeo" class="treemap"></div>
+      </div>
+      <div class="panel full" id="pnlLoad" style="display:none">
+        <h3>📉 โหลดเว็บรายวัน — เปิดใช้ / ดาวน์โหลด / คัดลอก</h3>
+        <div class="cbox"><canvas id="cLoad"></canvas></div>
+      </div>
+      <div class="panel full">
+        <h3>🖼️ Pipeline สร้างรูป (GitHub Actions → Supabase)</h3>
+        <div id="pxWrap"></div>
       </div>
     </div>`;
 
@@ -321,6 +334,72 @@ function render(d){
 
   // geo
   renderGeo(d.by_tz||[]);
+
+  // โหลดเว็บรายวัน (เฉพาะ range mode + v2)
+  if(!isDay && Array.isArray(d.by_day_actions) && d.by_day_actions.length){
+    $('pnlLoad').style.display='';
+    const rows=d.by_day_actions;
+    const mkDs=(label,key,color)=>({label,data:rows.map(x=>N(x[key])),borderColor:color,
+      backgroundColor:'transparent',tension:.35,pointRadius:2});
+    const o=chartOpts();o.plugins.legend={display:true,labels:{color:TICK,boxWidth:14,font:{size:11}}};
+    mkChart('cLoad',{type:'line',data:{labels:rows.map(x=>x.day.slice(5)),
+      datasets:[mkDs('เปิดใช้','opens',GOLD),mkDs('ดาวน์โหลด','downloads','#e78f6e'),mkDs('คัดลอก','copies','#b98fe7')]},options:o});
+  }
+
+  renderPipeline(d.pipeline, isDay);
+}
+
+/* ── pipeline (สถิติ gen รูปจาก GitHub Actions) ── */
+const CAT_TH={flowers:'ดอกไม้',dharma:'ธรรมะ',inspire:'กำลังใจ',miss:'คิดถึง',birthday:'วันเกิด',elderly:'ผู้สูงวัย',
+  health:'สุขภาพ',festival:'เทศกาล',family:'ครอบครัว',pets:'สัตว์เลี้ยง',coffee:'กาแฟ',nature:'ธรรมชาติ'};
+function renderPipeline(p, isDay){
+  const w=$('pxWrap');
+  if(!V2){
+    w.innerHTML='<div style="color:var(--mut);font-size:13px;line-height:1.8">ยังไม่ได้ติดตั้งสถิติส่วนนี้ —'
+      +' รันไฟล์ <b>analytics-schema-v2.sql</b> ใน Supabase SQL Editor ครั้งเดียว (ตั้ง secret ให้ตรงรหัสเดิม)</div>';
+    return;
+  }
+  if(!p||(N(p.keeps)===0&&N(p.rejects)===0)){
+    w.innerHTML='<div style="color:var(--mut);font-size:13px">ยังไม่มีข้อมูลในช่วงนี้ — สถิติเริ่มเก็บหลัง deploy supaLog (10 มิ.ย. 2569)</div>';
+    return;
+  }
+  const keeps=N(p.keeps),rejects=N(p.rejects),total=keeps+rejects;
+  const rate=total?Math.round(keeps/total*100):0;
+  let html=`<div class="kpis" style="margin-bottom:12px">
+    ${kpi(keeps.toLocaleString(),'รูปที่เก็บ (ผ่านตรวจ)',true)}
+    ${kpi(rejects.toLocaleString(),'ทิ้ง (ไม่ผ่าน)')}
+    ${kpi(rate+'%','อัตราผ่าน',true)}
+    ${kpi(p.avg_score!=null?p.avg_score:'—','คะแนนเฉลี่ย /100')}
+  </div>`;
+  if(!isDay&&Array.isArray(p.by_day)&&p.by_day.length>1)
+    html+='<div class="cbox" style="height:170px;margin-bottom:12px"><canvas id="cPx"></canvas></div>';
+  html+='<div id="tmCat" class="treemap" style="margin-bottom:12px"></div>';
+  if(Array.isArray(p.runs)&&p.runs.length){
+    html+=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+      <tr style="color:var(--mut);text-align:left"><th style="padding:4px 8px">เวลา</th><th>วันเป้า</th><th>เก็บ/เป้า</th>
+      <th>gens</th><th>ค้าง</th><th>นาที</th><th>AI pol ✓/✗</th><th>AI gem ✓/✗</th></tr>`;
+    for(const r of p.runs){
+      let m={};try{m=JSON.parse(r.ref||'{}');}catch(e){}
+      const ai=m.ai||{},pol=ai.pol||{},gem=ai.gem||{};
+      html+=`<tr style="border-top:1px solid var(--line)"><td style="padding:5px 8px;white-space:nowrap">${r.t}</td>
+        <td>${(m.d||'').slice(5)}</td><td>${m.kept??'—'}/${m.target??'—'}</td><td>${m.gens??'—'}</td>
+        <td>${m.pending??'—'}</td><td>${m.min??'—'}</td>
+        <td>${N(pol.ok)}/<span style="color:${N(pol.fail)?'var(--red)':'var(--mut)'}">${N(pol.fail)}</span></td>
+        <td>${N(gem.ok)}/<span style="color:${N(gem.fail)?'var(--red)':'var(--mut)'}">${N(gem.fail)}</span></td></tr>`;
+    }
+    html+='</table></div>';
+  }
+  w.innerHTML=html;
+  if(!isDay&&Array.isArray(p.by_day)&&p.by_day.length>1){
+    const o=chartOpts();o.plugins.legend={display:true,labels:{color:TICK,boxWidth:14,font:{size:11}}};
+    o.scales.x.stacked=true;o.scales.y.stacked=true;
+    mkChart('cPx',{type:'bar',data:{labels:p.by_day.map(x=>x.day.slice(5)),datasets:[
+      {label:'เก็บ',data:p.by_day.map(x=>N(x.keeps)),backgroundColor:'#7fd1a0',borderRadius:3},
+      {label:'ทิ้ง',data:p.by_day.map(x=>N(x.rejects)),backgroundColor:'#e76e6e',borderRadius:3}]},options:o});
+  }
+  const PAL=['#7fd1a0','#6ea8e7','#b98fe7','#e7b96e','#5bc4d4','#e78f6e','#a0d96e','#e76e9c','#9e6ee7','#d9c76e','#6ee7c4','#e7866e'];
+  let pi=0;
+  drawTreemap('tmCat',(p.by_cat||[]).map(x=>({label:CAT_TH[x.cat]||x.cat||'?',value:N(x.n),color:PAL[pi++%PAL.length]})));
 }
 
 /* ── treemap ── */
