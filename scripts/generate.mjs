@@ -595,11 +595,11 @@ function guessCategory(subject, src) {
   if (/heart.*rose|love.*letter|missing|longing|romance|two.*chair|two.*mug|two.*tree|message.*bottle|anniversary|two sparrows/.test(txt)) return 'miss';
   if (/birthday|cake.*candle|balloon.*party|confetti|cupcake.*sprinkle|gift.*wrap|birthday.*cake/.test(txt)) return 'birthday';
   if (/elderly|grandparent|grandchild|silver.*hair|older.*couple|tai.*chi|senior|elder/.test(txt)) return 'elderly';
-  if (/yoga|breakfast.*bowl.*fruit|smoothie|stethoscope|fitness|herbal.*tea|wellness|medicine|doctor|health|stretching/.test(txt)) return 'health';
+  if (/\byoga\b|breakfast.*bowl.*fruit|smoothie|stethoscope|fitness|herbal.*tea|wellness|medicine|doctor|health|stretching/.test(txt)) return 'health';
   if (/songkran|loy.*krathong|krathong|festival|firework|new year.*celeb|christmas tree|diwali|makha|visakha|asalha|cultural.*festival|temple.*fair/.test(txt)) return 'festival';
   if (/family.*silhouette|family.*together|family.*dinner|three.*generation|father.*child|mother.*child|grandchild|sibling|family.*picnic/.test(txt)) return 'family';
-  if (/kitten|puppy|dog|cat|hamster|pet|bunny|rabbit|parrot|fish.*bowl|betta|turtle.*beach|golden.*retriever|shiba|corgi/.test(txt)) return 'pets';
-  if (/coffee|latte|espresso|cafe|cappuccino|drip.*coffee|cold brew|barista|mug.*cozy/.test(txt)) return 'coffee';
+  if (/\bkitten\b|\bpuppy\b|\bdog\b|\bcat\b|hamster|\bpet\b|\bbunny\b|rabbit|parrot|fish.*bowl|betta|turtle.*beach|golden.*retriever|shiba|corgi/.test(txt)) return 'pets';
+  if (/\bcoffee\b|latte|espresso|\bcafe\b|cappuccino|drip.*coffee|cold brew|barista|mug.*cozy/.test(txt)) return 'coffee';
   if (/mountain.*mist|waterfall|ocean.*horizon|canyon|aurora|rice.*terrace|mangrove|beach.*sunrise|bamboo.*forest|cherry.*blossom.*pond|sea.*cloud/.test(txt)) return 'nature';
   // fallback ตาม SUBJECTS เดิม
   if (/lotus|flower|bloom|ดอก/.test(txt)) return 'flowers';
@@ -1428,11 +1428,18 @@ const ALL_CATEGORIES    = ['flowers','dharma','inspire','miss','birthday','elder
 // หมวดที่เหมาะกับรูปถ่าย Pexels (ของจริง ไม่มีคน) → ใช้ดึงรูปก่อนเพื่อกัน Pollinations 429
 // หมวดเชิงความคิด (birthday/miss/inspire/dharma/festival/family/elderly) ไม่อยู่ในนี้ → ใช้ AI gen อย่างเดียว
 const CAT_PHOTO_QUERIES = {
-  flowers: ['flower macro closeup', 'blooming flowers garden', 'rose flower close up', 'lotus flower water', 'orchid flower bloom', 'sunflower field bright'],
-  nature:  ['mountain landscape sunrise', 'green forest morning mist', 'waterfall nature', 'sea beach sunrise', 'green rice field', 'lake reflection morning'],
-  coffee:  ['coffee cup on table morning', 'latte art coffee', 'roasted coffee beans', 'hot coffee steam cup'],
-  pets:    ['cute cat kitten', 'cute dog puppy', 'fluffy kitten closeup', 'golden retriever puppy'],
-  health:  ['fresh green tea cup', 'fresh fruits bowl', 'fresh vegetables healthy', 'green smoothie healthy'],
+  flowers:  ['flower macro closeup', 'blooming flowers garden', 'rose flower close up', 'lotus flower water', 'orchid flower bloom', 'sunflower field bright'],
+  nature:   ['mountain landscape sunrise', 'green forest morning mist', 'waterfall nature', 'sea beach sunrise', 'green rice field', 'lake reflection morning'],
+  coffee:   ['coffee cup on table morning', 'latte art coffee', 'roasted coffee beans', 'hot coffee steam cup'],
+  pets:     ['cute cat kitten', 'cute dog puppy', 'fluffy kitten closeup', 'golden retriever puppy'],
+  health:   ['fresh green tea cup', 'fresh fruits bowl', 'fresh vegetables healthy', 'green smoothie healthy'],
+  // หมวดเหล่านี้ก็ใช้รูปถ่ายได้ (ของจริง ไม่มีคน) — เพิ่ม มิ.ย.2569 หลัง Pollinations 429 ทำหมวด AI-gen แทบไม่โต
+  // ⚠️ query ทุกตัวต้องไม่ถูก guessCategory ตีเป็น "หมวดอื่น" (ไม่งั้น pruneOffCategoryPhotos จะวนลบทิ้ง)
+  dharma:   ['golden buddhist pagoda stupa', 'thai buddhist temple golden', 'gold buddha statue serene', 'white stupa pagoda sunrise', 'incense candle temple offering'],
+  birthday: ['birthday cake candles', 'colorful balloons celebration', 'birthday cupcake sprinkles', 'gift box ribbon bow'],
+  festival: ['lantern festival night lights', 'red chinese lanterns', 'fireworks night sky celebration', 'thai krathong lotus candle'],
+  inspire:  ['sunrise rays through clouds', 'morning golden light sky clouds', 'rainbow after rain sky', 'hot air balloon sunrise sky'],
+  // miss / family / elderly: ภาพต้องสื่อความรู้สึก/มีคน → ใช้ AI gen อย่างเดียว
 };
 
 function loadCatBank() {
@@ -1491,6 +1498,34 @@ function pruneCopiedDayCards(cb) {
     data.count = kept.length;
   }
   if (removed > 0) console.log(`  🧹 cat_bank: ตัดการ์ดรายวันที่หลุดเข้าคลัง ${removed} รูป (คลังหมวดต้องไร้วัน)`);
+  return removed;
+}
+
+// ล้างรูปถ่ายที่ "ปนหมวด" ออกจาก cat_bank — เกิดจากช่วงก่อน strict mode (มิ.ย.2569)
+// ที่ fetchStockPhoto สุ่ม QUERIES กลาง 45% ทำให้รูปพระ/เจดีย์หลุดเข้าหมวด pets/flowers ฯลฯ
+// วิธีตรวจ: รูปถ่ายทุกใบเก็บ query ที่ใช้ดึงไว้ใน src.name → ส่งเข้า guessCategory
+// ถ้าเดาได้ "หมวดอื่น" ชัดเจน = ปนหมวด ลบทิ้ง ; เดาไม่ออก (null) = ไม่แน่ใจ เก็บไว้
+function pruneOffCategoryPhotos(cb) {
+  let removed = 0;
+  for (const cat of ALL_CATEGORIES) {
+    const data = cb[cat];
+    if (!data || !Array.isArray(data.images)) continue;
+    const kept = [];
+    for (const img of data.images) {
+      const guessed = img && img.src ? guessCategory('', img.src) : null;
+      if (guessed && guessed !== cat) {
+        const base = (img.file || '').split('/').pop();
+        if (base) { try { fs.rmSync(path.join(CAT_BANK_DIR, cat, base), { force: true }); } catch (e) {} }
+        console.log(`  🧹 cat_bank[${cat}]: ลบรูปปนหมวด "${img.src.name}" (ที่จริงคือ ${guessed})`);
+        removed++;
+      } else {
+        kept.push(img);
+      }
+    }
+    data.images = kept;
+    data.count = kept.length;
+  }
+  if (removed > 0) console.log(`  🧹 cat_bank: ล้างรูปปนหมวดรวม ${removed} รูป`);
   return removed;
 }
 
@@ -1766,11 +1801,13 @@ async function main() {
   // harvest: เก็บ "สำเนาไร้วัน" ของรูป deck ที่ผ่าน vision แล้ว ลง cat_bank ตามหมวด
   // ใช้ raw + ผลตรวจ vision ที่จ่ายไปแล้วซ้ำ → ไม่เรียก genImage/vision เพิ่ม แค่ render การ์ดไร้วันอีกใบ
   // (เป็น closure ใน main เพราะต้องใช้ renderCard + catHeadlineFor ที่นิยามในนี้)
-  const harvestToCatBank = async (cb, cat, raw, hash, blessing, src) => {
+  const harvestToCatBank = async (cb, cat, raw, hash, deckBlessing, src) => {
     if (!cat || !cb[cat]) return false;
     if (cb[cat].count >= CAT_BANK_TARGET) return false;
     if (isDuplicate(hash, cb[cat].hashes || [], PHASH_THRESHOLD)) return false;
     const catHl = catHeadlineFor(cat, cb[cat].count);
+    // คำอวยพรใช้ของหมวด (ไม่ใช่คำอวยพรรายวันที่ติดมากับ deck) ให้ข้อความตรงหมวดเสมอ
+    const blessing = pickCatBlessing(cat) || deckBlessing;
     let card;
     try { card = await renderCard({ raw, blessing, withDay: false, headlineOverride: catHl || '' }); }
     catch (e) { return false; }
@@ -1922,7 +1959,8 @@ async function main() {
   // ทำให้หน้าหมวดโชว์ "สวัสดีวันพุธ" ทั้งที่วันนี้วันอังคาร — คลังหมวดต้องเติมจากรูปไร้วัน (gen, withDay:false) เท่านั้น
   {
     const cb = loadCatBank();
-    if (pruneCopiedDayCards(cb) > 0) saveCatBank(cb);
+    const n = pruneCopiedDayCards(cb) + pruneOffCategoryPhotos(cb);
+    if (n > 0) saveCatBank(cb);
   }
 
   // 3) เติม cat_bank + evergreen — cat_bank รันแม้ deck ยังไม่เต็ม (ใช้โควตาที่ออมไว้)
@@ -1937,20 +1975,19 @@ async function main() {
       console.log(`  ── cat_bank ขาด ${deficit.length} หมวด: ${deficit.map(d=>d.cat+'('+d.have+'/'+CAT_BANK_TARGET+')').join(', ')}`);
     }
     // วน round-robin ข้ามหมวด (ไม่ gen หมวดเดียวจนหมดก่อน)
-    let defIdx = 0;
+    let defIdx = 0, catTries = 0, genFailStreak = 0;
     while (deficit.length > 0 && timeLeft() > 120000 && gens < MAX_GEN_PER_RUN) {
       // เลือกหมวดถัดไป (round-robin)
       defIdx = defIdx % deficit.length;
       const { cat } = deficit[defIdx];
       if (cb[cat].count >= CAT_BANK_TARGET) { deficit.splice(defIdx, 1); continue; }
 
-      gens++;
+      catTries++;
       // เลือก subject จาก CATEGORY_SUBJECTS ของหมวดนั้น
       const catSubs = CATEGORY_SUBJECTS[cat] || [];
       const existingFiles = new Set((cb[cat].images || []).map(x => x.file));
-      const catSubIdx = gens % Math.max(catSubs.length, 1);
       const catSubject = catSubs.length > 0
-        ? catSubs[catSubIdx % catSubs.length]
+        ? catSubs[catTries % catSubs.length]
         : pickSubject(dayTheme);
 
       // หมวดที่เหมาะกับรูปถ่าย → ลอง Pexels ก่อน (เสถียร+ฟรี กัน Pollinations 429) แล้ว fallback AI gen
@@ -1968,8 +2005,19 @@ async function main() {
         try {
           const prompt = `${catSubject}, ${dayTheme.tone} color palette, soft morning light, elegant, highly detailed, beautiful, no text, no letters, no numbers, no watermark, no signature`;
           raw = await genImage(prompt, seed);
-        } catch (e) { defIdx++; continue; }
+        } catch (e) {
+          // Pollinations ล่มยาว (429 ฯลฯ): อย่าวน fail รัวๆ เผาเวลา/โควตาเปล่า — พักให้ rate-limit window ผ่านก่อน
+          genFailStreak++;
+          if (genFailStreak >= 3 && timeLeft() > 180000) {
+            console.log(`  ⏸ gen fail ติดกัน ${genFailStreak} ครั้ง — พัก 60s รอ rate-limit คลาย`);
+            await sleep(60000);
+            genFailStreak = 0;
+          }
+          defIdx++; continue;
+        }
       }
+      genFailStreak = 0;
+      gens++; // นับโควตาเมื่อ "ได้รูปจริง" เท่านั้น — fail ไม่กินโควตา (มี timeLeft() คุมเวลาอยู่แล้ว)
 
       let h; try { h = dhash(raw); } catch (e) { defIdx++; continue; }
       // dedup กับรูปใน cat_bank ของหมวดนั้น
