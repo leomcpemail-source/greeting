@@ -1958,7 +1958,7 @@ async function main() {
       const photoQs = CAT_PHOTO_QUERIES[cat];
       if (photoQs && photosEnabled()) {
         try {
-          const ph = await fetchStockPhoto(fetchT, TXT_TIMEOUT_MS, photoQs);
+          const ph = await fetchStockPhoto(fetchT, TXT_TIMEOUT_MS, photoQs, { strict: true });
           raw = ph.buffer; src = ph.src;
           console.log(`  [cat ${cat}] photo "${src.name}" by ${src.by}`);
         } catch (e) { /* รูปถ่ายล่ม → ตก AI gen ข้างล่าง */ }

@@ -83,11 +83,15 @@ export function dayFlowerQueries(flowerDesc, tone) {
 }
 
 // fetchT: fetch helper, ms: timeout, preferQueries: query list ตามสีวัน (ถ้ามีจะสุ่มจากชุดนี้ก่อน)
-export async function fetchStockPhoto(fetchT, ms = 45000, preferQueries = null) {
+// opts.strict = true: ใช้เฉพาะ preferQueries เท่านั้น (ไม่ fallback ไป QUERIES กลาง) — สำหรับ cat_bank
+//   ที่ต้องได้รูปตรงหมวดเป๊ะ ถ้าหาไม่เจอจะ throw เพื่อให้ผู้เรียกตก AI gen แทนการได้รูปผิดหมวด
+export async function fetchStockPhoto(fetchT, ms = 45000, preferQueries = null, opts = {}) {
   if (!KEY) throw new Error('no PEXELS_API_KEY');
+  const strict = !!opts.strict;
   // ถ้ามี preferQueries (สีดอกไม้วัน) ใช้ก่อน 55% เพื่อให้โทนสีตรงวัน; ที่เหลือสุ่มจาก QUERIES กลาง
   // (เพิ่มจาก 0.4 → 0.55 มิ.ย.2569: เพื่อให้สีรูปตรงกับวันมากขึ้น)
-  const usePrefer = preferQueries && preferQueries.length && Math.random() < 0.55;
+  // strict: บังคับใช้ preferQueries เสมอ (cat_bank ต้องตรงหมวด ห้ามปน QUERIES กลาง)
+  const usePrefer = preferQueries && preferQueries.length && (strict || Math.random() < 0.55);
   const pool = usePrefer ? preferQueries : QUERIES;
   const q = pool[Math.floor(Math.random() * pool.length)];
   const page = 1 + Math.floor(Math.random() * 8);
