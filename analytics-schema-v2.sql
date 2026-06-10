@@ -10,6 +10,10 @@
 --   4. user stats ทุกตัว "ไม่นับ" แถวของ pipeline (visitor_id='pipeline') — แยกขาดจากสถิติคน
 --
 -- ⚠️ แก้บรรทัด secret ให้ตรงกับรหัสผ่านเดิมใน dashboard_stats ก่อนรัน
+--
+-- แก้บั๊กเวลา (10 มิ.ย. 2569): "at time zone '+07'" ใน Postgres = UTC-7 (สเปก POSIX กลับเครื่องหมาย!)
+--   ทำให้กราฟชั่วโมง/วันเพี้ยน -14 ชม. (เข้าใช้ 06:00 ไทย ขึ้นกราฟ 16:00) → เปลี่ยนเป็น 'Asia/Bangkok'
+--   ⚠️ ถ้าเคยรันไฟล์นี้ไปแล้ว ต้อง "รันไฟล์นี้ใหม่" ใน Supabase SQL Editor (ใส่ secret เดิมก่อนรัน) ถึงจะหาย
 
 create or replace function public.dashboard_stats2(pass text, days int default 7, target_date text default null)
 returns json
@@ -62,18 +66,18 @@ begin
     'avg_events_per_visitor', (select coalesce(round(count(*)::numeric / nullif(count(distinct visitor_id),0), 1), 0) from ev),
 
     'by_day', (select coalesce(json_agg(row_to_json(j) order by j.day), '[]'::json) from (
-        select to_char(ts at time zone '+07','YYYY-MM-DD') as day, count(*) as n
+        select to_char(ts at time zone 'Asia/Bangkok','YYYY-MM-DD') as day, count(*) as n
         from ev where type = 'open' group by 1) j),
 
     'by_day_actions', (select coalesce(json_agg(row_to_json(j) order by j.day), '[]'::json) from (
-        select to_char(ts at time zone '+07','YYYY-MM-DD') as day,
+        select to_char(ts at time zone 'Asia/Bangkok','YYYY-MM-DD') as day,
                count(*) filter (where type = 'open')     as opens,
                count(*) filter (where type = 'download') as downloads,
                count(*) filter (where type = 'copy')     as copies
         from ev group by 1) j),
 
     'by_hour', (select coalesce(json_agg(row_to_json(j) order by j.hour), '[]'::json) from (
-        select extract(hour from ts at time zone '+07')::int as hour, count(*) as n
+        select extract(hour from ts at time zone 'Asia/Bangkok')::int as hour, count(*) as n
         from ev group by 1) j),
 
     'by_type', (select coalesce(json_agg(row_to_json(j) order by j.n desc), '[]'::json) from (
@@ -88,7 +92,7 @@ begin
         'avg_score', (select round(avg((ref::jsonb->>'score')::numeric), 1)
                       from px where type = 'px_keep' and ref like '{%'),
         'by_day', (select coalesce(json_agg(row_to_json(j) order by j.day), '[]'::json) from (
-            select to_char(ts at time zone '+07','YYYY-MM-DD') as day,
+            select to_char(ts at time zone 'Asia/Bangkok','YYYY-MM-DD') as day,
                    count(*) filter (where type = 'px_keep')   as keeps,
                    count(*) filter (where type = 'px_reject') as rejects
             from px group by 1) j),
@@ -96,7 +100,7 @@ begin
             select coalesce(ref::jsonb->>'cat','?') as cat, count(*) as n
             from px where type = 'px_keep' and ref like '{%' group by 1) j),
         'runs', (select coalesce(json_agg(row_to_json(j)), '[]'::json) from (
-            select to_char(ts at time zone '+07','MM-DD HH24:MI') as t, ref
+            select to_char(ts at time zone 'Asia/Bangkok','MM-DD HH24:MI') as t, ref
             from px where type = 'px_run' order by ts desc limit 12) j)
       ))
   ) into result;

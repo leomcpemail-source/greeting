@@ -218,6 +218,18 @@ html,body{
   box-shadow:0 4px 16px rgba(231,48,143,.3);transition:transform .12s;}
 .catd-use:active{transform:scale(.97)}
 
+/* lightbox ดูรูปใหญ่ก่อนเลือก — ผู้สูงอายุดูรายละเอียดชัดๆ ก่อนกดใช้/บันทึก */
+#cardPreview{position:fixed;inset:0;z-index:9998;background:rgba(22,10,18,.93);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:16px;gap:14px;}
+#cardPreview img{max-width:min(94vw,560px);max-height:64vh;border-radius:18px;box-shadow:0 10px 36px rgba(0,0,0,.55);}
+.cp-btns{display:flex;gap:12px;width:100%;max-width:420px;}
+.cp-use{flex:1.4;border:none;border-radius:16px;padding:16px 10px;background:var(--pink);color:#fff;
+  font-family:'Kanit';font-size:19px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(231,48,143,.4);transition:transform .12s;}
+.cp-use:active{transform:scale(.97)}
+.cp-close{flex:1;border:1.5px solid rgba(255,255,255,.45);border-radius:16px;padding:16px 10px;background:rgba(255,255,255,.14);
+  color:#fff;font-family:'Kanit';font-size:18px;cursor:pointer;transition:transform .12s;}
+.cp-close:active{transform:scale(.97)}
+
 /* misc */
 .msg{text-align:center;padding:40px 20px;color:var(--text2);font-size:14px;line-height:1.7}
 .msg code{background:#f5f5f5;padding:2px 6px;border-radius:6px;font-size:12px}
@@ -1058,14 +1070,33 @@ function buildCatDetailGrid(images,base,version){
     const chk=document.createElement('div');chk.className='catd-item-check';chk.textContent='✓';
     const img=document.createElement('img');img.crossOrigin='anonymous';img.loading='lazy';img.decoding='async';img.alt='';img.src=`${base}/${c.file}?v=${version}`;
     item.appendChild(img);item.appendChild(chk);
-    item.addEventListener('click',()=>{document.querySelectorAll('.catd-item').forEach(el=>el.classList.remove('selected'));item.classList.add('selected');selectedCatCard={...c,_base:base,_ver:version};});
+    item.addEventListener('click',()=>{
+      document.querySelectorAll('.catd-item').forEach(el=>el.classList.remove('selected'));item.classList.add('selected');
+      selectedCatCard={...c,_base:base,_ver:version};
+      openCardPreview(selectedCatCard);  // แตะรูป = เด้งดูใหญ่เต็มจอก่อน ค่อยตัดสินใจ
+    });
     if(i===0)selectedCatCard={...c,_base:base,_ver:version};
     grid.appendChild(item);
   });
 }
 
+/* lightbox: ดูรูปใหญ่เต็มจอก่อนเลือก — ปุ่มใหญ่อ่านง่ายสำหรับผู้สูงอายุ */
+function openCardPreview(card){
+  document.getElementById('cardPreview')?.remove();
+  const ov=document.createElement('div');ov.id='cardPreview';
+  const img=document.createElement('img');img.alt='ดูรูปใหญ่';
+  img.src=`${card._base||imgBase}/${card.file}?v=${card._ver||''}`;
+  const btns=document.createElement('div');btns.className='cp-btns';
+  const use=document.createElement('button');use.className='cp-use';use.textContent='✓ ใช้รูปนี้';
+  use.onclick=()=>{ov.remove();selectedCatCard=card;useSelectedCard();};
+  const cl=document.createElement('button');cl.className='cp-close';cl.textContent='✕ ปิด';
+  cl.onclick=()=>ov.remove();
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});  // แตะพื้นมืดก็ปิดได้
+  btns.append(use,cl);ov.append(img,btns);document.body.appendChild(ov);
+}
+
 document.getElementById('catdBack').addEventListener('click',()=>switchTab('category'));
-document.getElementById('catdUse').addEventListener('click',()=>{
+function useSelectedCard(){
   if(!selectedCatCard){toast('กรุณาเลือกรูปก่อนนะคะ');return;}
   // เก็บ base ไว้ "ต่อใบ" (ไม่แก้ imgBase ทั้งระบบ) เพื่อให้ thumbnail ใบอื่นไม่พัง
   const newCard={file:selectedCatCard.file,blessing:selectedCatCard.blessing||'',src:selectedCatCard.src||null,base:selectedCatCard._base||imgBase,headline:selectedCatCard.headline||''};
@@ -1076,7 +1107,8 @@ document.getElementById('catdUse').addEventListener('click',()=>{
   showCard(0,0);buildThumbStrip();
   const lbl=CATEGORIES.find(c=>c.id===currentCatId)?.label||'';
   toast(`✓ เปลี่ยนรูป${lbl?(' '+lbl):''}แล้ว`);track2('next');
-});
+}
+document.getElementById('catdUse').addEventListener('click',useSelectedCard);
 
 /* ── TAB NAV ── */
 function switchTab(tab){
