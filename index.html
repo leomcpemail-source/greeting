@@ -376,7 +376,7 @@ function esc(x){return String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','
 
 /* ── STATE ── */
 let M=null, CARDS=[], imgBase='';
-let _manifestCache=null,_manifestFolder='',_catBankCache=null;
+let _manifestCache=null,_manifestFolder='';
 let uBl=[];  // ใช้โดย pickBless (render state)
 
 async function getManifest(){
@@ -387,12 +387,6 @@ async function getManifest(){
   if(r&&r.ok){_manifestCache=await r.json();_manifestFolder=todayISO;return{m:_manifestCache,folder:todayISO};}
   r=await mfFetch(`img/evergreen/manifest.json`).catch(()=>null);
   if(r&&r.ok){_manifestCache=await r.json();_manifestFolder='evergreen';return{m:_manifestCache,folder:'evergreen'};}
-  return null;
-}
-async function getCatBank(){
-  if(_catBankCache)return _catBankCache;
-  const r=await mfFetch(`img/cat_bank/index.json`).catch(()=>null);
-  if(r&&r.ok){_catBankCache=await r.json();return _catBankCache;}
   return null;
 }
 /* ── MANIFEST CARD DATA ── */
@@ -783,12 +777,19 @@ function buildCard(cb,CW){
   const h=document.createElement('div');h.className='hello';
   h.style.cssText=`font-family:'${L.font}',sans-serif;font-size:${hs}px`;
   const _hl=M.headline||(M.dayTh?('สวัสดีวัน'+M.dayTh):'');
-  // วันพระ: headline 2 บรรทัด "วันนี้วันพระ" + "สวัสดีวัน..." (ตรวจจากตัวข้อความ เพื่อให้ทำงานทั้งบนเว็บและตอน bake ฝั่ง server)
-  if(_hl.startsWith('วันนี้วันพระ')){
-    const rest=_hl.replace('วันนี้วันพระ','').trim();
-    h.innerHTML=_wrap(['วันนี้','วันพระ'])+'<br>'+(rest?_segHTML(rest):'');
-  } else {
-    h.innerHTML=(M.dayTh&&_hl===('สวัสดีวัน'+M.dayTh))?_wrap(['สวัสดี','วัน'+M.dayTh]):_segHTML(_hl);
+  // headline 2 บรรทัด: "บรรทัดพิเศษ\nสวัสดีวัน..." (วันพระ/วันสำคัญ/คำหัวหมวด) — ทุกการ์ดมีสวัสดีวันเสมอ
+  // (ทำงานทั้งบนเว็บและตอน bake ฝั่ง server เพราะ composite ดึง buildCard ชุดนี้ไปใช้)
+  let _l1='',_l2=_hl;
+  const _nl=_hl.indexOf('\n');
+  if(_nl>=0){_l1=_hl.slice(0,_nl).trim();_l2=_hl.slice(_nl+1).trim();}
+  else if(_hl.startsWith('วันนี้วันพระ ')){_l1='วันนี้วันพระ';_l2=_hl.slice('วันนี้วันพระ'.length).trim();} // manifest รุ่นเก่า
+  const _line=(t)=>(M.dayTh&&t===('สวัสดีวัน'+M.dayTh))?_wrap(['สวัสดี','วัน'+M.dayTh]):_segHTML(t);
+  if(_l1){
+    // บรรทัดพิเศษยาว (เช่น "วันนี้วันเฉลิมพระชนมพรรษา...") ย่อขนาดตามความยาว ไม่ให้ล้นการ์ด
+    const _l1s=_l1.length<=13?hs:Math.max(Math.round(hs*0.45),Math.round(hs*13/_l1.length));
+    h.innerHTML=`<span style="font-size:${_l1s}px">${_segHTML(_l1)}</span><br>`+(_l2?_line(_l2):'');
+  }else{
+    h.innerHTML=_l2?_line(_l2):'';
   }
   const blEl=document.createElement('div');blEl.className='bless';blEl.style.fontSize=bsz+'px';
   blEl.innerHTML=_segHTML(bl);
@@ -986,13 +987,12 @@ function buildCatGrid(){
 }
 async function loadCatThumb(cat,card,ph){
   try{
-    const cb=await getCatBank();const cd=cb&&cb[cat.id];
+    /* thumbnail หมวด = รูปของ "วันนี้" (หมวดคือ filter ของชุดเดียวกับหน้าแรก — ทุกใบมีสวัสดีวัน) */
     let src=null;
-    if(cd&&cd.images&&cd.images.length){src=`${BASE}/img/cat_bank/${cat.id}/${cd.images[0].file}`;}
-    if(!src){const res=await getManifest();if(res){const{m,folder}=res;
+    const res=await getManifest();if(res){const{m,folder}=res;
       const all=(m.images||[]).map(x=>typeof x==='string'?{file:x,category:null}:{file:x.file,category:x.category||null});
       const fc=(m.categories&&m.categories[cat.id])||[];const fi=all.filter(x=>x.category===cat.id);
-      const ci=fc.length?fc:fi;if(ci.length)src=`${BASE}/img/${folder}/${ci[0].file}`;}}
+      const ci=fc.length?fc:fi;if(ci.length)src=`${BASE}/img/${folder}/${ci[0].file}`;}
     if(!src)return;
     const img=document.createElement('img');img.className='cat-card-img';img.crossOrigin='anonymous';img.alt=cat.label;img.src=src;
     img.onload=()=>{card.insertBefore(img,ph);ph.remove();};img.onerror=()=>{};
@@ -1007,22 +1007,20 @@ async function openCategory(cat){
   const useBtn=document.getElementById('catdUse');useBtn.disabled=true;useBtn.style.opacity='0.5';
   switchTab('catdetail');
   try{
-    const cb=await getCatBank();const cd=cb&&cb[cat.id];
-    const fromBank=cd&&cd.images&&cd.images.length?cd.images:null;
+    /* หมวด = filter ของรูป "วันนี้" (ชุดเดียวกับหน้าแรก ทุกใบมีสวัสดีวันตรงวันจริง) */
     let fromManifest=null;const res=await getManifest();
     if(res){const{m}=res;
       const all=(m.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null}:{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null});
       const fc=(m.categories&&m.categories[cat.id]&&m.categories[cat.id].length)?m.categories[cat.id]:null;
       const fi=all.filter(x=>x.category===cat.id);fromManifest=fc||(fi.length?fi:null);}
-    const rawImgs=fromBank||fromManifest;
-    if(!rawImgs||!rawImgs.length){showCatEmpty(cat,`ยังไม่มีรูป${cat.label}`);return;}
+    const rawImgs=fromManifest;
+    if(!rawImgs||!rawImgs.length){showCatEmpty(cat,`วันนี้ยังไม่มีรูป${cat.label}`);return;}
     // กันรูปซ้ำในหมวดเดียวกัน (ตัดไฟล์ชื่อเดียวกันออก)
     const _seen=new Set();
     const imgs=rawImgs.filter(x=>{const k=x&&x.file;if(!k||_seen.has(k))return false;_seen.add(k);return true;});
-    const isBank=!!fromBank;
-    const baseUrl=isBank?`${BASE}/img/cat_bank/${cat.id}`:(res?`${BASE}/img/${res.folder}`:`${BASE}/img/evergreen`);
+    const baseUrl=res?`${BASE}/img/${res.folder}`:`${BASE}/img/evergreen`;
     const ver=res&&res.m?res.m.version||'':'';
-    document.getElementById('catdCount').textContent=`${imgs.length} รูป${isBank?' (คลังถาวร)':''}`;
+    document.getElementById('catdCount').textContent=`${imgs.length} รูป`;
     useBtn.disabled=false;useBtn.style.opacity='1';
     buildCatDetailGrid(imgs,baseUrl,ver);
   }catch(e){showCatEmpty(cat,'โหลดไม่สำเร็จ ลองใหม่นะคะ');}
@@ -1035,7 +1033,7 @@ function showCatEmpty(cat,reason){
     '<div style="grid-column:1/-1;text-align:center;padding:44px 20px;">'
     +'<div style="font-size:52px;margin-bottom:14px">'+cat.ic+'</div>'
     +'<div style="font-family:Chonburi;font-size:17px;color:#3a2230;margin-bottom:10px">'+cat.label+'</div>'
-    +'<div style="font-size:14px;color:#9a8a96;line-height:1.8;margin-bottom:22px">'+reason+'<br>รูปจะเพิ่มขึ้นในวันถัดไปค่ะ</div>'
+    +'<div style="font-size:14px;color:#9a8a96;line-height:1.8;margin-bottom:22px">'+reason+'<br>รูปจะทยอยเพิ่มขึ้นระหว่างวันค่ะ</div>'
     +'<button onclick="switchTab(\'category\')" style="background:#e7308f;color:#fff;border:none;border-radius:14px;padding:12px 28px;font-family:Kanit;font-size:15px;font-weight:600;cursor:pointer;">← กลับเลือกหมวดอื่น</button>'
     +'</div>';
 }
@@ -1087,7 +1085,6 @@ async function boot(){
   catch{try{M=await tryLoad('evergreen');folder='evergreen';}
   catch{stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen สักครู่ หรือไปที่ <b>Actions → Run workflow</b></div>`;return;}}
   _manifestCache=M;_manifestFolder=folder;imgBase=`${BASE}/img/${folder}`;
-  getCatBank().catch(()=>{});
 
   CARDS=(M.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null,base:imgBase,headline:M.headline||''}:{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null,base:imgBase,headline:x.headline||M.headline||''}).filter(c=>c.file);
   // หน้าแรกแสดงคละหมวด แต่ถ้าวันนี้เกี่ยวกับหมวดใด ให้หมวดนั้นมาก่อน
