@@ -51,12 +51,19 @@ jobs:
         with:
           node-version: 20
 
+      # cache โมเดล CLIP (AI local ด่านตรวจเนื้อหา) — โหลดครั้งแรกครั้งเดียว รอบถัดไปใช้ cache
+      - name: Cache CLIP model
+        uses: actions/cache@v4
+        with:
+          path: .hf-cache
+          key: hf-clip-vit-base-patch32-v1
+
       # composite เป็นทางหลักแล้ว (รูปสำเร็จ) — ติดตั้ง Puppeteer/Chromium + jpeg-js ทุกครั้ง
       - name: Install deps
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq fonts-thai-tlwg fonts-noto-color-emoji || true
           npm init -y >/dev/null 2>&1 || true
-          npm i jpeg-js puppeteer@23
+          npm i jpeg-js puppeteer@23 @huggingface/transformers --onnxruntime-node-install-cuda=skip
           npx puppeteer browsers install chrome
 
       - name: Generate (rolling, self-stops ~85 min)
@@ -72,6 +79,7 @@ jobs:
           OUT_ROOT: 'output/img'
           PHOTO_SHARE: '0.50'          # Pollen กลับมาแล้ว (มิ.ย.2569) — AI gen 50%, Pexels 50% ; ตั้ง '1.0' ถ้า Pollen หมดอีก
           USE_POLL_VISION: '1'         # เปิด vision Pollinations (Pollen กลับมาแล้ว มิ.ย.2569) — ปิดด้วย '0' ถ้า Pollen หมดอีก
+          USE_LOCAL_VISION: '1'        # AI local (CLIP) ด่านตรวจเนื้อหาชั้นสุดท้ายของ photo-trust — ปิดด้วย '0'
 
       # publish: บีบเป็น commit เดียว (orphan) แล้ว force-push — ไม่มี history bloat แต่คงไฟล์สะสมไว้
       - name: Publish to daily-images branch

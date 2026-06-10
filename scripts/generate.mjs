@@ -27,6 +27,7 @@ const POLLINATIONS_MODEL   = process.env.POLLINATIONS_MODEL   || 'flux';
 const MIN_VOTERS = Number(process.env.MIN_VOTERS || 1);
 const PHOTO_SHARE = Number(process.env.PHOTO_SHARE || 0.50);          // สัดส่วนใช้รูปถ่าย Pexels — ลดลง (Pollen กลับมาแล้ว มิ.ย.2569: 0.92→0.50 ให้ AI gen มากขึ้น)
 const PHOTO_TRUST_NOVOTE = (process.env.PHOTO_TRUST_NOVOTE || '1') !== '0'; // รูปถ่าย curated: ถ้า AI ล่มหมด (0 โหวต) ให้ผ่านได้ (กันหน้าว่าง)
+const USE_LOCAL_VISION = (process.env.USE_LOCAL_VISION || '1') !== '0'; // AI local (CLIP) ด่านตรวจเนื้อหาชั้นสุดท้ายของ photo-trust — ปิดด้วย '0'
 const USE_POLL_VISION = (process.env.USE_POLL_VISION || '1') === '1';   // vision ฝั่ง Pollinations — เปิดเป็นค่าเริ่มต้น (Pollen กลับมาแล้ว มิ.ย.2569) ปิดได้ด้วย env USE_POLL_VISION=0
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 const GROQ_API_KEY       = process.env.GROQ_API_KEY       || '';
@@ -1724,6 +1725,19 @@ async function main() {
   const voters = [{ name: 'gemini', fn: visionGemRubric }];
   if (USE_POLL_VISION) voters.unshift({ name: 'pollinations', fn: visionPollRubric });
   console.log(`  ✦ voters: ${voters.map(v=>v.name).join('+')} | passScore=${PASS_SCORE} minClarity=${MIN_CLARITY} minVoters=${MIN_VOTERS}`);
+
+  // ── AI local (CLIP บนเครื่อง runner) — ด่านเนื้อหาชั้นสุดท้ายของ photo-trust เท่านั้น ──
+  // import ล้ม → ใช้ no-op ต่อ (พฤติกรรมเดิม) ห้าม crash
+  let localCheck = async () => null;
+  if (USE_LOCAL_VISION) {
+    try {
+      const lv = await import('./lib/localvision.mjs');
+      localCheck = lv.localContentCheck;
+      console.log('  ✦ local vision: เปิดใช้ CLIP (photo-trust ด่านสุดท้าย)');
+    } catch (e) {
+      console.log(`  ! local vision import ไม่สำเร็จ (${e.message}) — ใช้พฤติกรรมเดิม`);
+    }
+  }
   const aiStat = { pol: { ok: 0, fail: 0 }, gem: { ok: 0, fail: 0 } };
   const panel = async (cardBuf) => {
     const r = await scorePanel(cardBuf, voters, { passScore: PASS_SCORE, minClarity: MIN_CLARITY, minVoters: MIN_VOTERS });
@@ -1897,11 +1911,19 @@ async function main() {
       supaLog('px_keep', { d: targetISO, cat: imgCat, score: r.score, src: src ? 1 : 0 });
     } else if (r.decision === 'pending' && src && PHOTO_TRUST_NOVOTE && (r.perAI||[]).every(a => !a.scores)) {
       // รูปถ่าย royalty-free + AI ล่มหมด → trust (กัน keyword กรองที่ photos.mjs แทน ไม่เพิ่ม Gemini call)
-      st.images.push({ file: fname, score: 60, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline });
-      if (imgCat && catCount[imgCat] != null) catCount[imgCat]++;
-      catFails[cat] = 0;
-      console.log(`  ✓ keep(photo-trust) ${fname} [${src.name}] ${imgCat}=${catCount[imgCat]||0}/${CAT_TARGET}`);
-      supaLog('px_keep', { d: targetISO, cat: imgCat, score: 60, src: 1, trust: 1 });
+      // ด่านสุดท้าย: AI local (CLIP) ตรวจเนื้อหารูปก่อนปล่อยผ่าน — ตรวจไม่ได้ (null) = พฤติกรรมเดิม
+      const lc = await localCheck(raw).catch(() => null);
+      if (lc && lc.ok === false) {
+        fs.rmSync(path.join(dir, fname), { force: true });
+        console.log(`  ✗ reject(local) ${fname} เนื้อหาไม่เหมาะ: ${lc.label} ${Math.round(lc.conf * 100)}%`);
+        supaLog('px_reject', { d: targetISO, cat: imgCat, reason: ('local:' + lc.label).slice(0, 120) });
+      } else {
+        st.images.push({ file: fname, score: 60, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline });
+        if (imgCat && catCount[imgCat] != null) catCount[imgCat]++;
+        catFails[cat] = 0;
+        console.log(`  ✓ keep(photo-trust${lc ? '·local:ok' : ''}) ${fname} [${src.name}] ${imgCat}=${catCount[imgCat]||0}/${CAT_TARGET}`);
+        supaLog('px_keep', { d: targetISO, cat: imgCat, score: 60, src: 1, trust: 1, lv: lc ? 1 : 0 });
+      }
     } else if (r.decision === 'pending') {
       st.pending.push({ file: fname, blessing, baseId, seed, src, tries: 0, headline: cardHeadline, subject: subject || null, category: imgCat || null });
       console.log(`  … pending ${fname} (${r.reason}) [${(r.perAI||[]).map(a=>`${a.name}:${a.error?('ERR '+a.error):(a.scores?'ok':'no-json')}`).join(' | ')}]`);
