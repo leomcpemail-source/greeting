@@ -11,7 +11,10 @@ import { photosEnabled, fetchStockPhoto, dayFlowerQueries } from './lib/photos.m
 // ---------- ตั้งค่า ----------
 // GitHub Actions free tier: job timeout สูงสุด 1h30m (5400วิ)
 // ประมาณการ: ~90วิ/รูป (จาก log จริง) × 40 รูป = 60 นาที + buffer 30 นาที = 90 นาที ✓
-const TARGET = 30;               // ลด 40 → 30 ให้ "ทุกรูป" ผ่าน vision ได้ภายในงบเวลา (carousel สุ่ม combo ได้ไม่จำกัดอยู่แล้ว 30 รูปพอ)
+// เป้ารายวัน = "ต่อหมวด" (เจ้าของกำหนด มิ.ย.2569): ทุกหมวดต้องมีอย่างน้อย CAT_TARGET รูป/วัน
+// รวม = CAT_TARGET × 12 หมวด (~360 รูป/วัน) — เติมสะสมข้ามรอบด้วย rolling pipeline
+const CAT_TARGET = Number(process.env.CAT_TARGET || 30);   // รูปขั้นต่ำต่อหมวดต่อวัน
+const TARGET = Number(process.env.TARGET || 0) || CAT_TARGET * 12; // 12 = ALL_CATEGORIES.length
 const MAX_ATTEMPTS = 60;         // TARGET * 2 (เผื่อ reject ~50%)
 const IMG_SIZE = 800;
 const MIN_GAP_MS = 15500;       // เว้นขั้นต่ำระหว่าง request Pollinations (โควต้า ~1/15วิ)
@@ -1434,10 +1437,7 @@ const RUN_BUDGET_MS     = Number(process.env.RUN_BUDGET_MS     || 85 * 60 * 1000
 const PHASH_THRESHOLD   = Number(process.env.PHASH_THRESHOLD   || 6);   // ยิ่งน้อยยิ่งเข้มงวด (กันรูปซ้ำ)
 const MAX_SUBJECT_REPEAT= Number(process.env.MAX_SUBJECT_REPEAT|| 3);
 const MAX_PENDING_TRIES = Number(process.env.MAX_PENDING_TRIES || 3);
-const MAX_GEN_PER_RUN   = Number(process.env.MAX_GEN_PER_RUN   || 200); // กัน loop หลุดเผาโควตา
-// สัดส่วนรูป deck รายวันที่ gen แบบ "เจาะหมวด" (round-robin 12 หมวด) เพื่อให้ tab หมวด
-// มีรูปของวันนี้ครบทุกหมวด — รูปพวกนี้อยู่หน้าแรกด้วย (ทุกรูปที่ gen ต้องโชว์หน้าแรก)
-const CATEGORY_MIX = Number(process.env.CATEGORY_MIX || 0.5);
+const MAX_GEN_PER_RUN   = Number(process.env.MAX_GEN_PER_RUN   || 300); // กัน loop หลุดเผาโควตา
 const BASE_REUSE_GAP_DAYS = Number(process.env.BASE_REUSE_GAP_DAYS || 21); // base เดิมเว้นกี่วันถึงใช้ซ้ำ
 const BASE_MAX_SHARE    = Number(process.env.BASE_MAX_SHARE    || (1 / 3)); // สัดส่วน base ต่อวัน
 const EVERGREEN_TARGET  = Number(process.env.EVERGREEN_TARGET  || 40);
@@ -1460,6 +1460,10 @@ const CAT_PHOTO_QUERIES = {
   birthday: ['birthday cake candles', 'colorful balloons celebration', 'birthday cupcake sprinkles', 'gift box ribbon bow'],
   festival: ['lantern festival night lights', 'red chinese lanterns', 'fireworks night sky celebration', 'thai krathong lotus candle'],
   inspire:  ['sunrise rays through clouds', 'morning golden light sky clouds', 'rainbow after rain sky', 'hot air balloon sunrise sky'],
+  // หมวดเชิงความรู้สึก — ใช้ภาพเชิงสัญลักษณ์/เงา ไม่เอาหน้าคนโคลสอัพ (BLOCKED_ALT_KEYWORDS ช่วยกรองซ้ำ)
+  miss:     ['two coffee cups together table', 'red roses bouquet romantic', 'heart shape rose petals', 'love letter envelope dried flowers', 'two birds together branch'],
+  family:   ['family silhouette sunset beach', 'family walking silhouette sunrise', 'family holding hands silhouette', 'warm home window light evening'],
+  elderly:  ['elderly couple walking park behind', 'grandparent child hands holding', 'elderly hands tea cup', 'old couple silhouette sunset bench'],
 };
 // ⚠️ ระบบ cat_bank (คลังรูปไร้วันแยกหมวด) ถูกถอดออกแล้ว (มิ.ย.2569) — เจ้าของชี้ว่าหมวด
 // คือ "การ์ดสวัสดีชุดเดียวกัน แบ่งตามภาพพื้นหลัง" ทุกใบต้องมี "สวัสดีวัน..." เสมอ
@@ -1642,10 +1646,10 @@ async function main() {
 
   // คลังคำอวยพร "ทั่วไป": gen ครั้งเดียวต่อวัน — ใช้กับการ์ดภาพทั่วไป (สวัสดีวันอย่างเดียว)
   // วันพิเศษก็ gen ชุดทั่วไปเสมอ เพราะการ์ดภาพทั่วไปของวันนั้นใช้คำปกติ (เจ้าของ: คนต่างศาสนาก็ใช้ได้)
-  if (!st.blessings || st.blessings.length < TARGET) {
+  if (!st.blessings || st.blessings.length < Math.min(TARGET, 40)) {
     try {
       // วันสำคัญแบบ ownBlessings/solemn (ราชพิธี/วันรำลึก): gen แบบวันปกติ ไม่อิงธีม
-      const bl = await genBlessingsGemini({ dayTh: dayTheme.th, headline: fest ? fest.headline : helloLine, isFestival: !!fest && !fest.ownBlessings, n: TARGET, extraContext: '' });
+      const bl = await genBlessingsGemini({ dayTh: dayTheme.th, headline: fest ? fest.headline : helloLine, isFestival: !!fest && !fest.ownBlessings, n: Math.min(TARGET, 40), extraContext: '' });
       if (bl && bl.length) st.blessings = bl;
     } catch (e) { console.log('blessings gen fail:', e.message); }
     if (!st.blessings || !st.blessings.length)
@@ -1746,74 +1750,78 @@ async function main() {
   st.pending = stillPending;
   saveManifest(dir, st);
 
-  // 2) สร้างเพิ่มจนครบ target
+  // 2) เติมจนทุกหมวดมีอย่างน้อย CAT_TARGET รูป (เจ้าของกำหนด: 30 รูป/หมวด/วัน)
+  // เลือก "หมวดที่ขาดมากสุด" ก่อนเสมอ — ทุกรูปอยู่หน้าแรก, tab หมวดคือ filter ของชุดเดียวกัน
   const bank = loadBank();
-  const baseBudget = Math.floor(TARGET * BASE_MAX_SHARE);
-  let baseUsed = st.images.filter(i => i.baseId).length;
-
-  // round-robin หมวดสำหรับ "gen เจาะหมวด" — ให้ tab หมวดมีรูปของวันนี้ครบทุกหมวด
-  let catRR = st.images.length;
+  const catCount = {};
+  for (const c of ALL_CATEGORIES) catCount[c] = 0;
+  for (const i of st.images) if (i.category && catCount[i.category] != null) catCount[i.category]++;
+  const MAX_CAT_FAILS = 6;  // หมวดไหนล้มติดกันเกินนี้ (แหล่งรูปล่ม) พักหมวดนั้นไว้รอบนี้
+  const catFails = {};
+  const nextDeficitCat = () => {
+    let best = null;
+    for (const c of ALL_CATEGORIES) {
+      if (catCount[c] >= CAT_TARGET) continue;
+      if ((catFails[c] || 0) >= MAX_CAT_FAILS) continue;
+      if (best == null || catCount[c] < catCount[best]) best = c;
+    }
+    return best;
+  };
+  const pickCatSubject = (c) => {
+    const subs = (CATEGORY_SUBJECTS[c] || []).filter(x => (st.subjectCount[x] || 0) < MAX_SUBJECT_REPEAT);
+    return subs.length ? subs[Math.floor(Math.random() * subs.length)] : pickSubject(theme);
+  };
 
   while (st.images.length < TARGET && timeLeft() > 90000 && gens < MAX_GEN_PER_RUN) {
-    gens++;
     let raw, baseId = null, seed = null, subject = null, hash, src = null;
     let themed = false;   // true = ภาพตรงธีมวันพิเศษ → ได้บรรทัดพิเศษ (วันนี้วันพระ/ชื่อวันสำคัญ)
-    let cat = null;       // หมวดที่ตั้งใจ gen (รู้แน่ ไม่ต้องเดา)
+    let cat = null;       // หมวดที่ตั้งใจเติม (รู้แน่ ไม่ต้องเดา)
 
-    const elig = bank.bases.filter(b => !b.lastUsed || daysBetween(b.lastUsed, targetISO) >= BASE_REUSE_GAP_DAYS);
-    const useBank = baseUsed < baseBudget && elig.length > 0 && Math.random() < 0.4; // บางครั้งดึง base มาเร่ง
+    // ธีมวันพิเศษ: นับเข้าหมวดของธีม (เทศกาล→festival, วันพระ→dharma)
+    if (fest && Math.random() < FEST_SUBJECT_RATIO && catCount.festival < CAT_TARGET) {
+      themed = true; cat = 'festival';
+      subject = fest.subjects[Math.floor(Math.random() * fest.subjects.length)];
+    } else if (wanPhra && Math.random() < 0.50 && catCount.dharma < CAT_TARGET) {
+      themed = true; cat = 'dharma';
+      subject = pickCatSubject('dharma');
+    } else {
+      cat = nextDeficitCat();
+      if (!cat) break;  // ทุกหมวดครบ (หรือพักหมดเพราะแหล่งรูปล่ม) — จบรอบนี้
+    }
+    gens++;
 
+    const markFail = () => { catFails[cat] = (catFails[cat] || 0) + 1; };
     try {
-      if (useBank) {
-        const b = elig[Math.floor(Math.random() * elig.length)];
-        raw = fs.readFileSync(path.join(EVERGREEN_DIR, b.raw));
-        baseId = b.id; src = b.src || null;
-      } else if (fest && Math.random() < FEST_SUBJECT_RATIO) {
-        // ภาพตรงธีมวันสำคัญ/เทศกาล → การ์ดนี้จะขึ้นบรรทัดพิเศษของวัน
-        themed = true;
-        subject = fest.subjects[Math.floor(Math.random() * fest.subjects.length)];
-      } else if (wanPhra && Math.random() < 0.50) {
-        // วันพระ: ~ครึ่งหนึ่งเป็นภาพวัด/ธรรมะ → ขึ้น "วันนี้วันพระ" เฉพาะใบพวกนี้
-        themed = true; cat = 'dharma';
-        const dharmaSubs = CATEGORY_SUBJECTS.dharma;
-        subject = dharmaSubs[Math.floor(Math.random() * dharmaSubs.length)];
-      } else if (Math.random() < CATEGORY_MIX) {
-        // gen เจาะหมวด (round-robin) — รูปอยู่หน้าแรกด้วย และ tab หมวดกรองเจอแน่นอน
-        cat = ALL_CATEGORIES[catRR % ALL_CATEGORIES.length]; catRR++;
-        const photoQs = CAT_PHOTO_QUERIES[cat];
-        if (photoQs && photosEnabled() && Math.random() < PHOTO_SHARE) {
-          try {
-            const ph = await fetchStockPhoto(fetchT, TXT_TIMEOUT_MS, photoQs, { strict: true });
-            raw = ph.buffer; src = ph.src;
-            console.log(`[${gens}] photo[${cat}] "${src.name}" by ${src.by} (${st.images.length}/${TARGET})`);
-          } catch (e) { /* รูปถ่ายล่ม → ตก AI gen ด้วย subject ของหมวด */ }
-        }
-        if (!raw) {
-          const subs = CATEGORY_SUBJECTS[cat] || [];
-          subject = subs.length ? subs[Math.floor(Math.random() * subs.length)] : pickSubject(theme);
-        }
-      } else if (photosEnabled() && Math.random() < PHOTO_SHARE) {
-        // รูปถ่าย royalty-free (ดอกไม้/ต้นไม้/สถานที่ ไม่มีคน) — ใส่เครดิตผ่านปุ่ม i ในเว็บ
-        try {
-          const ph = await fetchStockPhoto(fetchT, TXT_TIMEOUT_MS, dayFlowerQueries(theme.flower, theme.tone));
-          raw = ph.buffer; src = ph.src;
-          console.log(`[${gens}] photo "${src.name}" by ${src.by} (${st.images.length}/${TARGET})`);
-        } catch (e) { console.log('  (photo fail):', e.message); }
-      }
-      if (!raw) {
-        if (!subject) subject = pickSubject(theme);
-        if ((st.subjectCount[subject] || 0) >= MAX_SUBJECT_REPEAT) continue;
+      const photoQs = CAT_PHOTO_QUERIES[cat];
+      const tryPhoto = async () => {
+        const ph = await fetchStockPhoto(fetchT, TXT_TIMEOUT_MS, photoQs, { strict: true });
+        raw = ph.buffer; src = ph.src; subject = null;
+        console.log(`[${gens}] photo[${cat}] "${src.name}" by ${src.by} (${st.images.length}/${TARGET})`);
+      };
+      const tryGen = async () => {
+        if (!subject) subject = pickCatSubject(cat);
         do { seed = Math.floor(Math.random() * 1e9); } while (st.usedSeeds.includes(seed));
         const prompt = `${subject}, ${theme.tone} color palette, soft golden morning light, dreamy, elegant, highly detailed, beautiful, no text, no letters, no numbers, no watermark, no signature`;
-        console.log(`[${gens}] gen seed=${seed}${cat ? ` [${cat}]` : ''}${themed ? ' [ธีมวันพิเศษ]' : ''} (${st.images.length}/${TARGET})`);
+        console.log(`[${gens}] gen seed=${seed} [${cat}]${themed ? ' [ธีมวันพิเศษ]' : ''} (${st.images.length}/${TARGET})`);
         raw = await genImage(prompt, seed);
-      }
-    } catch (e) { console.log('  ! gen:', e.message); continue; }
+      };
+      if (themed) await tryGen();   // ภาพธีมวันพิเศษต้องเป็นภาพตามธีม (AI gen)
+      else if (photoQs && photosEnabled()) {
+        // สลับรูปถ่าย/AI ตาม PHOTO_SHARE — ตัวไหนล่มถอยไปอีกตัวเสมอ (กันหมวดค้างเมื่อแหล่งหนึ่งล่ม)
+        if (Math.random() < PHOTO_SHARE) {
+          try { await tryPhoto(); } catch (e) { await tryGen(); }
+        } else {
+          try { await tryGen(); } catch (e) { subject = null; await tryPhoto(); }
+        }
+      } else await tryGen();
+    } catch (e) { markFail(); console.log(`  ! gen[${cat}]:`, e.message); continue; }
+    if (!raw) { markFail(); continue; }
 
     // dedup ก่อน composite (ประหยัด) — เช็คทั้งวันนี้ + 7 วันย้อนหลัง
     try { hash = dhash(raw); } catch (e) { continue; }
     if (isDuplicate(hash, st.hashes, PHASH_THRESHOLD) || isDuplicate(hash, weekHashes, PHASH_THRESHOLD)) {
       if (seed != null) st.usedSeeds.push(seed);
+      markFail();  // ซ้ำบ่อย = คลังรูปหมวดนี้เริ่มตัน — นับเป็น fail เพื่อให้สลับไปหมวดอื่นก่อน
       console.log('  ↺ รูปซ้ำ (วันนี้/7วัน) ทิ้ง');
       continue;
     }
@@ -1854,13 +1862,16 @@ async function main() {
 
     if (r.decision === 'keep') {
       st.images.push({ file: fname, score: r.score, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline });
-      if (baseId) { baseUsed++; const b = bank.bases.find(x => x.id === baseId); if (b) { b.lastUsed = targetISO; b.uses = (b.uses || 0) + 1; } }
+      if (imgCat && catCount[imgCat] != null) catCount[imgCat]++;
+      catFails[cat] = 0;
       const scoreBreak = (r.perAI||[]).filter(a=>a.scores).map(a=>`${a.name}:c${a.scores.clarity}b${a.scores.beauty}w${a.scores.warmth}q${a.scores.quality}`).join(' | ');
-      console.log(`  ✓ keep ${fname} (${r.score}) [${scoreBreak}]`);
+      console.log(`  ✓ keep ${fname} (${r.score}) [${scoreBreak}] ${imgCat}=${catCount[imgCat]||0}/${CAT_TARGET}`);
     } else if (r.decision === 'pending' && src && PHOTO_TRUST_NOVOTE && (r.perAI||[]).every(a => !a.scores)) {
       // รูปถ่าย royalty-free + AI ล่มหมด → trust (กัน keyword กรองที่ photos.mjs แทน ไม่เพิ่ม Gemini call)
       st.images.push({ file: fname, score: 60, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline });
-      console.log(`  ✓ keep(photo-trust) ${fname} [${src.name}] cat=${imgCat||'?'}`);
+      if (imgCat && catCount[imgCat] != null) catCount[imgCat]++;
+      catFails[cat] = 0;
+      console.log(`  ✓ keep(photo-trust) ${fname} [${src.name}] ${imgCat}=${catCount[imgCat]||0}/${CAT_TARGET}`);
     } else if (r.decision === 'pending') {
       st.pending.push({ file: fname, blessing, baseId, seed, src, tries: 0, headline: cardHeadline, subject: subject || null, category: imgCat || null });
       console.log(`  … pending ${fname} (${r.reason}) [${(r.perAI||[]).map(a=>`${a.name}:${a.error?('ERR '+a.error):(a.scores?'ok':'no-json')}`).join(' | ')}]`);
@@ -1913,6 +1924,11 @@ async function main() {
   try { await renderer.close(); } catch (e) {}
   saveManifest(dir, st);
   saveRecentHashes(recentHashes, targetISO);  // บันทึก hash 7 วันกันภาพซ้ำข้ามสัปดาห์
+  {
+    const cc = {}; for (const c of ALL_CATEGORIES) cc[c] = 0;
+    for (const i of st.images) if (i.category && cc[i.category] != null) cc[i.category]++;
+    console.log(`  หมวด: ${ALL_CATEGORIES.map(c => `${c}=${cc[c]}/${CAT_TARGET}`).join(' ')}`);
+  }
   console.log(`=== [done] target ${targetISO} เก็บ ${st.images.length}/${TARGET} ค้าง ${st.pending.length} gens ${gens} เหลือเวลา ${Math.round(timeLeft() / 1000)}s ===`);
 }
 

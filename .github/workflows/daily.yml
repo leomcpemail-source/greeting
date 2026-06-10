@@ -67,7 +67,7 @@ jobs:
           POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
           # ออปชัน: ใส่คีย์เพื่อเปิดรูปถ่าย royalty-free (ดอกไม้/ต้นไม้/สถานที่) จาก Pexels
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-          TARGET: '30'
+          CAT_TARGET: '30'          # รูปขั้นต่ำต่อหมวด/วัน (รวม ~360/วัน = 12 หมวด) — อย่าใส่ TARGET ทับ ไม่งั้นเป้ารายหมวดเพี้ยน
           RUN_BUDGET_MS: '5100000'  # 85 นาที
           OUT_ROOT: 'output/img'
           PHOTO_SHARE: '0.50'          # Pollen กลับมาแล้ว (มิ.ย.2569) — AI gen 50%, Pexels 50% ; ตั้ง '1.0' ถ้า Pollen หมดอีก

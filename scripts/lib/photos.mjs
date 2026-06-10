@@ -82,33 +82,44 @@ export function dayFlowerQueries(flowerDesc, tone) {
   return out;
 }
 
+// cache ผลค้นหาต่อ query — 1 search ได้ ~15 รูป ใช้ทีละรูปจนหมดค่อยค้นหน้าใหม่
+// จำเป็นเมื่อเติมรูปจำนวนมาก/วัน (30 รูป × 12 หมวด): ลด search call ~10 เท่า
+// กันชน rate limit Pexels (200 req/ชม., 20k/เดือน)
+const _searchCache = new Map();  // query -> photo[] (ที่ยังไม่ถูกใช้)
+
 // fetchT: fetch helper, ms: timeout, preferQueries: query list ตามสีวัน (ถ้ามีจะสุ่มจากชุดนี้ก่อน)
-// opts.strict = true: ใช้เฉพาะ preferQueries เท่านั้น (ไม่ fallback ไป QUERIES กลาง) — สำหรับ cat_bank
+// opts.strict = true: ใช้เฉพาะ preferQueries เท่านั้น (ไม่ fallback ไป QUERIES กลาง) — สำหรับรูปเจาะหมวด
 //   ที่ต้องได้รูปตรงหมวดเป๊ะ ถ้าหาไม่เจอจะ throw เพื่อให้ผู้เรียกตก AI gen แทนการได้รูปผิดหมวด
 export async function fetchStockPhoto(fetchT, ms = 45000, preferQueries = null, opts = {}) {
   if (!KEY) throw new Error('no PEXELS_API_KEY');
   const strict = !!opts.strict;
   // ถ้ามี preferQueries (สีดอกไม้วัน) ใช้ก่อน 55% เพื่อให้โทนสีตรงวัน; ที่เหลือสุ่มจาก QUERIES กลาง
-  // (เพิ่มจาก 0.4 → 0.55 มิ.ย.2569: เพื่อให้สีรูปตรงกับวันมากขึ้น)
-  // strict: บังคับใช้ preferQueries เสมอ (cat_bank ต้องตรงหมวด ห้ามปน QUERIES กลาง)
+  // strict: บังคับใช้ preferQueries เสมอ (รูปเจาะหมวดต้องตรงหมวด ห้ามปน QUERIES กลาง)
   const usePrefer = preferQueries && preferQueries.length && (strict || Math.random() < 0.55);
   const pool = usePrefer ? preferQueries : QUERIES;
   const q = pool[Math.floor(Math.random() * pool.length)];
-  const page = 1 + Math.floor(Math.random() * 8);
-  const res = await fetchT(
-    `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=15&page=${page}&orientation=square`,
-    { headers: { Authorization: KEY } }, ms);
-  if (!res.ok) throw new Error('pexels http ' + res.status);
-  const data = await res.json();
-  // กรองรูปที่ alt/description มี keyword ไม่เหมาะ
-  const list = (data.photos || []).filter(p => {
-    if (!p || !p.src || !(p.src.large || p.src.original)) return false;
-    const altLow = (p.alt || p.photographer_url || '').toLowerCase();
-    const urlLow = (p.url || '').toLowerCase();
-    return !BLOCKED_ALT_KEYWORDS.some(kw => altLow.includes(kw) || urlLow.includes(kw));
-  });
-  if (!list.length) throw new Error('no safe photos for ' + q);
-  const p = list[Math.floor(Math.random() * list.length)];
+
+  let list = _searchCache.get(q);
+  if (!list || !list.length) {
+    const page = 1 + Math.floor(Math.random() * 8);
+    const res = await fetchT(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=15&page=${page}&orientation=square`,
+      { headers: { Authorization: KEY } }, ms);
+    if (!res.ok) throw new Error('pexels http ' + res.status);
+    const data = await res.json();
+    // กรองรูปที่ alt/description มี keyword ไม่เหมาะ
+    list = (data.photos || []).filter(p => {
+      if (!p || !p.src || !(p.src.large || p.src.original)) return false;
+      const altLow = (p.alt || p.photographer_url || '').toLowerCase();
+      const urlLow = (p.url || '').toLowerCase();
+      return !BLOCKED_ALT_KEYWORDS.some(kw => altLow.includes(kw) || urlLow.includes(kw));
+    });
+    // สลับลำดับ ให้การหยิบทีละรูปไม่เรียงตาม popularity เป๊ะ
+    for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+    _searchCache.set(q, list);
+  }
+  if (!list.length) { _searchCache.delete(q); throw new Error('no safe photos for ' + q); }
+  const p = list.pop();  // ใช้แล้วตัดออก — เรียกครั้งถัดไปได้รูปอื่นจากผลค้นเดิม
   const imgUrl = p.src.large2x || p.src.large || p.src.original;
   const imgRes = await fetchT(imgUrl, {}, ms);
   if (!imgRes.ok) throw new Error('pexels img http ' + imgRes.status);

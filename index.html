@@ -437,6 +437,16 @@ function computeSize(){
   CW=Math.max(180,Math.min(Math.round(sw*0.98),Math.round(sh*0.98)));
 }
 
+/* preload เฉพาะรูปรอบๆ ใบปัจจุบัน (±2) — deck ใหญ่ (หลายร้อยใบ) ห้ามโหลดทีเดียวทั้งหมด */
+const _preloaded=new Set();
+function preloadNeighbors(idx){
+  for(const d of[1,-1,2,-2]){
+    const c=cardFor(idx+d);if(!c||!c.file)continue;
+    const url=`${c.base||imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;
+    if(_preloaded.has(url))continue;_preloaded.add(url);
+    const im=new Image();im.crossOrigin='anonymous';im.decoding='async';im.src=url;
+  }
+}
 function showCard(idx,dir){
   if(!CARDS.length)return;
   curIdx=((idx%CARDS.length)+CARDS.length)%CARDS.length;
@@ -448,6 +458,7 @@ function showCard(idx,dir){
   curCardEl=cw.querySelector('.card');
   if(dir){requestAnimationFrame(()=>{cw.style.transition='opacity .28s,transform .28s';cw.style.opacity='1';cw.style.transform='translateX(0)';});}
   updateThumbActive();
+  preloadNeighbors(curIdx);
 }
 
 function nextCard(){showCard(curIdx+1,1);track2('next');}
@@ -499,7 +510,8 @@ function buildThumbStrip(){
   const row=document.getElementById('thumbRow');row.innerHTML='';
   CARDS.forEach((c,i)=>{
     const t=document.createElement('div');t.className='thumb'+(i===0?' active':'');
-    const img=document.createElement('img');img.src=`${c.base||imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;img.alt='';
+    const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.alt='';
+    img.src=`${c.base||imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;
     t.appendChild(img);
     t.addEventListener('click',()=>{showCard(i,i>curIdx?1:-1);});
     row.appendChild(t);
@@ -1044,7 +1056,7 @@ function buildCatDetailGrid(images,base,version){
   images.forEach((c,i)=>{
     const item=document.createElement('div');item.className='catd-item'+(i===0?' selected':'');
     const chk=document.createElement('div');chk.className='catd-item-check';chk.textContent='✓';
-    const img=document.createElement('img');img.crossOrigin='anonymous';img.alt='';img.src=`${base}/${c.file}?v=${version}`;
+    const img=document.createElement('img');img.crossOrigin='anonymous';img.loading='lazy';img.decoding='async';img.alt='';img.src=`${base}/${c.file}?v=${version}`;
     item.appendChild(img);item.appendChild(chk);
     item.addEventListener('click',()=>{document.querySelectorAll('.catd-item').forEach(el=>el.classList.remove('selected'));item.classList.add('selected');selectedCatCard={...c,_base:base,_ver:version};});
     if(i===0)selectedCatCard={...c,_base:base,_ver:version};
@@ -1139,7 +1151,7 @@ async function boot(){
   document.getElementById('actions').style.display='';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     showCard(0,0);attachSwipe();buildThumbStrip();
-    CARDS.forEach(c=>{const im=new Image();im.crossOrigin='anonymous';im.src=`${c.base||imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;});
+    preloadNeighbors(0);  // โหลดเฉพาะใบข้างเคียง — ที่เหลือทยอยโหลดตอนผู้ใช้เลื่อนถึง
     if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>requestAnimationFrame(relayout));
   }));
   buildCatGrid();
