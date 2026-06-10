@@ -173,7 +173,8 @@ $('datePicker').addEventListener('change', () => {
 
 /* ── fetch ── */
 function _okHost(){try{const h=location.hostname;return h==='leomcpemail-source.github.io'||h==='localhost'||h==='127.0.0.1';}catch(e){return false;}}
-let V2=true;  // false = ยังไม่ได้รัน analytics-schema-v2.sql ใน Supabase → ใช้ RPC เดิม
+let V2=true;          // false = ยังไม่ได้รัน analytics-schema-v2.sql ใน Supabase → ใช้ RPC เดิม
+let V2_BAD_SECRET=false; // true = v2 ติดตั้งแล้วแต่ secret ไม่ตรงรหัสเดิม (ลืมแก้ CHANGE_ME)
 async function rpc(){
   // dashboard ที่ถูกลอกไป deploy โดเมนอื่น → ทำเหมือนรหัสผ่านผิดเสมอ
   if(!_okHost())return{error:'unauthorized'};
@@ -185,9 +186,21 @@ async function rpc(){
     headers:{'Content-Type':'application/json','apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON},
     body: JSON.stringify(body)
   });
+  V2=true;V2_BAD_SECRET=false;
   let res = await call('dashboard_stats2');
   if(res.status===404){V2=false;res=await call('dashboard_stats');}   // ยังไม่ติดตั้ง v2
-  else V2=true;
+  else if(res.ok){
+    const d = await res.json();
+    if(d?.error!=='unauthorized') return d;
+    // v2 ปฏิเสธรหัส → ลองรหัสเดิมกับ RPC เก่า: ถ้าผ่าน = secret ใน v2 ไม่ตรง (ห้ามล็อกผู้ดูแลออก)
+    const res0 = await call('dashboard_stats');
+    if(res0.ok){
+      const d0 = await res0.json();
+      if(d0?.error!=='unauthorized'){V2=false;V2_BAD_SECRET=true;return d0;}
+      return d0;  // ผิดทั้งคู่ = รหัสผิดจริง
+    }
+    return d;
+  }
   if(!res.ok) throw new Error('http '+res.status);
   return res.json();
 }
@@ -354,6 +367,12 @@ const CAT_TH={flowers:'ดอกไม้',dharma:'ธรรมะ',inspire:'ก
   health:'สุขภาพ',festival:'เทศกาล',family:'ครอบครัว',pets:'สัตว์เลี้ยง',coffee:'กาแฟ',nature:'ธรรมชาติ'};
 function renderPipeline(p, isDay){
   const w=$('pxWrap');
+  if(V2_BAD_SECRET){
+    w.innerHTML='<div style="color:var(--red);font-size:13px;line-height:1.8">⚠️ <b>dashboard_stats2</b> ติดตั้งแล้ว'
+      +' แต่ <b>secret ไม่ตรง</b>กับรหัสเดิม (อาจยังเป็น CHANGE_ME) — แก้บรรทัด secret ใน Supabase SQL Editor แล้วรันใหม่'
+      +'<br><span style="color:var(--mut)">ระหว่างนี้แสดงข้อมูลจาก RPC เดิมให้ก่อน (ไม่มีสถิติ pipeline/เครื่องโดยประมาณ)</span></div>';
+    return;
+  }
   if(!V2){
     w.innerHTML='<div style="color:var(--mut);font-size:13px;line-height:1.8">ยังไม่ได้ติดตั้งสถิติส่วนนี้ —'
       +' รันไฟล์ <b>analytics-schema-v2.sql</b> ใน Supabase SQL Editor ครั้งเดียว (ตั้ง secret ให้ตรงรหัสเดิม)</div>';
