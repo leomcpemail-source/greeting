@@ -435,7 +435,9 @@ function showSource(src){
   box.style.cssText="max-width:340px;width:100%;background:rgba(255,255,255,.95);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:18px;padding:18px;font-family:'Sarabun';color:#243a4d;box-shadow:0 12px 40px rgba(10,40,70,.3)";
   const name=src.name?`<div style="font-size:16px;font-weight:700;margin-bottom:6px">${esc(src.name)}</div>`:'';
   const by=src.by?`<div style="font-size:14px;color:#8195a6;margin-bottom:4px">ภาพโดย ${esc(src.by)}</div>`:'';
-  const link=src.link?`<a href="${esc(src.link)}" target="_blank" rel="noopener" style="font-size:13px;color:#2e8fd1;word-break:break-all">${esc(src.link)}</a>`:'';
+  // อนุญาตเฉพาะ http/https — กัน javascript:/data: scheme เผื่อ manifest ถูกแทรกค่าแปลก
+  const safeLink=src.link&&/^https?:\/\//i.test(String(src.link))?src.link:'';
+  const link=safeLink?`<a href="${esc(safeLink)}" target="_blank" rel="noopener noreferrer" style="font-size:13px;color:#2e8fd1;word-break:break-all">${esc(safeLink)}</a>`:'';
   box.innerHTML=`<div style="font-size:12px;letter-spacing:.05em;color:#a9bac7;margin-bottom:8px">แหล่งที่มาของภาพ</div>${name}${by}${link}<div style="margin-top:14px;text-align:right"><button id="srcClose" style="font-family:'Kanit';font-size:14px;font-weight:600;background:#2e8fd1;color:#fff;border:none;padding:9px 22px;border-radius:11px;cursor:pointer">ปิด</button></div>`;
   ov.appendChild(box);ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
   document.body.appendChild(ov);const cl=document.getElementById('srcClose');if(cl)cl.onclick=()=>ov.remove();

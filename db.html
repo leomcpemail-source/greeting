@@ -235,8 +235,7 @@ async function loadLiveLog(){
     if(!r.ok) throw new Error('http ' + r.status);
     const lg = await r.json();
     if(!Array.isArray(lg) || !lg.length){ el.innerHTML = '<li style="border-color:var(--line);color:var(--mut)">ยังไม่มีบันทึก — ระบบจะเริ่มเขียนหลังรอบ gen ถัดไป</li>'; return; }
-    const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-    const ft = t => { try { return new Date(t).toLocaleString(undefined, { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }); } catch(e){ return t; } };
+    const ft = t => { try { return esc(new Date(t).toLocaleString(undefined, { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })); } catch(e){ return esc(t); } };
     el.innerHTML = lg.slice(0, 16).map(e =>
       `<li><span class="d">🕐 ${ft(e.t)}${e.d ? ' · ชุดวันที่ ' + esc(e.d) : ''}</span>${(e.txt||[]).map(esc).join('<br>')}</li>`
     ).join('');
@@ -458,6 +457,10 @@ function hideLoading(){ /* content จะถูก render แทน */ }
 
 /* ── render ── */
 const N = v => Number(v)||0;
+// กัน stored XSS: ตาราง events เปิดให้ anon เขียน (จำเป็นสำหรับ analytics ฝั่ง client)
+// → ทุกค่าที่มาจาก events (type/tz/cat/ref) ต้อง esc ก่อนใส่ innerHTML เสมอ ไม่งั้น attacker
+//   ยิง event ที่มี payload HTML แล้วโค้ดรันในบริบทแอดมินตอนเปิด dashboard ได้
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const GOLD='#e7c46a', GRIDC='#283047', TICK='#8b93a7';
 
 function chartOpts(){
@@ -622,9 +625,11 @@ function renderPipeline(p, isDay){
     for(const r of p.runs){
       let m={};try{m=JSON.parse(r.ref||'{}');}catch(e){}
       const ai=m.ai||{},pol=ai.pol||{},gem=ai.gem||{};
-      html+=`<tr style="border-top:1px solid var(--line)"><td style="padding:5px 8px;white-space:nowrap">${r.t}</td>
-        <td>${(m.d||'').slice(5)}</td><td>${m.kept??'—'}/${m.target??'—'}</td><td>${m.gens??'—'}</td>
-        <td>${m.pending??'—'}</td><td>${m.min??'—'}</td>
+      // m.* มาจาก events.ref ที่ anon เขียนได้ → ตัวเลขบังคับผ่าน N(), ข้อความผ่าน esc() เสมอ
+      const num=v=>(v==null?'—':N(v));
+      html+=`<tr style="border-top:1px solid var(--line)"><td style="padding:5px 8px;white-space:nowrap">${esc(r.t)}</td>
+        <td>${esc(String(m.d||'').slice(5))}</td><td>${num(m.kept)}/${num(m.target)}</td><td>${num(m.gens)}</td>
+        <td>${num(m.pending)}</td><td>${num(m.min)}</td>
         <td>${N(pol.ok)}/<span style="color:${N(pol.fail)?'var(--red)':'var(--mut)'}">${N(pol.fail)}</span></td>
         <td>${N(gem.ok)}/<span style="color:${N(gem.fail)?'var(--red)':'var(--mut)'}">${N(gem.fail)}</span></td></tr>`;
     }
@@ -649,10 +654,11 @@ function drawTreemap(id, items){
   if(!items.length){el.innerHTML='<div style="color:var(--mut);padding:10px">ยังไม่มีข้อมูล</div>';return;}
   const sorted=[...items].sort((a,b)=>b.value-a.value);
   const total=sorted.reduce((s,x)=>s+x.value,0);
-  const cell=(x,big)=>`<div class="tm-cell" style="background:${x.color};flex:${Math.max(x.value/total*20,1)} 1 0;min-height:${big?68:50}px"
-    title="${x.label}: ${x.value.toLocaleString()}">
-    <div class="tm-lbl" style="font-size:${big?14:11}px">${x.label}</div>
-    <div class="tm-val">${x.value.toLocaleString()}</div>
+  // x.label มาจาก cat/type/tz ในตาราง events (anon เขียนได้) → ต้อง esc ทั้งใน title และเนื้อ
+  const cell=(x,big)=>`<div class="tm-cell" style="background:${esc(x.color)};flex:${Math.max(x.value/total*20,1)} 1 0;min-height:${big?68:50}px"
+    title="${esc(x.label)}: ${N(x.value).toLocaleString()}">
+    <div class="tm-lbl" style="font-size:${big?14:11}px">${esc(x.label)}</div>
+    <div class="tm-val">${N(x.value).toLocaleString()}</div>
   </div>`;
   const top=sorted.slice(0,2),rest=sorted.slice(2);
   let h=`<div style="display:flex;gap:4px;width:100%;margin-bottom:4px">${top.map(x=>cell(x,true)).join('')}</div>`;
