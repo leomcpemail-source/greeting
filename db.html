@@ -165,7 +165,7 @@ function enter(){
 }
 
 /* ── refs: ภาพต้นแบบสอนระบบเรียนรู้ (เก็บใน Supabase ผ่าน RPC ล็อกด้วยรหัส dashboard) ── */
-const REFS_MIN = 8;  // ต่ำกว่านี้ pipeline จะยังไม่ใช้สัญญาณ refs (ดู LEARNING-PLAN.md)
+const REFS_MIN = 8;  // ต่ำกว่านี้ pipeline จะยังไม่ใช้สัญญาณ refs (แผนเต็มอยู่ใน Notion ของโปรเจกต์)
 async function refsRpc(fn, extra){
   const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
     method:'POST',
@@ -183,10 +183,10 @@ async function loadRefs(){
     const d = await refsRpc('refs_list');
     if(d?.error==='not_installed'){
       $('refsCount').textContent='';
-      grid.innerHTML='<div style="color:var(--mut);font-size:12px;line-height:1.8">ยังไม่ได้ติดตั้ง — รันไฟล์ <b>refs-schema.sql</b> ใน Supabase SQL Editor ครั้งเดียว (ตั้ง secret ให้ตรงรหัสนี้)</div>';
+      grid.innerHTML='<div style="color:var(--mut);font-size:12px;line-height:1.8">ยังไม่ได้ติดตั้ง — รัน SQL ติดตั้ง refs ใน Supabase ครั้งเดียว (สคริปต์อยู่ในเอกสาร Notion ของโปรเจกต์ ตั้ง secret ให้ตรงรหัสนี้)</div>';
       return;
     }
-    if(d?.error==='unauthorized'){ grid.innerHTML='<div style="color:var(--red);font-size:12px">secret ใน refs-schema.sql ไม่ตรงรหัสนี้</div>'; return; }
+    if(d?.error==='unauthorized'){ grid.innerHTML='<div style="color:var(--red);font-size:12px">secret ของ RPC refs ไม่ตรงรหัสนี้</div>'; return; }
     const list = Array.isArray(d)?d:[];
     $('refsCount').textContent = `${list.length} ใบ`;
     $('refsWarn').textContent = list.length===0 ? '' :
