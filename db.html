@@ -77,6 +77,24 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
 
 .note{color:var(--mut);font-size:11px;margin-top:20px;text-align:center;line-height:1.8}
 .err-bar{color:var(--red);font-size:13px;text-align:center;min-height:18px;margin-bottom:8px}
+
+/* tab หลักของ board: Dashboard (auto-refresh) / สอนระบบ (นิ่ง ไม่ refresh) */
+.dtabs{display:flex;gap:8px;margin-bottom:14px}
+.dtab{font-family:'Kanit';cursor:pointer;border:1px solid var(--line);border-radius:12px;
+  padding:9px 18px;background:transparent;color:var(--ink);font-size:14px;transition:all .15s}
+.dtab.on{background:var(--gold);color:#241a06;border-color:var(--gold);font-weight:600}
+
+/* tag บทเรียนที่ระบบเรียนรู้ */
+.lt-wrap{display:flex;flex-wrap:wrap;gap:8px}
+.lt{font-family:'Sarabun';font-size:13px;font-weight:600;color:#1a2032;background:#cfe3b8;
+  border-radius:18px;padding:6px 14px;line-height:1.3}
+.lt.style{background:#bcd6f0}.lt.word{background:#e8d3b8}.lt.content{background:#d9c2e0}
+.lt-legend{color:var(--mut);font-size:11px;margin:10px 0 0}
+
+/* log การเรียนรู้ของ AI */
+.ai-log{list-style:none;display:flex;flex-direction:column;gap:10px}
+.ai-log li{font-size:13px;line-height:1.7;border-left:3px solid var(--gold);padding-left:12px}
+.ai-log .d{font-family:'Kanit';color:var(--gold);font-size:12px;display:block}
 </style>
 </head>
 <body>
@@ -97,6 +115,13 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
       <div class="updated" id="updated"></div>
     </div>
 
+    <!-- tab หลัก: Dashboard (refresh ทุก 30 วิ) / สอนระบบ (นิ่ง) -->
+    <div class="dtabs">
+      <button class="dtab on" id="dtabDash" onclick="switchDbTab('dash')">📊 Dashboard</button>
+      <button class="dtab" id="dtabTeach" onclick="switchDbTab('teach')">🧠 สอนระบบ</button>
+    </div>
+
+    <div id="tabDash">
     <!-- filter bar -->
     <div class="filter-bar">
       <div class="filter-row">
@@ -120,20 +145,43 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
     <div id="content">
       <div class="loading"><div class="spin"></div>กำลังโหลด…</div>
     </div>
+    </div><!-- /tabDash -->
 
-    <!-- refs: ภาพต้นแบบสอนระบบเรียนรู้ (อยู่นอก #content — ไม่โดน auto-refresh ทับ) -->
-    <div class="panel" id="refsPanel" style="margin-top:14px">
-      <h3>🖼️ ภาพต้นแบบสอนระบบ (refs) <span id="refsCount" style="color:var(--gold)"></span></h3>
-      <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:10px">
-        อัปโหลดภาพสวัสดีที่เห็นคนนิยมส่งต่อกันจริงใน LINE — ระบบจะเรียนรู้ให้การ์ดที่สร้างหน้าตาใกล้เคียงชุดนี้<br>
-        เก็บถาวร ไม่ต้องอัปโหลดทุกวัน • เป้าหมาย 20+ ใบ คละแนว (ดอกไม้/พระ/วิว/มงคล) • แตะ ✕ เพื่อเอาภาพที่ไม่ดีออก
+    <!-- ═══ tab สอนระบบ — นิ่ง ไม่โดน auto-refresh 30 วิ (refresh เฉพาะ #content ใน tabDash) ═══ -->
+    <div id="tabTeach" style="display:none">
+
+      <!-- refs: ภาพต้นแบบสอนระบบเรียนรู้ -->
+      <div class="panel" id="refsPanel">
+        <h3>🖼️ ภาพต้นแบบสอนระบบ (refs) <span id="refsCount" style="color:var(--gold)"></span></h3>
+        <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:10px">
+          อัปโหลดภาพสวัสดีที่เห็นคนนิยมส่งต่อกันจริงใน LINE — ระบบจะเรียนรู้ให้การ์ดที่สร้างหน้าตาใกล้เคียงชุดนี้<br>
+          เก็บถาวร ไม่ต้องอัปโหลดทุกวัน • เป้าหมาย 20+ ใบ คละแนว (ดอกไม้/พระ/วิว/มงคล) • แตะ ✕ เพื่อเอาภาพที่ไม่ดีออก
+        </div>
+        <div id="refsWarn" style="color:var(--red);font-size:12px;margin-bottom:8px"></div>
+        <button class="btn-gold" style="width:auto;padding:9px 18px" onclick="refsPick()">＋ อัปโหลดรูป</button>
+        <span id="refsStatus" style="color:var(--mut);font-size:12px;margin-left:10px"></span>
+        <input type="file" id="refsFile" accept="image/*" multiple style="display:none">
+        <div id="refsGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"></div>
       </div>
-      <div id="refsWarn" style="color:var(--red);font-size:12px;margin-bottom:8px"></div>
-      <button class="btn-gold" style="width:auto;padding:9px 18px" onclick="refsPick()">＋ อัปโหลดรูป</button>
-      <span id="refsStatus" style="color:var(--mut);font-size:12px;margin-left:10px"></span>
-      <input type="file" id="refsFile" accept="image/*" multiple style="display:none">
-      <div id="refsGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"></div>
-    </div>
+
+      <!-- บทเรียนที่ระบบเรียนรู้แล้ว: ภาพสวัสดีที่ user ชอบหน้าตาเป็นยังไง -->
+      <div class="panel" style="margin-top:14px">
+        <h3>🏷️ สิ่งที่เรียนรู้แล้ว — ภาพสวัสดีที่ user ชอบควรเป็นแบบนี้</h3>
+        <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:12px">
+          สรุปจากการวิเคราะห์ภาพยอดนิยมจริงที่เจ้าของส่งให้ + หลักที่ใช้ปรับระบบไปแล้ว —
+          เมื่อระบบเรียนรู้อัตโนมัติ (Phase 0) เริ่มทำงาน tag จะอัปเดตเองจากข้อมูลจริง
+        </div>
+        <div class="lt-wrap" id="ltWrap"></div>
+        <div class="lt-legend">สี: <span style="color:#bcd6f0">■</span> ตัวหนังสือ/สไตล์ &nbsp;<span style="color:#e8d3b8">■</span> คำอวยพร &nbsp;<span style="color:#d9c2e0">■</span> เนื้อหาภาพ &nbsp;<span style="color:#cfe3b8">■</span> หลักทั่วไป</div>
+      </div>
+
+      <!-- log: AI เรียนรู้และแก้อะไรไปแล้วบ้าง -->
+      <div class="panel" style="margin-top:14px">
+        <h3>📜 บันทึกการเรียนรู้ของ AI (ล่าสุดอยู่บน)</h3>
+        <ul class="ai-log" id="aiLog"></ul>
+      </div>
+
+    </div><!-- /tabTeach -->
 
     <div class="note">
       visitor_id เป็นรหัสสุ่มใน localStorage (incognito นับแยก) • เครื่องโดยประมาณ = fingerprint ua+ภาษา+timezone (นับ incognito รวมเครื่องเดิม) • ประเทศประมาณจาก timezone<br>
@@ -162,6 +210,47 @@ function enter(){
   startAutoRefresh();
   load();
   loadRefs();   // โหลดครั้งเดียวตอนเข้า (ไม่ผูกกับ auto-refresh — รูปเยอะ ไม่ควรดึงซ้ำทุก 30 วิ)
+  renderLearned(); renderAiLog();   // เนื้อหานิ่งใน tab สอนระบบ — render ครั้งเดียว
+}
+
+/* ── tab หลัก: dashboard refresh ทุก 30 วิเฉพาะ #content / tab สอนระบบนิ่งสนิท ── */
+function switchDbTab(t){
+  $('tabDash').style.display  = t==='dash' ? '' : 'none';
+  $('tabTeach').style.display = t==='teach'? '' : 'none';
+  $('dtabDash').classList.toggle('on', t==='dash');
+  $('dtabTeach').classList.toggle('on', t==='teach');
+}
+
+/* ── บทเรียนที่ระบบเรียนรู้แล้ว — อัปเดตรายการนี้ทุกครั้งที่ได้บทเรียนใหม่ ──
+   cls: style=ตัวหนังสือ/สไตล์, word=คำอวยพร, content=เนื้อหาภาพ, ไม่ใส่=หลักทั่วไป */
+const LEARNED_TAGS = [
+  { t:'🔤 ตัวหนังสือใหญ่ ~10-12% ของภาพ อ่านออกตั้งแต่ thumbnail ใน LINE', cls:'style' },
+  { t:'⬛ ขอบตัวอักษรหนาตัดกับพื้นหลัง (ขาวขอบดำเด่นสุด)', cls:'style' },
+  { t:'🖼️ ภาพเต็มเฟรมไม่มีกรอบ ดูเป็น "ภาพสวัสดีไทย" ไม่ใช่การ์ดฝรั่ง', cls:'style' },
+  { t:'✨ มีประกาย/ลูกเล่นตกแต่ง (ดาว จุดคั่น เส้นประ)', cls:'style' },
+  { t:'🙏 พรยาวแบบผู้ใหญ่ หลายวรรค: บุญบารมีคุ้มครอง แคล้วคลาดปลอดภัย', cls:'word' },
+  { t:'💰 คำมงคลเรียกทรัพย์: รวยสุข รวยทรัพย์ มั่งคั่ง มั่งมี', cls:'word' },
+  { t:'❤️ สุขภาพ-อายุมั่นขวัญยืน ลูกหลานกตัญญู = ธีมที่โดนใจวัยนี้สุด', cls:'word' },
+  { t:'🌈 สีภาพตรงสีประจำวัน (จันทร์เหลือง อังคารชมพู พฤหัสส้ม...)', cls:'content' },
+  { t:'🌺 ดอกไม้โคลสอัพดอกใหญ่เต็มภาพ ชนะวิวกว้างๆ', cls:'content' },
+  { t:'🛕 พระพุทธรูป/วัด + แสงทอง ให้ความรู้สึกขลัง น่าส่งต่อ', cls:'content' },
+  { t:'🌅 "อรุณสวัสดิ์" พระอาทิตย์ขึ้น = ภาพยอดส่งช่วงเช้า', cls:'content' },
+  { t:'📅 ภาพที่นิยมมักไม่มีวันที่ — ของเรามีวันที่ตรงวันจริงเป็นจุดต่าง' },
+];
+function renderLearned(){
+  $('ltWrap').innerHTML = LEARNED_TAGS.map(x=>`<span class="lt ${x.cls||''}">${x.t}</span>`).join('');
+}
+
+/* ── log การเรียนรู้/แก้ไขของ AI — AI ผู้ดูแลเติมรายการใหม่ "บนสุด" ทุกรอบที่ทำงาน ── */
+const AI_LOG = [
+  { d:'11 มิ.ย. 2569', t:'ออกแบบระบบเรียนรู้อัตโนมัติ: เรียนจากภายนอกก่อน (ภาพ refs จริง + Gemini จำลองผู้ใช้วัย 60+) แล้วถ่ายน้ำหนักไปเสียงผู้ใช้จริงเองเมื่อยอดใช้โต — สร้างแผงอัปโหลดภาพต้นแบบนี้ไว้รอ' },
+  { d:'11 มิ.ย. 2569', t:'เรียนรู้จากภาพยอดนิยม 5 ใบที่เจ้าของส่งให้: ภาพที่คนส่งต่อกันตัวหนังสือใหญ่+ขอบหนา คำอวยพรยาวแนวบุญบารมี/รวยทรัพย์ และสีตรงวัน → ปรับระบบแล้ว: ขยายตัวหนังสือทั้งชุด+ขอบทึบ 8 ทิศ, เพิ่ม layout ตัวใหญ่ 4 แบบ + แบบไร้กรอบ, เติมพรผู้ใหญ่ทุกหมวด, ดอกไม้จับคู่สีประจำวัน' },
+  { d:'11 มิ.ย. 2569', t:'พบสาเหตุกราฟเวลาเพี้ยน -14 ชม.: Postgres ตีความ "+07" แบบ POSIX (กลับเครื่องหมาย) → แก้เป็น Asia/Bangkok และจดเป็นกฎ: ห้ามใช้ offset เปล่าใน SQL อีก' },
+  { d:'11 มิ.ย. 2569', t:'ปรับ UI ตามเสียงผู้ใช้สูงวัย: แตะรูปดูใหญ่เต็มจอได้ทั้งหน้าแรกและหน้าหมวด, เปลี่ยนธีมเป็นฟ้าสบายตา (คงปุ่มเขียวบันทึก/LINE ที่คุ้นแล้ว)' },
+  { d:'10 มิ.ย. 2569', t:'อุดช่องรูปไม่เหมาะหลุด (เคสจระเข้/ชุดเจ้าสาว): ติดตั้ง AI local (CLIP) รันบนเครื่องเอง ฟรีไม่มีโควตา เป็นด่านตรวจเนื้อหาสุดท้ายเมื่อ AI cloud ล่มหมด' },
+];
+function renderAiLog(){
+  $('aiLog').innerHTML = AI_LOG.map(x=>`<li><span class="d">${x.d}</span>${x.t}</li>`).join('');
 }
 
 /* ── refs: ภาพต้นแบบสอนระบบเรียนรู้ (เก็บใน Supabase ผ่าน RPC ล็อกด้วยรหัส dashboard) ── */
