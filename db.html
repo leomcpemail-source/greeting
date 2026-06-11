@@ -175,9 +175,17 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
         <div class="lt-legend">สี: <span style="color:#bcd6f0">■</span> ตัวหนังสือ/สไตล์ &nbsp;<span style="color:#e8d3b8">■</span> คำอวยพร &nbsp;<span style="color:#d9c2e0">■</span> เนื้อหาภาพ &nbsp;<span style="color:#cfe3b8">■</span> หลักทั่วไป</div>
       </div>
 
-      <!-- log: AI เรียนรู้และแก้อะไรไปแล้วบ้าง -->
+      <!-- log สดจาก pipeline: อัปเดตเองทุกครั้งที่ระบบรันเสร็จ (~90 นาที) — refresh เฉพาะข้อความส่วนนี้ -->
       <div class="panel" style="margin-top:14px">
-        <h3>📜 บันทึกการเรียนรู้ของ AI (ล่าสุดอยู่บน)</h3>
+        <h3>📡 บันทึกสดจากระบบ (เวลาแสดงตามเครื่องของคุณ)
+          <button class="chip" style="margin-left:8px;padding:3px 12px;font-size:12px" onclick="loadLiveLog()">↻ รีเฟรช</button>
+        </h3>
+        <ul class="ai-log" id="aiLogLive"><li style="border-color:var(--line);color:var(--mut)">กำลังโหลด…</li></ul>
+      </div>
+
+      <!-- log: AI ผู้ดูแลเรียนรู้และแก้อะไรไปแล้วบ้าง -->
+      <div class="panel" style="margin-top:14px">
+        <h3>📜 บันทึกจาก AI ผู้ดูแล (ล่าสุดอยู่บน)</h3>
         <ul class="ai-log" id="aiLog"></ul>
       </div>
 
@@ -211,6 +219,31 @@ function enter(){
   load();
   loadRefs();   // โหลดครั้งเดียวตอนเข้า (ไม่ผูกกับ auto-refresh — รูปเยอะ ไม่ควรดึงซ้ำทุก 30 วิ)
   renderLearned(); renderAiLog();   // เนื้อหานิ่งใน tab สอนระบบ — render ครั้งเดียว
+  loadLiveLog();                    // log สดจาก pipeline — ดึงซ้ำเองทุก 5 นาที (เฉพาะข้อความ ไม่แตะส่วนอัปโหลด)
+  if(_liveTimer) clearInterval(_liveTimer);
+  _liveTimer = setInterval(loadLiveLog, 300000);
+}
+
+/* ── log สดจาก pipeline: ไฟล์ img/learn-log.json บน branch daily-images (เขียนใหม่ทุกรอบ gen ~90 นาที) ──
+   timestamp ในไฟล์เป็น UTC ISO → แปลงด้วย toLocaleString ของเครื่องผู้เปิด = เวลาประเทศของ user เสมอ */
+const LEARN_LOG_URL = 'https://raw.githubusercontent.com/leomcpemail-source/greeting/daily-images/img/learn-log.json';
+let _liveTimer = null;
+async function loadLiveLog(){
+  const el = $('aiLogLive');
+  try{
+    const r = await fetch(LEARN_LOG_URL + '?t=' + Date.now(), { cache:'no-store' });
+    if(!r.ok) throw new Error('http ' + r.status);
+    const lg = await r.json();
+    if(!Array.isArray(lg) || !lg.length){ el.innerHTML = '<li style="border-color:var(--line);color:var(--mut)">ยังไม่มีบันทึก — ระบบจะเริ่มเขียนหลังรอบ gen ถัดไป</li>'; return; }
+    const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+    const ft = t => { try { return new Date(t).toLocaleString(undefined, { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }); } catch(e){ return t; } };
+    el.innerHTML = lg.slice(0, 16).map(e =>
+      `<li><span class="d">🕐 ${ft(e.t)}${e.d ? ' · ชุดวันที่ ' + esc(e.d) : ''}</span>${(e.txt||[]).map(esc).join('<br>')}</li>`
+    ).join('');
+  }catch(e){
+    // ไฟล์ยังไม่ถูกสร้าง (รอรอบ gen แรกหลัง deploy) หรือเน็ตล่ม — ไม่ใช่ error ของผู้ใช้
+    el.innerHTML = '<li style="border-color:var(--line);color:var(--mut)">ยังไม่มีบันทึกสด (เริ่มเก็บอัตโนมัติหลังรอบ gen ถัดไป ~90 นาที)</li>';
+  }
 }
 
 /* ── tab หลัก: dashboard refresh ทุก 30 วิเฉพาะ #content / tab สอนระบบนิ่งสนิท ── */

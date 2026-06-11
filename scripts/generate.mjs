@@ -2019,6 +2019,28 @@ async function main() {
   console.log(`=== [done] target ${targetISO} เก็บ ${st.images.length}/${TARGET} ค้าง ${st.pending.length} gens ${gens} เหลือเวลา ${Math.round(timeLeft() / 1000)}s ===`);
   supaLog('px_run', { d: targetISO, kept: st.images.length, target: TARGET, pending: st.pending.length, gens,
     min: Math.round((Date.now() - start) / 60000), ai: aiStat });
+
+  // ── learn-log: บันทึก "สิ่งที่ระบบทำ/เรียนรู้รอบนี้" เป็นประโยคไทย → db.html (tab สอนระบบ) ดึงไปแสดงสด ──
+  // timestamp เก็บ UTC ISO — ฝั่ง db.html แปลงเป็นโซนเวลาเครื่องผู้เปิดเอง ; ห้าม throw (เป็นของเสริม)
+  // เมื่อระบบเรียนรู้ Phase 0 (brain) มาถึง ให้เติมประโยคบทเรียนจริงลงไฟล์เดียวกันนี้
+  try {
+    const LOG_FILE = path.join(IMG_DIR, 'learn-log.json');
+    let lg = [];
+    try { lg = JSON.parse(fs.readFileSync(LOG_FILE, 'utf8')); } catch (e) {}
+    if (!Array.isArray(lg)) lg = [];
+    const cc2 = {}; for (const c of ALL_CATEGORIES) cc2[c] = 0;
+    for (const i of st.images) if (i.category && cc2[i.category] != null) cc2[i.category]++;
+    const lack = ALL_CATEGORIES.filter(c => cc2[c] < CAT_TARGET);
+    const txt = [
+      `สร้างการ์ดสะสม ${st.images.length}/${TARGET} ใบ (รอบนี้ลองสร้าง ${gens} ครั้ง, ค้างตรวจ ${st.pending.length}, ใช้เวลา ${Math.round((Date.now() - start) / 60000)} นาที)`,
+      `AI ตรวจรูป — Pollinations ตอบ ${aiStat.pol.ok} ล้ม ${aiStat.pol.fail} · Gemini ตอบ ${aiStat.gem.ok} ล้ม ${aiStat.gem.fail}`,
+      lack.length ? `หมวดที่ยังไม่ครบเป้า: ${lack.map(c => `${c} ${cc2[c]}/${CAT_TARGET}`).join(', ')}` : `ทุกหมวดครบเป้า ${CAT_TARGET} ใบแล้ว`,
+    ];
+    lg.unshift({ t: new Date().toISOString(), d: targetISO, txt });
+    fs.writeFileSync(LOG_FILE, JSON.stringify(lg.slice(0, 80)));
+    console.log('  ✓ learn-log บันทึกแล้ว');
+  } catch (e) { console.log('  ! learn-log:', e.message); }
+
   await supaFlush();
 }
 
