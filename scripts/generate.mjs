@@ -1971,8 +1971,19 @@ async function main() {
       return s != null ? Math.round(s * 100) / 100 : null;
     };
 
+    // ด่าน brain: ใบที่หน้าตา "ไม่เข้าพวกภาพยอดนิยม" ชัดเจน → ทิ้งแล้วให้ loop สร้างใบใหม่แทนทันที
+    // (ยกเว้นใบธีมวันพิเศษ — เนื้อหาบังคับ ไม่ควรวัดกับ refs ; มีเพดานคัดต่อรอบกัน loop ไม่หยุด)
+    const brainCull = (sim) => {
+      if (themed || !brain || !brain.shouldReject(sim)) return false;
+      fs.rmSync(path.join(dir, fname), { force: true });
+      console.log(`  ✗ reject(brain) ${fname} sim=${Math.round(sim * 100)}% ไม่เข้าพวกภาพยอดนิยม → สร้างใหม่`);
+      supaLog('px_reject', { d: targetISO, cat: imgCat, reason: 'brain:low-sim:' + sim });
+      return true;
+    };
+
     if (r.decision === 'keep') {
       const sim = await simOf();
+      if (brainCull(sim)) continue;
       st.images.push({ file: fname, score: r.score, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline, sty: styArr, sim });
       if (imgCat && catCount[imgCat] != null) catCount[imgCat]++;
       catFails[cat] = 0;
@@ -1989,6 +2000,7 @@ async function main() {
         supaLog('px_reject', { d: targetISO, cat: imgCat, reason: ('local:' + lc.label).slice(0, 120) });
       } else {
         const sim = await simOf();
+        if (brainCull(sim)) continue;
         st.images.push({ file: fname, score: 60, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline, sty: styArr, sim });
         if (imgCat && catCount[imgCat] != null) catCount[imgCat]++;
         catFails[cat] = 0;

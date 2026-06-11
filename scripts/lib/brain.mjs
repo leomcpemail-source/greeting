@@ -12,6 +12,10 @@ const REFS_MIN = 8;        // refs น้อยกว่านี้ = ปิด
 const TOPK = 5;            // sim ของการ์ด = ค่าเฉลี่ย top-5 ความใกล้เคียงกับ refs (กัน outlier)
 const MIN_N = 3;           // สไตล์ที่มีตัวอย่างน้อยกว่านี้ ยังไม่ถ่วงน้ำหนัก (ใช้ 1.0)
 const CLAMP_LO = 0.4, CLAMP_HI = 2.5, EXPLORE = 0.2, DECAY = 0.9;
+// คัดทิ้ง-สร้างใหม่: ใบที่ sim ต่ำกว่าค่าเฉลี่ยมาก = "หน้าตาไม่เข้าพวกภาพยอดนิยม" → ทิ้งแล้ว gen แทน
+const SIM_HIST_MIN = Number(process.env.LEARN_SIM_HIST_MIN || 30);   // ต้องเห็นการ์ดมาก่อนกี่ใบถึงกล้าคัด
+const SIM_MARGIN = Number(process.env.LEARN_SIM_MARGIN || 0.12);     // ต่ำกว่าค่าเฉลี่ยเกินนี้ = คัดออก
+const CULL_MAX = Number(process.env.LEARN_CULL_MAX || 12);           // เพดานคัดต่อรอบ (กัน loop ทิ้งไม่หยุด)
 
 const cos = (a, b) => { let s = 0; const n = Math.min(a.length, b.length); for (let i = 0; i < n; i++) s += a[i] * b[i]; return s; };
 
@@ -31,6 +35,9 @@ export async function initBrain({ imgDir, sbUrl, sbAnon, secret, fetchT, names }
     }
     const carry = mem.src || {};   // ผลสำเร็จ/ล้มของแหล่งรูปจากรอบก่อน (ใช้เริ่มรอบนี้ได้เลย ไม่ต้องล้มซ้ำก่อนปรับ)
     const src = { genOk: 0, genFail: 0, photoOk: 0, photoFail: 0 };
+    // การกระจายของ sim ที่เคยเห็น (รวมข้ามรอบ + decay) — ใช้ตั้งเกณฑ์คัดทิ้งแบบ relative
+    const simHist = { n: (mem.simHist?.n || 0) * DECAY, sum: (mem.simHist?.sum || 0) * DECAY };
+    let culled = 0;
 
     // ── ดึงภาพต้นแบบ refs จาก Supabase (ต้องมี LEARN_SECRET = รหัส dashboard) ──
     let refs = [], refsErr = '';
@@ -114,12 +121,29 @@ export async function initBrain({ imgDir, sbUrl, sbAnon, secret, fetchT, names }
       observe(sty, sim) {
         try {
           if (sim == null || !sty) return;
+          simHist.n += 1; simHist.sum += sim;
           for (const [k, i] of Object.entries({ fr: sty.fr, lay: sty.lay, tx: sty.tx, ov: sty.ov })) {
             if (i == null) continue;
             const e = (stats[k][i] = stats[k][i] || { n: 0, sum: 0 });
             e.n += 1; e.sum += sim;
           }
         } catch (e) {}
+      },
+
+      // เกณฑ์คัดทิ้ง-สร้างใหม่: ใบที่ต่ำกว่าค่าเฉลี่ยที่เคยเห็นเกิน SIM_MARGIN (และพ้นพื้น 0.12)
+      // เปิดเมื่อข้อมูลพอ (≥SIM_HIST_MIN ใบ) + มีเพดานต่อรอบ — กันคัดมั่ว/คัดไม่หยุดช่วงเริ่มเรียน
+      simThreshold() {
+        if (!simEnabled || simHist.n < SIM_HIST_MIN) return null;
+        return Math.max(0.12, simHist.sum / simHist.n - SIM_MARGIN);
+      },
+      shouldReject(sim) {
+        try {
+          if (sim == null || culled >= CULL_MAX) return false;
+          const thr = this.simThreshold();
+          if (thr == null || sim >= thr) return false;
+          culled++;
+          return true;
+        } catch (e) { return false; }
       },
 
       // จดผลของแหล่งรูป: 'gen' (AI สร้าง) / 'photo' (Pexels)
@@ -149,7 +173,11 @@ export async function initBrain({ imgDir, sbUrl, sbAnon, secret, fetchT, names }
       finish(photoShareBase) {
         const notes = [];
         try {
-          fs.writeFileSync(LEARN_FILE, JSON.stringify({ stats, src: { ...src, ts: Date.now() } }));
+          fs.writeFileSync(LEARN_FILE, JSON.stringify({ stats, simHist, src: { ...src, ts: Date.now() } }));
+          if (culled > 0) {
+            const thr = this.simThreshold();
+            notes.push(`คัดการ์ดหน้าตาไม่เข้าพวกภาพยอดนิยมออก ${culled} ใบ (sim ต่ำกว่า ${thr != null ? Math.round(thr * 100) + '%' : 'เกณฑ์'}) แล้วสร้างใบใหม่แทนทันที`);
+          }
           if (simEnabled) {
             // หาสไตล์เด่น/อ่อนจากข้อมูลที่มีพอ — รายงานเป็นภาษาคน
             const pick = (kind, label, arr) => {
