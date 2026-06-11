@@ -381,7 +381,10 @@ const CATEGORIES = [
 
 /* ── ANALYTICS ── */
 function visitorId(){try{let v=localStorage.getItem('gv_id'),isNew=false;if(!v){v='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('gv_id',v);isNew=true;}return{v,isNew};}catch{return{v:'v_anon',isNew:false};}}
-async function track2(type){if(SB_URL.includes('YOURPROJECT'))return;try{const{v,isNew}=visitorId();await fetch(`${SB_URL}/rest/v1/events`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'return=minimal'},body:JSON.stringify({visitor_id:v,session_id:SID,type,tz:Intl.DateTimeFormat().resolvedOptions().timeZone,lang:navigator.language,ua:navigator.userAgent.slice(0,200),ref:document.referrer.slice(0,200),is_returning:type==='open'?!isNew:false})});}catch{}}
+async function track2(type,card){if(SB_URL.includes('YOURPROJECT'))return;try{const{v,isNew}=visitorId();
+// แนบข้อมูลใบที่ถูกกด (ไฟล์/หมวด/สไตล์) ลง ref — ระบบเรียนรู้ใช้เป็น "เสียงโหวตของ user จริง" ; ไม่มี card = referrer เดิม
+const ref=(card&&card.file)?JSON.stringify({f:card.file,cat:card.category||null,sty:card.sty||null}).slice(0,200):document.referrer.slice(0,200);
+await fetch(`${SB_URL}/rest/v1/events`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'return=minimal'},body:JSON.stringify({visitor_id:v,session_id:SID,type,tz:Intl.DateTimeFormat().resolvedOptions().timeZone,lang:navigator.language,ua:navigator.userAgent.slice(0,200),ref,is_returning:type==='open'?!isNew:false})});}catch{}}
 function trackGC(name){try{if(window.goatcounter?.count)window.goatcounter.count({path:name,title:name,event:true});}catch{}}
 function toast(t){const el=document.getElementById('toastEl');el.textContent=t;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),2400);}
 function esc(x){return String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -994,7 +997,7 @@ document.getElementById('btnSave').onclick=async()=>{
   try{const c=await snapshot();const fname=`${M.headline||'สวัสดีวันนี้'}.png`;
     if(IS_LINE||IS_LINE_WV){showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อบันทึก 👆');}
     else{const a=document.createElement('a');a.download=fname;a.href=c.toDataURL('image/png');a.click();toast('บันทึกแล้ว ✓');}
-    trackGC('download');track2('download');}
+    trackGC('download');track2('download',CARDS[curIdx]);}
   catch(e){toast('บันทึกไม่สำเร็จ ลองแคปหน้าจอแทน');}
   finally{m.innerHTML=orig;btn.disabled=false;}
 };
@@ -1010,20 +1013,20 @@ document.getElementById('btnLine').onclick=async()=>{
 
     // 1) Web Share API — เปิดแผงแชร์ของระบบ เลือก LINE แล้วส่งให้เพื่อนได้จริง (Chrome/Safari มือถือ)
     if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
-      try{await navigator.share({files:[file]});trackGC('line');track2('line');return;}
+      try{await navigator.share({files:[file]});trackGC('line');track2('line',CARDS[curIdx]);return;}
       catch(err){if(err&&err.name==='AbortError')return;/* ไม่รองรับ/หมดสิทธิ์ → fallback ข้างล่าง */}
     }
 
     // 2) เดสก์ท็อป: คัดลอกรูปลงคลิปบอร์ด แล้วไปวางใน LINE ได้เลย
     if(!IS_LINE&&blob&&window.ClipboardItem&&navigator.clipboard?.write){
       try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
-        toast('คัดลอกแล้ว เปิด LINE แล้ววางได้เลย ✓');trackGC('line');track2('line');return;}
+        toast('คัดลอกแล้ว เปิด LINE แล้ววางได้เลย ✓');trackGC('line');track2('line',CARDS[curIdx]);return;}
       catch{/* ตกไป viewer */}
     }
 
     // 3) Fallback (LINE in-app / เบราว์เซอร์เก่า): แสดงรูปให้กดค้างเพื่อแชร์/บันทึก
     showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อแชร์เข้า LINE 👆');
-    trackGC('line');track2('line');
+    trackGC('line');track2('line',CARDS[curIdx]);
   }
   catch(e){toast('ไม่สำเร็จ ลองกดบันทึกแทน');}
   finally{m.innerHTML=orig;btn.disabled=false;}
@@ -1070,7 +1073,7 @@ async function openCategory(cat){
     /* หมวด = filter ของรูป "วันนี้" (ชุดเดียวกับหน้าแรก ทุกใบมีสวัสดีวันตรงวันจริง) */
     let fromManifest=null;const res=await getManifest();
     if(res){const{m}=res;
-      const all=(m.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null}:{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null});
+      const all=(m.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null}:{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null,sty:x.sty||null});
       const fc=(m.categories&&m.categories[cat.id]&&m.categories[cat.id].length)?m.categories[cat.id]:null;
       const fi=all.filter(x=>x.category===cat.id);fromManifest=fc||(fi.length?fi:null);}
     const rawImgs=fromManifest;
@@ -1135,7 +1138,7 @@ document.getElementById('catdBack').addEventListener('click',()=>switchTab('cate
 function useSelectedCard(){
   if(!selectedCatCard){toast('กรุณาเลือกรูปก่อนนะคะ');return;}
   // เก็บ base ไว้ "ต่อใบ" (ไม่แก้ imgBase ทั้งระบบ) เพื่อให้ thumbnail ใบอื่นไม่พัง
-  const newCard={file:selectedCatCard.file,blessing:selectedCatCard.blessing||'',src:selectedCatCard.src||null,base:selectedCatCard._base||imgBase,headline:selectedCatCard.headline||''};
+  const newCard={file:selectedCatCard.file,blessing:selectedCatCard.blessing||'',src:selectedCatCard.src||null,base:selectedCatCard._base||imgBase,headline:selectedCatCard.headline||'',sty:selectedCatCard.sty||null,category:selectedCatCard.category||null};
   const existing=CARDS.filter(c=>c.file!==newCard.file);
   CARDS.length=0;CARDS.push(newCard,...existing);
   // สลับไปหน้าแรกก่อน เพื่อให้หน้าอยู่ในจอจริงก่อนค่อย build/เลื่อน thumbnail
@@ -1166,7 +1169,7 @@ async function boot(){
   catch{stage.innerHTML=`<div class="msg">ยังไม่มีรูปของวันนี้ 😴<br><br>รอรอบ gen สักครู่ หรือไปที่ <b>Actions → Run workflow</b></div>`;return;}}
   _manifestCache=M;_manifestFolder=folder;imgBase=`${BASE}/img/${folder}`;
 
-  CARDS=(M.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null,base:imgBase,headline:M.headline||''}:{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null,base:imgBase,headline:x.headline||M.headline||''}).filter(c=>c.file);
+  CARDS=(M.images||[]).map(x=>typeof x==='string'?{file:x,blessing:'',src:null,category:null,base:imgBase,headline:M.headline||''}:{file:x.file,blessing:x.blessing||'',src:x.src||null,category:x.category||null,base:imgBase,headline:x.headline||M.headline||'',sty:x.sty||null}).filter(c=>c.file);
   // หน้าแรกแสดงคละหมวด แต่ถ้าวันนี้เกี่ยวกับหมวดใด ให้หมวดนั้นมาก่อน
   // วันพระ → ธรรมะมาก่อน, เทศกาล → เทศกาลมาก่อน
   (function sortHomeCards(){

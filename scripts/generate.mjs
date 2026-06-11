@@ -28,6 +28,8 @@ const MIN_VOTERS = Number(process.env.MIN_VOTERS || 1);
 const PHOTO_SHARE = Number(process.env.PHOTO_SHARE || 0.50);          // สัดส่วนใช้รูปถ่าย Pexels — ลดลง (Pollen กลับมาแล้ว มิ.ย.2569: 0.92→0.50 ให้ AI gen มากขึ้น)
 const PHOTO_TRUST_NOVOTE = (process.env.PHOTO_TRUST_NOVOTE || '1') !== '0'; // รูปถ่าย curated: ถ้า AI ล่มหมด (0 โหวต) ให้ผ่านได้ (กันหน้าว่าง)
 const USE_LOCAL_VISION = (process.env.USE_LOCAL_VISION || '1') !== '0'; // AI local (CLIP) ด่านตรวจเนื้อหาชั้นสุดท้ายของ photo-trust — ปิดด้วย '0'
+const USE_LEARNING = (process.env.USE_LEARNING || '1') !== '0'; // หัวสมองเรียนรู้ (brain): refs similarity + ปรับแหล่งรูปอัตโนมัติ — ปิดด้วย '0'
+const LEARN_SECRET = process.env.LEARN_SECRET || '';            // รหัสเดียวกับ dashboard — ใช้ดึงภาพต้นแบบ refs (ไม่มี = สัญญาณ refs ปิด)
 const USE_POLL_VISION = (process.env.USE_POLL_VISION || '1') === '1';   // vision ฝั่ง Pollinations — เปิดเป็นค่าเริ่มต้น (Pollen กลับมาแล้ว มิ.ย.2569) ปิดได้ด้วย env USE_POLL_VISION=0
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 const GROQ_API_KEY       = process.env.GROQ_API_KEY       || '';
@@ -1580,7 +1582,8 @@ function loadManifest(dir, meta) {
 }
 function saveManifest(dir, st) {
   fs.mkdirSync(dir, { recursive: true });
-  const images = [...st.images].sort((a, b) => (b.score || 0) - (a.score || 0)); // เว็บโชว์คะแนนสูงก่อน
+  // เว็บโชว์คะแนน rubric สูงก่อน ; คะแนนเท่ากัน → ใบที่ใกล้เคียงภาพยอดนิยมจริง (sim จาก brain) ขึ้นก่อน
+  const images = [...st.images].sort((a, b) => ((b.score || 0) - (a.score || 0)) || ((b.sim || 0) - (a.sim || 0)));
   // สร้าง categories map จากรูปที่มี category field
   const categories = buildCategoryMap(images);
   fs.writeFileSync(path.join(dir, 'manifest.json'),
@@ -1768,6 +1771,22 @@ async function main() {
       console.log(`  ! local vision import ไม่สำเร็จ (${e.message}) — ใช้พฤติกรรมเดิม`);
     }
   }
+  // ── หัวสมอง (brain): เรียนจากภาพต้นแบบ refs + ปรับสัดส่วนแหล่งรูปตามสภาพโควตา ──
+  // ล่ม/ไม่มีข้อมูล = ทุกอย่างถอยกลับสุ่ม uniform + PHOTO_SHARE ตาม config เดิมเป๊ะ
+  let brain = null;
+  if (USE_LEARNING) {
+    try {
+      const bm = await import('./lib/brain.mjs');
+      const names = await renderer.page.evaluate(() => ({
+        fr: FRAMES.map(f => f.n || ''), lay: LAYOUTS.map((l, i) => `${l.font}#${i}`), tx: TEXT_SIZES.map(t => t.id || ''),
+      })).catch(() => null);
+      brain = await bm.initBrain({ imgDir: IMG_DIR, sbUrl: SB_URL, sbAnon: SB_ANON, secret: LEARN_SECRET, fetchT, names });
+      if (brain) console.log(`  ✦ brain: เปิด — refs ${brain.refsCount} ใบ ${brain.simEnabled ? '(ใช้สัญญาณ CLIP similarity)' : `(สัญญาณ refs ปิด${brain.refsErr ? ': ' + brain.refsErr : ''})`}`);
+    } catch (e) { console.log(`  ! brain ไม่ทำงาน (${e.message}) — สุ่มแบบเดิม`); }
+  }
+  const brainPick = (k, n) => (brain ? brain.pickIdx(k, n) : Math.floor(Math.random() * n));
+  const pickSty = () => ({ fr: brainPick('fr', rCounts.frames), lay: brainPick('lay', rCounts.layouts), tx: brainPick('tx', rCounts.texts), ov: brainPick('ov', rCounts.overlays) });
+
   const aiStat = { pol: { ok: 0, fail: 0 }, gem: { ok: 0, fail: 0 } };
   const panel = async (cardBuf) => {
     const r = await scorePanel(cardBuf, voters, { passScore: PASS_SCORE, minClarity: MIN_CLARITY, minVoters: MIN_VOTERS });
@@ -1778,16 +1797,17 @@ async function main() {
     return r;
   };
 
-  const renderCard = async ({ raw, blessing, withDay, headlineOverride }) => {
+  const renderCard = async ({ raw, blessing, withDay, headlineOverride, sty }) => {
     const band = await bestTextBand(raw);
     // headlineOverride = คำขึ้นต้นเฉพาะหมวด (เช่น "สุขสันต์วันเกิด"); ถ้าไม่ส่งมา ใช้ค่าเริ่มต้นของวัน
     const hl = headlineOverride != null ? headlineOverride : (withDay ? headline : '');
+    const s = sty || pickSty();   // brain ถ่วงน้ำหนักสไตล์ตามที่เรียนมา (ไม่มี brain = uniform เดิม)
     return renderer.render({
       imgDataUrl: `data:image/jpeg;base64,${raw.toString('base64')}`,
-      frameIdx: Math.floor(Math.random() * rCounts.frames),
-      layoutIdx: Math.floor(Math.random() * rCounts.layouts),
-      txIdx: Math.floor(Math.random() * rCounts.texts),
-      ovIdx: Math.floor(Math.random() * rCounts.overlays),
+      frameIdx: s.fr,
+      layoutIdx: s.lay,
+      txIdx: s.tx,
+      ovIdx: s.ov,
       headline: hl,                                 // evergreen: '' = ไม่ใส่บรรทัด "สวัสดีวัน..."
       blessing, dateThai: withDay ? dateThai : '',
       // คลังหมวด/evergreen (withDay:false) ใช้สีกลาง ไม่ใช้สีประจำวัน เพื่อไม่ให้ดูเหมือนการ์ดของวันใดวันหนึ่ง
@@ -1868,8 +1888,11 @@ async function main() {
       let photoQs = CAT_PHOTO_QUERIES[cat];
       if (cat === 'flowers') photoQs = [...dayFlowerQueries(theme.flower, theme.tone), ...(photoQs || [])];
       const tryPhoto = async () => {
-        const ph = await fetchStockPhoto(fetchT, TXT_TIMEOUT_MS, photoQs, { strict: true });
-        raw = ph.buffer; src = ph.src; subject = null;
+        try {
+          const ph = await fetchStockPhoto(fetchT, TXT_TIMEOUT_MS, photoQs, { strict: true });
+          raw = ph.buffer; src = ph.src; subject = null;
+          brain?.srcEvent('photo', true);
+        } catch (e) { brain?.srcEvent('photo', false); throw e; }
         console.log(`[${gens}] photo[${cat}] "${src.name}" by ${src.by} (${st.images.length}/${TARGET})`);
       };
       const tryGen = async () => {
@@ -1879,12 +1902,14 @@ async function main() {
         do { seed = Math.floor(Math.random() * 1e9); } while (st.usedSeeds.includes(seed));
         const prompt = `${subject}, ${theme.tone} color palette, soft golden morning light, dreamy, elegant, highly detailed, beautiful, no text, no letters, no numbers, no watermark, no signature`;
         console.log(`[${gens}] gen seed=${seed} [${cat}]${themed ? ' [ธีมวันพิเศษ]' : ''} (${st.images.length}/${TARGET})`);
-        raw = await genImage(prompt, seed);
+        try { raw = await genImage(prompt, seed); brain?.srcEvent('gen', true); }
+        catch (e) { brain?.srcEvent('gen', false); throw e; }   // โควตาหมด/ล่ม → brain จำไว้ปรับสัดส่วน
       };
       if (themed) await tryGen();   // ภาพธีมวันพิเศษต้องเป็นภาพตามธีม (AI gen)
       else if (photoQs && photosEnabled()) {
-        // สลับรูปถ่าย/AI ตาม PHOTO_SHARE — ตัวไหนล่มถอยไปอีกตัวเสมอ (กันหมวดค้างเมื่อแหล่งหนึ่งล่ม)
-        if (Math.random() < PHOTO_SHARE) {
+        // สลับรูปถ่าย/AI ตามสัดส่วนปรับตัว: gen โควตาหมด → brain เทไปรูปถ่ายเอง (สูงสุด 95%) ฟื้นแล้วคืนค่า config
+        const share = brain ? brain.photoShare(PHOTO_SHARE) : PHOTO_SHARE;
+        if (Math.random() < share) {
           try { await tryPhoto(); } catch (e) { await tryGen(); }
         } else {
           try { await tryGen(); } catch (e) { subject = null; await tryPhoto(); }
@@ -1921,9 +1946,10 @@ async function main() {
     else if (imgCat && CAT_BLESSINGS[imgCat]) blessing = pickCatBlessing(imgCat) || pickBl(st.images.length);
     else blessing = pickBl(st.images.length);
 
-    // composite = การ์ดสำเร็จ
+    // composite = การ์ดสำเร็จ — sty เลือกโดย brain (ถ่วงน้ำหนักตามที่เรียนจากภาพต้นแบบ)
+    const sty = pickSty();
     let card;
-    try { card = await renderCard({ raw, blessing, withDay: true, headlineOverride: cardHeadline }); }
+    try { card = await renderCard({ raw, blessing, withDay: true, headlineOverride: cardHeadline, sty }); }
     catch (e) { console.log('  ! render:', e.message); continue; } // render พัง = ข้ามรูปนี้ (ไม่ fallback รูปดิบ)
     if (!card || card.length < 2000) { console.log('  ! render เล็กผิดปกติ'); continue; }
 
@@ -1936,13 +1962,23 @@ async function main() {
     if (seed != null) st.usedSeeds.push(seed);
     if (subject) st.subjectCount[subject] = (st.subjectCount[subject] || 0) + 1;
 
+    // brain: วัดความใกล้เคียงภาพต้นแบบของการ์ดสำเร็จ (ใช้ทั้งเรียนรู้ + จัดลำดับใน manifest)
+    const styArr = [sty.fr, sty.lay, sty.tx, sty.ov];
+    const simOf = async () => {
+      if (!brain) return null;
+      const s = await brain.scoreCard(card).catch(() => null);
+      if (s != null) brain.observe(sty, s);
+      return s != null ? Math.round(s * 100) / 100 : null;
+    };
+
     if (r.decision === 'keep') {
-      st.images.push({ file: fname, score: r.score, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline });
+      const sim = await simOf();
+      st.images.push({ file: fname, score: r.score, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline, sty: styArr, sim });
       if (imgCat && catCount[imgCat] != null) catCount[imgCat]++;
       catFails[cat] = 0;
       const scoreBreak = (r.perAI||[]).filter(a=>a.scores).map(a=>`${a.name}:c${a.scores.clarity}b${a.scores.beauty}w${a.scores.warmth}q${a.scores.quality}`).join(' | ');
-      console.log(`  ✓ keep ${fname} (${r.score}) [${scoreBreak}] ${imgCat}=${catCount[imgCat]||0}/${CAT_TARGET}`);
-      supaLog('px_keep', { d: targetISO, cat: imgCat, score: r.score, src: src ? 1 : 0 });
+      console.log(`  ✓ keep ${fname} (${r.score})${sim != null ? ` sim=${Math.round(sim*100)}%` : ''} [${scoreBreak}] ${imgCat}=${catCount[imgCat]||0}/${CAT_TARGET}`);
+      supaLog('px_keep', { d: targetISO, cat: imgCat, score: r.score, src: src ? 1 : 0, sty: styArr, sim });
     } else if (r.decision === 'pending' && src && PHOTO_TRUST_NOVOTE && (r.perAI||[]).every(a => !a.scores)) {
       // รูปถ่าย royalty-free + AI ล่มหมด → trust (กัน keyword กรองที่ photos.mjs แทน ไม่เพิ่ม Gemini call)
       // ด่านสุดท้าย: AI local (CLIP) ตรวจเนื้อหารูปก่อนปล่อยผ่าน — ตรวจไม่ได้ (null) = พฤติกรรมเดิม
@@ -1952,11 +1988,12 @@ async function main() {
         console.log(`  ✗ reject(local) ${fname} เนื้อหาไม่เหมาะ: ${lc.label} ${Math.round(lc.conf * 100)}%`);
         supaLog('px_reject', { d: targetISO, cat: imgCat, reason: ('local:' + lc.label).slice(0, 120) });
       } else {
-        st.images.push({ file: fname, score: 60, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline });
+        const sim = await simOf();
+        st.images.push({ file: fname, score: 60, blessing, baseId, src, category: imgCat, subject: subject || null, headline: cardHeadline, sty: styArr, sim });
         if (imgCat && catCount[imgCat] != null) catCount[imgCat]++;
         catFails[cat] = 0;
         console.log(`  ✓ keep(photo-trust${lc ? '·local:ok' : ''}) ${fname} [${src.name}] ${imgCat}=${catCount[imgCat]||0}/${CAT_TARGET}`);
-        supaLog('px_keep', { d: targetISO, cat: imgCat, score: 60, src: 1, trust: 1, lv: lc ? 1 : 0 });
+        supaLog('px_keep', { d: targetISO, cat: imgCat, score: 60, src: 1, trust: 1, lv: lc ? 1 : 0, sty: styArr, sim });
       }
     } else if (r.decision === 'pending') {
       st.pending.push({ file: fname, blessing, baseId, seed, src, tries: 0, headline: cardHeadline, subject: subject || null, category: imgCat || null });
@@ -2036,6 +2073,8 @@ async function main() {
       `AI ตรวจรูป — Pollinations ตอบ ${aiStat.pol.ok} ล้ม ${aiStat.pol.fail} · Gemini ตอบ ${aiStat.gem.ok} ล้ม ${aiStat.gem.fail}`,
       lack.length ? `หมวดที่ยังไม่ครบเป้า: ${lack.map(c => `${c} ${cc2[c]}/${CAT_TARGET}`).join(', ')}` : `ทุกหมวดครบเป้า ${CAT_TARGET} ใบแล้ว`,
     ];
+    // หัวสมอง: บันทึกความจำ + เติม "ประโยคที่เรียนรู้รอบนี้" (สไตล์เด่น/อ่อน, การสลับแหล่งรูป)
+    if (brain) { try { txt.push(...(brain.finish(PHOTO_SHARE) || [])); } catch (e) {} }
     lg.unshift({ t: new Date().toISOString(), d: targetISO, txt });
     fs.writeFileSync(LOG_FILE, JSON.stringify(lg.slice(0, 80)));
     console.log('  ✓ learn-log บันทึกแล้ว');

@@ -80,6 +80,9 @@ jobs:
           PHOTO_SHARE: '0.50'          # Pollen กลับมาแล้ว (มิ.ย.2569) — AI gen 50%, Pexels 50% ; ตั้ง '1.0' ถ้า Pollen หมดอีก
           USE_POLL_VISION: '1'         # เปิด vision Pollinations (Pollen กลับมาแล้ว มิ.ย.2569) — ปิดด้วย '0' ถ้า Pollen หมดอีก
           USE_LOCAL_VISION: '1'        # AI local (CLIP) ด่านตรวจเนื้อหาชั้นสุดท้ายของ photo-trust — ปิดด้วย '0'
+          USE_LEARNING: '1'            # หัวสมองเรียนรู้ (brain): refs similarity + สลับแหล่งรูปอัตโนมัติ — ปิดด้วย '0'
+          # รหัสเดียวกับ dashboard — ใช้ดึงภาพต้นแบบ refs (ไม่ตั้ง = สัญญาณ refs ปิด ส่วนอื่นของ brain ยังทำงาน)
+          LEARN_SECRET: ${{ secrets.LEARN_SECRET }}
 
       # publish: บีบเป็น commit เดียว (orphan) แล้ว force-push — ไม่มี history bloat แต่คงไฟล์สะสมไว้
       - name: Publish to daily-images branch

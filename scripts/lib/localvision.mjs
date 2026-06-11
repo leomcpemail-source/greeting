@@ -57,6 +57,47 @@ async function getPipe() {
   return pipePromise;
 }
 
+// ── image embedding (ใช้โดย brain.mjs วัดความใกล้เคียงกับภาพต้นแบบ refs) ──
+let embedPromise = null;
+let embedBroken = false;
+async function getEmbedPipe() {
+  if (embedBroken) return null;
+  if (!embedPromise) {
+    embedPromise = (async () => {
+      const { pipeline, env } = await import('@huggingface/transformers');
+      env.cacheDir = process.env.HF_CACHE_DIR || './.hf-cache';
+      return pipeline('image-feature-extraction', 'Xenova/clip-vit-base-patch32', { dtype: 'q8' });
+    })().catch((e) => {
+      embedBroken = true;
+      console.log(`  ! localvision: โหลด embed ไม่สำเร็จ (${e.message})`);
+      return null;
+    });
+  }
+  return embedPromise;
+}
+
+// รับ Buffer jpeg → Array ตัวเลข (L2-normalized) หรือ null — ห้าม throw เด็ดขาด
+export async function imageEmbed(buf) {
+  try {
+    const pipe = await getEmbedPipe();
+    if (!pipe) return null;
+    const tmp = path.join(os.tmpdir(), `lve_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`);
+    try {
+      fs.writeFileSync(tmp, buf);
+      const out = await pipe(tmp);
+      // ผลอาจเป็น Tensor ({data}) หรือ array ซ้อน — ดึงเป็น flat array ให้ได้
+      let v = out && out.data ? Array.from(out.data) : (Array.isArray(out) ? out.flat(Infinity) : null);
+      if (!v || !v.length) return null;
+      const norm = Math.sqrt(v.reduce((s, x) => s + x * x, 0)) || 1;
+      return v.map(x => x / norm);
+    } finally {
+      fs.rmSync(tmp, { force: true });
+    }
+  } catch (e) {
+    return null;
+  }
+}
+
 // รับ Buffer jpeg → {ok,label,conf} หรือ null เมื่อตรวจไม่ได้ (caller ใช้พฤติกรรมเดิม)
 export async function localContentCheck(buf) {
   try {
