@@ -121,6 +121,20 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
       <div class="loading"><div class="spin"></div>กำลังโหลด…</div>
     </div>
 
+    <!-- refs: ภาพต้นแบบสอนระบบเรียนรู้ (อยู่นอก #content — ไม่โดน auto-refresh ทับ) -->
+    <div class="panel" id="refsPanel" style="margin-top:14px">
+      <h3>🖼️ ภาพต้นแบบสอนระบบ (refs) <span id="refsCount" style="color:var(--gold)"></span></h3>
+      <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:10px">
+        อัปโหลดภาพสวัสดีที่เห็นคนนิยมส่งต่อกันจริงใน LINE — ระบบจะเรียนรู้ให้การ์ดที่สร้างหน้าตาใกล้เคียงชุดนี้<br>
+        เก็บถาวร ไม่ต้องอัปโหลดทุกวัน • เป้าหมาย 20+ ใบ คละแนว (ดอกไม้/พระ/วิว/มงคล) • แตะ ✕ เพื่อเอาภาพที่ไม่ดีออก
+      </div>
+      <div id="refsWarn" style="color:var(--red);font-size:12px;margin-bottom:8px"></div>
+      <button class="btn-gold" style="width:auto;padding:9px 18px" onclick="refsPick()">＋ อัปโหลดรูป</button>
+      <span id="refsStatus" style="color:var(--mut);font-size:12px;margin-left:10px"></span>
+      <input type="file" id="refsFile" accept="image/*" multiple style="display:none">
+      <div id="refsGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"></div>
+    </div>
+
     <div class="note">
       visitor_id เป็นรหัสสุ่มใน localStorage (incognito นับแยก) • เครื่องโดยประมาณ = fingerprint ua+ภาษา+timezone (นับ incognito รวมเครื่องเดิม) • ประเทศประมาณจาก timezone<br>
       <span id="updated2"></span>
@@ -147,6 +161,91 @@ function enter(){
   $('board').style.display='block';
   startAutoRefresh();
   load();
+  loadRefs();   // โหลดครั้งเดียวตอนเข้า (ไม่ผูกกับ auto-refresh — รูปเยอะ ไม่ควรดึงซ้ำทุก 30 วิ)
+}
+
+/* ── refs: ภาพต้นแบบสอนระบบเรียนรู้ (เก็บใน Supabase ผ่าน RPC ล็อกด้วยรหัส dashboard) ── */
+const REFS_MIN = 8;  // ต่ำกว่านี้ pipeline จะยังไม่ใช้สัญญาณ refs (ดู LEARNING-PLAN.md)
+async function refsRpc(fn, extra){
+  const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON},
+    body: JSON.stringify({ pass: PASS, ...(extra||{}) })
+  });
+  if(res.status===404) return { error:'not_installed' };
+  if(!res.ok) throw new Error('http '+res.status);
+  return res.json();
+}
+async function loadRefs(){
+  const grid=$('refsGrid');
+  grid.innerHTML='<div style="color:var(--mut);font-size:12px">กำลังโหลด…</div>';
+  try{
+    const d = await refsRpc('refs_list');
+    if(d?.error==='not_installed'){
+      $('refsCount').textContent='';
+      grid.innerHTML='<div style="color:var(--mut);font-size:12px;line-height:1.8">ยังไม่ได้ติดตั้ง — รันไฟล์ <b>refs-schema.sql</b> ใน Supabase SQL Editor ครั้งเดียว (ตั้ง secret ให้ตรงรหัสนี้)</div>';
+      return;
+    }
+    if(d?.error==='unauthorized'){ grid.innerHTML='<div style="color:var(--red);font-size:12px">secret ใน refs-schema.sql ไม่ตรงรหัสนี้</div>'; return; }
+    const list = Array.isArray(d)?d:[];
+    $('refsCount').textContent = `${list.length} ใบ`;
+    $('refsWarn').textContent = list.length===0 ? '' :
+      (list.length < REFS_MIN ? `⚠️ ยังน้อยกว่า ${REFS_MIN} ใบ — ระบบเรียนรู้จะยังไม่ใช้สัญญาณชุดนี้จนกว่าจะถึงขั้นต่ำ` : '');
+    grid.innerHTML = list.length ? '' : '<div style="color:var(--mut);font-size:12px">ยังไม่มีภาพ — กดอัปโหลดเพื่อเริ่มสอนระบบ</div>';
+    for(const r of list){
+      const cell=document.createElement('div');
+      cell.style.cssText='position:relative;width:86px;height:86px;border-radius:10px;overflow:hidden;border:1px solid var(--line)';
+      const img=document.createElement('img');
+      img.src=r.img; img.alt=r.name||''; img.title=(r.name||'')+' • '+(r.t||'');
+      img.style.cssText='width:100%;height:100%;object-fit:cover;display:block';
+      const del=document.createElement('button');
+      del.textContent='✕'; del.title='ลบภาพนี้';
+      del.style.cssText='position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.62);color:#fff;font-size:12px;cursor:pointer;line-height:1';
+      del.onclick=()=>refsDel(r.id);
+      cell.append(img,del); grid.appendChild(cell);
+    }
+  }catch(e){ grid.innerHTML='<div style="color:var(--red);font-size:12px">โหลดไม่สำเร็จ: '+e.message+'</div>'; }
+}
+// ย่อรูปฝั่งเบราว์เซอร์ก่อนส่ง — CLIP ใช้รูปเล็กพอ ประหยัดที่ DB ~10 เท่า
+function refsShrink(file){
+  return new Promise((res,rej)=>{
+    const img=new Image();
+    img.onload=()=>{
+      try{
+        const MAX=512, k=Math.min(1, MAX/Math.max(img.width,img.height));
+        const c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(img.width*k)); c.height=Math.max(1,Math.round(img.height*k));
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        res(c.toDataURL('image/jpeg',0.82));
+      }catch(e){rej(e);}
+      finally{URL.revokeObjectURL(img.src);}
+    };
+    img.onerror=()=>rej(new Error('อ่านรูปไม่ได้'));
+    img.src=URL.createObjectURL(file);
+  });
+}
+function refsPick(){ $('refsFile').click(); }
+$('refsFile').addEventListener('change', async (e)=>{
+  const files=[...(e.target.files||[])]; e.target.value='';
+  if(!files.length) return;
+  const st=$('refsStatus'); let ok=0, fail=0;
+  for(let i=0;i<files.length;i++){
+    st.textContent=`กำลังอัปโหลด ${i+1}/${files.length}…`;
+    try{
+      const b64=await refsShrink(files[i]);
+      const r=await refsRpc('refs_add',{ p_name:files[i].name, p_img:b64 });
+      if(r?.ok) ok++;
+      else { fail++; if(r?.error==='full'){ st.textContent='เต็ม 100 ใบแล้ว — ลบของเก่าก่อน'; break; } }
+    }catch(err){ fail++; }
+  }
+  st.textContent=`เสร็จ: สำเร็จ ${ok}${fail?` • พลาด ${fail}`:''}`;
+  setTimeout(()=>{st.textContent='';},6000);
+  loadRefs();
+});
+async function refsDel(id){
+  if(!confirm('เอาภาพนี้ออกจากชุดสอนระบบ?')) return;
+  try{ await refsRpc('refs_del',{ p_id:id }); }catch(e){}
+  loadRefs();
 }
 
 /* ── filter logic ── */
