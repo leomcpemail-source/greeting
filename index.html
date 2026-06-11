@@ -22,7 +22,7 @@
     var diag='app.h='+appH+' | win='+window.innerHeight+' | dvh-ok='+(window.CSS&&CSS.supports&&CSS.supports('height','100dvh'))
       +' | card='+(hasCard?'yes':'no')+(errs.length?' | '+esc(errs.join(' ; ')):'');
     var d=document.createElement('div');
-    d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#fff;color:#7a2540;font-family:-apple-system,Sarabun,sans-serif;padding:20px;font-size:15px;line-height:1.7;border-bottom:3px solid #e7308f;';
+    d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#fff;color:#2a4d6b;font-family:-apple-system,Sarabun,sans-serif;padding:20px;font-size:15px;line-height:1.7;border-bottom:3px solid #2e8fd1;';
     d.innerHTML='<b style="font-size:18px">เปิดไม่สำเร็จ 😢</b> โปรดแคปหน้าจอนี้ส่งให้ผู้พัฒนา<br>'
       +'<span style="font-family:monospace;font-size:12px;color:#b00;word-break:break-word">'+diag+'</span>';
     (document.body||document.documentElement).appendChild(d);
@@ -38,10 +38,10 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --pink:#e7308f;--pink-soft:#ff6fb0;--pink-pale:#fde6f2;
+  --pink:#2e8fd1;--pink-soft:#7db8e8;--pink-pale:#e7f2fb;
   --green:#2a9d3f;--green-dark:#1f8a35;
   --line:#2db84a;
-  --text:#3a2230;--text2:#9a8a96;--text3:#b5a7b0;
+  --text:#243a4d;--text2:#8195a6;--text3:#a9bac7;
   --cream:#fff6ec;--cream-border:#f3e2cc;
   --bg:#ffffff;
   --tab-h:62px;
@@ -64,7 +64,7 @@ html,body{
 }
 @media(min-width:480px){
   body{background:#f0f0f3;}
-  .app{max-height:min(920px,calc(100% - 32px));border-radius:28px;box-shadow:0 12px 48px rgba(120,40,90,.18);border:1px solid #eee;}
+  .app{max-height:min(920px,calc(100% - 32px));border-radius:28px;box-shadow:0 12px 48px rgba(50,90,130,.18);border:1px solid #eee;}
 }
 
 /* ── PAGES ── */
@@ -75,7 +75,7 @@ html,body{
 
 /* ── TAB BAR ── */
 .tab-bar{position:absolute;bottom:0;left:0;right:0;height:var(--tab-h);background:#fff;
-  border-top:1px solid #f1e4ee;display:flex;padding-bottom:max(0px,env(safe-area-inset-bottom));z-index:100;}
+  border-top:1px solid #e3edf5;display:flex;padding-bottom:max(0px,env(safe-area-inset-bottom));z-index:100;}
 .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   border:none;background:none;cursor:pointer;font-family:'Sarabun';font-size:13px;font-weight:600;
   color:#c3b3bd;transition:color .2s;}
@@ -83,7 +83,7 @@ html,body{
 .tab-btn.active{color:var(--pink);}
 .tab-btn.active .tab-ic{transform:scale(1.08);}
 /* แบ่งกลางแบบภาพ */
-.tab-divider{width:1px;background:#f1e4ee;margin:14px 0;}
+.tab-divider{width:1px;background:#e3edf5;margin:14px 0;}
 
 /* ═══════════════ PAGE: TODAY ═══════════════ */
 #pageToday{background:#fff;}
@@ -104,7 +104,7 @@ html,body{
 .db-left{flex:1;display:flex;align-items:center;gap:10px;min-width:0;}
 .db-cal{font-size:23px;flex-shrink:0;}
 .db-main{min-width:0;}
-.db-date{font-family:'Sarabun';font-size:14.5px;font-weight:700;color:#5a4250;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.db-date{font-family:'Sarabun';font-size:14.5px;font-weight:700;color:#3f5668;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .db-lunar{font-family:'Sarabun';font-size:12.5px;color:#b89b6a;font-weight:600;margin-top:1px;}
 .db-divider{width:1.5px;align-self:stretch;background:var(--cream-border);margin:2px 10px;}
 .db-right{flex-shrink:0;display:flex;align-items:center;gap:7px;padding-right:6px;}
@@ -118,9 +118,9 @@ html,body{
 .stage{width:100%;height:100%;position:relative;display:flex;align-items:center;justify-content:center;overflow:visible;}
 /* arrows */
 .nav-arrow{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;
-  background:rgba(255,255,255,.82);border:1px solid rgba(231,48,143,.18);
+  background:rgba(255,255,255,.82);border:1px solid rgba(46,143,209,.18);
   display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:30;
-  box-shadow:0 3px 12px rgba(120,40,90,.18);font-size:18px;color:var(--pink);
+  box-shadow:0 3px 12px rgba(50,90,130,.18);font-size:18px;color:var(--pink);
   -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);transition:transform .12s,background .15s;user-select:none;}
 .nav-arrow:active{transform:translateY(-50%) scale(.88);}
 .nav-arrow.left{left:2px;}
@@ -162,7 +162,7 @@ html,body{
 
 /* Thumbnail strip */
 .thumbs{flex-shrink:0;padding:2px 16px 12px;}
-.thumbs-label{font-family:'Sarabun';font-size:14px;font-weight:700;color:#5a4250;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.thumbs-label{font-family:'Sarabun';font-size:14px;font-weight:700;color:#3f5668;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 .thumb-row{display:flex;gap:9px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
 .thumb-row::-webkit-scrollbar{display:none}
 .thumb{flex-shrink:0;width:80px;height:80px;border-radius:14px;overflow:hidden;position:relative;cursor:pointer;
@@ -187,7 +187,7 @@ html,body{
 .cat-grid-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;padding:6px 14px 18px;}
 .cat-card{border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .14s,box-shadow .14s;
-  aspect-ratio:1/.94;position:relative;box-shadow:0 2px 10px rgba(120,40,90,.1);}
+  aspect-ratio:1/.94;position:relative;box-shadow:0 2px 10px rgba(50,90,130,.1);}
 .cat-card:active{transform:scale(.95)}
 .cat-card-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
 .cat-card-band{position:absolute;bottom:0;left:0;right:0;padding:7px 9px;display:flex;align-items:center;gap:5px;}
@@ -197,7 +197,7 @@ html,body{
 /* ═══════════════ PAGE: CATEGORY DETAIL ═══════════════ */
 #pageCatDetail{background:#fff;}
 .catd-header{flex-shrink:0;background:#fff;padding:max(14px,env(safe-area-inset-top)) 16px 11px;
-  border-bottom:1px solid #f3e2ee;display:flex;align-items:center;gap:12px;}
+  border-bottom:1px solid #e3edf5;display:flex;align-items:center;gap:12px;}
 .catd-back{font-size:22px;cursor:pointer;border:none;background:none;line-height:1;padding:5px 7px;border-radius:10px;color:var(--pink);}
 .catd-back:active{background:var(--pink-pale);}
 .catd-title{font-family:'Chonburi';font-size:19px;color:var(--pink);}
@@ -205,17 +205,17 @@ html,body{
 .catd-grid-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .catd-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;padding:14px;}
 .catd-item{border-radius:15px;overflow:hidden;aspect-ratio:1;cursor:pointer;position:relative;
-  transition:transform .14s,box-shadow .14s;box-shadow:0 2px 9px rgba(120,40,90,.1);}
+  transition:transform .14s,box-shadow .14s;box-shadow:0 2px 9px rgba(50,90,130,.1);}
 .catd-item:active{transform:scale(.95)}
-.catd-item.selected{box-shadow:0 0 0 3px var(--pink),0 4px 14px rgba(231,48,143,.3);}
+.catd-item.selected{box-shadow:0 0 0 3px var(--pink),0 4px 14px rgba(46,143,209,.3);}
 .catd-item img{width:100%;height:100%;object-fit:cover;display:block;}
 .catd-item-check{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:var(--pink);
   color:#fff;display:none;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.3);}
 .catd-item.selected .catd-item-check{display:flex;}
-.catd-actions{flex-shrink:0;padding:12px 16px;background:#fff;border-top:1px solid #f3e2ee;}
+.catd-actions{flex-shrink:0;padding:12px 16px;background:#fff;border-top:1px solid #e3edf5;}
 .catd-use{width:100%;padding:14px;border:none;border-radius:15px;background:var(--pink);color:#fff;
   font-family:'Kanit';font-size:17px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
-  box-shadow:0 4px 16px rgba(231,48,143,.3);transition:transform .12s;}
+  box-shadow:0 4px 16px rgba(46,143,209,.3);transition:transform .12s;}
 .catd-use:active{transform:scale(.97)}
 
 /* lightbox ดูรูปใหญ่ก่อนเลือก — ผู้สูงอายุดูรายละเอียดชัดๆ ก่อนกดใช้/บันทึก */
@@ -224,7 +224,7 @@ html,body{
 #cardPreview img{max-width:min(94vw,560px);max-height:64vh;border-radius:18px;box-shadow:0 10px 36px rgba(0,0,0,.55);}
 .cp-btns{display:flex;gap:12px;width:100%;max-width:420px;}
 .cp-use{flex:1.4;border:none;border-radius:16px;padding:16px 10px;background:var(--pink);color:#fff;
-  font-family:'Kanit';font-size:19px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(231,48,143,.4);transition:transform .12s;}
+  font-family:'Kanit';font-size:19px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(46,143,209,.4);transition:transform .12s;}
 .cp-use:active{transform:scale(.97)}
 .cp-close{flex:1;border:1.5px solid rgba(255,255,255,.45);border-radius:16px;padding:16px 10px;background:rgba(255,255,255,.14);
   color:#fff;font-family:'Kanit';font-size:18px;cursor:pointer;transition:transform .12s;}
@@ -429,11 +429,11 @@ function showSource(src){
   const ov=document.createElement('div');ov.id='srcPop';
   ov.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(10,30,45,.55);display:flex;align-items:center;justify-content:center;padding:28px';
   const box=document.createElement('div');
-  box.style.cssText="max-width:340px;width:100%;background:rgba(255,255,255,.95);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:18px;padding:18px;font-family:'Sarabun';color:#3a2230;box-shadow:0 12px 40px rgba(10,40,70,.3)";
+  box.style.cssText="max-width:340px;width:100%;background:rgba(255,255,255,.95);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:18px;padding:18px;font-family:'Sarabun';color:#243a4d;box-shadow:0 12px 40px rgba(10,40,70,.3)";
   const name=src.name?`<div style="font-size:16px;font-weight:700;margin-bottom:6px">${esc(src.name)}</div>`:'';
-  const by=src.by?`<div style="font-size:14px;color:#9a8a96;margin-bottom:4px">ภาพโดย ${esc(src.by)}</div>`:'';
-  const link=src.link?`<a href="${esc(src.link)}" target="_blank" rel="noopener" style="font-size:13px;color:#e7308f;word-break:break-all">${esc(src.link)}</a>`:'';
-  box.innerHTML=`<div style="font-size:12px;letter-spacing:.05em;color:#b5a7b0;margin-bottom:8px">แหล่งที่มาของภาพ</div>${name}${by}${link}<div style="margin-top:14px;text-align:right"><button id="srcClose" style="font-family:'Kanit';font-size:14px;font-weight:600;background:#e7308f;color:#fff;border:none;padding:9px 22px;border-radius:11px;cursor:pointer">ปิด</button></div>`;
+  const by=src.by?`<div style="font-size:14px;color:#8195a6;margin-bottom:4px">ภาพโดย ${esc(src.by)}</div>`:'';
+  const link=src.link?`<a href="${esc(src.link)}" target="_blank" rel="noopener" style="font-size:13px;color:#2e8fd1;word-break:break-all">${esc(src.link)}</a>`:'';
+  box.innerHTML=`<div style="font-size:12px;letter-spacing:.05em;color:#a9bac7;margin-bottom:8px">แหล่งที่มาของภาพ</div>${name}${by}${link}<div style="margin-top:14px;text-align:right"><button id="srcClose" style="font-family:'Kanit';font-size:14px;font-weight:600;background:#2e8fd1;color:#fff;border:none;padding:9px 22px;border-radius:11px;cursor:pointer">ปิด</button></div>`;
   ov.appendChild(box);ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
   document.body.appendChild(ov);const cl=document.getElementById('srcClose');if(cl)cl.onclick=()=>ov.remove();
 }
@@ -485,14 +485,14 @@ function relayout(){
 
 /* swipe gesture */
 function attachSwipe(){
-  let sx=0,sy=0,dx=0,dragging=false,horiz=null,moved=false;
+  let sx=0,sy=0,dx=0,dragging=false,horiz=null,moved=false,tapTarget=null;
   const TH=48;
-  function start(x,y){sx=x;sy=y;dx=0;dragging=true;horiz=null;moved=false;}
+  function start(x,y,t){sx=x;sy=y;dx=0;dragging=true;horiz=null;moved=false;tapTarget=t||null;}
   function move(x,y){
     if(!dragging)return;
     dx=x-sx;const dy=y-sy;
     if(horiz===null&&(Math.abs(dx)>6||Math.abs(dy)>6)){horiz=Math.abs(dx)>=Math.abs(dy);}
-    if(Math.abs(dx)>6)moved=true;
+    if(Math.abs(dx)>6||Math.abs(dy)>6)moved=true;
     if(!horiz)return;
     const cw=stage.querySelector('.cw');
     if(cw){cw.style.transition='none';cw.style.transform=`translateX(${dx}px)`;cw.style.opacity=String(Math.max(.4,1-Math.abs(dx)/(CW*1.2)));}
@@ -502,19 +502,41 @@ function attachSwipe(){
     const cw=stage.querySelector('.cw');
     if(horiz&&Math.abs(dx)>=TH){
       if(dx<0)nextCard();else prevCard();
-    }else if(cw){
-      cw.style.transition='transform .25s,opacity .25s';cw.style.transform='translateX(0)';cw.style.opacity='1';
+    }else{
+      if(cw){cw.style.transition='transform .25s,opacity .25s';cw.style.transform='translateX(0)';cw.style.opacity='1';}
+      // แตะการ์ดเฉยๆ (ไม่ลาก) = ขยายดูรูปใหญ่ — ยกเว้นปุ่ม ⓘ แหล่งที่มา
+      if(!moved&&tapTarget&&tapTarget.closest&&tapTarget.closest('.card')&&!tapTarget.closest('.src-btn'))openStageZoom();
     }
   }
-  stage.addEventListener('mousedown',e=>{e.preventDefault();start(e.clientX,e.clientY);});
+  stage.addEventListener('mousedown',e=>{e.preventDefault();start(e.clientX,e.clientY,e.target);});
   window.addEventListener('mousemove',e=>{if(dragging)move(e.clientX,e.clientY);});
   window.addEventListener('mouseup',()=>{if(dragging)end();});
-  stage.addEventListener('touchstart',e=>start(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+  stage.addEventListener('touchstart',e=>start(e.touches[0].clientX,e.touches[0].clientY,e.target),{passive:true});
   stage.addEventListener('touchmove',e=>{move(e.touches[0].clientX,e.touches[0].clientY);if(horiz)e.preventDefault();},{passive:false});
   stage.addEventListener('touchend',end);
   window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();prevCard();}else if(e.key==='ArrowRight'){e.preventDefault();nextCard();}});
   document.getElementById('navLeft').addEventListener('click',prevCard);
   document.getElementById('navRight').addEventListener('click',nextCard);
+}
+
+/* แตะการ์ดหลัก = ขยายดูใหญ่เต็มจอ — clone การ์ดที่แสดงอยู่ทั้ง DOM (กรอบ+ข้อความครบ เหมือนที่เห็นเป๊ะ) */
+function openStageZoom(){
+  if(!curCardEl||!CW)return;
+  document.getElementById('cardPreview')?.remove();
+  const k=Math.min((window.innerWidth*0.97)/CW,(window.innerHeight*0.76)/CW);
+  const ov=document.createElement('div');ov.id='cardPreview';
+  const holder=document.createElement('div');
+  holder.style.cssText=`width:${Math.round(CW*k)}px;height:${Math.round(CW*k)}px;flex-shrink:0;`;
+  const clone=curCardEl.cloneNode(true);
+  const sb=clone.querySelector('.src-btn');if(sb)sb.remove();
+  clone.style.width=CW+'px';clone.style.height=CW+'px';clone.style.boxShadow='0 10px 36px rgba(0,0,0,.55)';
+  clone.style.transform=`scale(${k})`;clone.style.transformOrigin='top left';
+  holder.appendChild(clone);
+  const cl=document.createElement('button');cl.className='cp-close';cl.textContent='✕ ปิด';
+  cl.style.cssText='flex:0 0 auto;width:min(60vw,240px);';
+  cl.onclick=()=>ov.remove();
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});  // แตะพื้นมืดก็ปิดได้
+  ov.append(holder,cl);document.body.appendChild(ov);
 }
 
 /* ── THUMBNAIL STRIP ── */
@@ -1027,7 +1049,7 @@ async function openCategory(cat){
   currentCatId=cat.id;selectedCatCard=null;
   document.getElementById('catdTitle').textContent=`${cat.ic} ${cat.label}`;
   document.getElementById('catdCount').textContent='กำลังโหลด…';
-  document.getElementById('catdGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:#9a8a96;font-size:14px">กำลังโหลด…</div>';
+  document.getElementById('catdGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:#8195a6;font-size:14px">กำลังโหลด…</div>';
   const useBtn=document.getElementById('catdUse');useBtn.disabled=true;useBtn.style.opacity='0.5';
   switchTab('catdetail');
   try{
@@ -1056,9 +1078,9 @@ function showCatEmpty(cat,reason){
   document.getElementById('catdGrid').innerHTML=
     '<div style="grid-column:1/-1;text-align:center;padding:44px 20px;">'
     +'<div style="font-size:52px;margin-bottom:14px">'+cat.ic+'</div>'
-    +'<div style="font-family:Chonburi;font-size:17px;color:#3a2230;margin-bottom:10px">'+cat.label+'</div>'
-    +'<div style="font-size:14px;color:#9a8a96;line-height:1.8;margin-bottom:22px">'+reason+'<br>รูปจะทยอยเพิ่มขึ้นระหว่างวันค่ะ</div>'
-    +'<button onclick="switchTab(\'category\')" style="background:#e7308f;color:#fff;border:none;border-radius:14px;padding:12px 28px;font-family:Kanit;font-size:15px;font-weight:600;cursor:pointer;">← กลับเลือกหมวดอื่น</button>'
+    +'<div style="font-family:Chonburi;font-size:17px;color:#243a4d;margin-bottom:10px">'+cat.label+'</div>'
+    +'<div style="font-size:14px;color:#8195a6;line-height:1.8;margin-bottom:22px">'+reason+'<br>รูปจะทยอยเพิ่มขึ้นระหว่างวันค่ะ</div>'
+    +'<button onclick="switchTab(\'category\')" style="background:#2e8fd1;color:#fff;border:none;border-radius:14px;padding:12px 28px;font-family:Kanit;font-size:15px;font-weight:600;cursor:pointer;">← กลับเลือกหมวดอื่น</button>'
     +'</div>';
 }
 
