@@ -657,6 +657,12 @@ const FRAMES=[
   {n:'สีประจำวันกนก', fi:28, layers:[
     {line:1,inset:10,w:4,color:'DAY',radius:0},
   ], corners:{t:'steps',inset:10,size:34,w:5,gap:6,color:'DAY',color2:'DAY2'}},
+  // 19-21) ไร้กรอบ (มิ.ย.2569) — ภาพเต็มเฟรมแบบภาพสวัสดีไทยที่นิยมส่งต่อกัน (ใส่ 3 ช่องให้สุ่มเจอบ่อยขึ้น)
+  {n:'ไร้กรอบ', fi:16, layers:[]},
+  {n:'ไร้กรอบเส้นใน', fi:18, layers:[
+    {line:1,inset:7,w:1.5,color:'rgba(255,255,255,.45)',radius:10},
+  ]},
+  {n:'ไร้กรอบ', fi:16, layers:[]},
 ];
 
 /* ── LAYOUTS ────────────────────────────────────────────────────────── */
@@ -683,13 +689,20 @@ const LAYOUTS=[
   {font:'Chonburi', j:'flex-end', a:'center', ta:'center',rot:0, scrim:'bottom',panel:false,narrow:false,hs:46,bs:24,pad:'18px 22px 36px'},
   {font:'Sarabun', j:'center', a:'flex-end', ta:'center',rot:0, scrim:'center',panel:true, narrow:false,hs:28,bs:17,pad:'20px'},
   {font:'Kanit', j:'flex-end', a:'flex-end', ta:'right', rot:8, scrim:'bottom',panel:true, narrow:true, hs:34,bs:20,pad:'18px 26px 30px'},
+  // ── แบบตัวใหญ่พิเศษ (มิ.ย.2569) — สไตล์ภาพสวัสดีไทยที่นิยมส่งต่อกัน: ตัวหนังสือเด่นเต็มภาพ ──
+  {font:'Chonburi', j:'flex-end', a:'center', ta:'center',rot:0, scrim:'bottom',panel:false,narrow:false,hs:52,bs:27,pad:'18px 20px 34px'},
+  {font:'Kanit', j:'flex-start',a:'center', ta:'center',rot:0, scrim:'top', panel:false,narrow:false,hs:50,bs:26,pad:'30px 20px'},
+  {font:'Mitr', j:'flex-end', a:'center', ta:'center',rot:0, scrim:'bottom',panel:false,narrow:false,hs:48,bs:28,pad:'18px 22px 32px'},
+  {font:'Pattaya', j:'flex-start',a:'center', ta:'center',rot:0, scrim:'top', panel:false,narrow:false,hs:50,bs:25,pad:'28px 20px'},
 ];
 const TEXT_SIZES=[
-  {id:'normal', hs_mul:1.00, bs_mul:1.00, gap:8 },
-  {id:'hero',   hs_mul:1.28, bs_mul:0.90, gap:6, outline:true },
-  {id:'compact',hs_mul:0.82, bs_mul:0.85, gap:5 },
-  {id:'wide',   hs_mul:1.08, bs_mul:1.12, gap:10, outline:true },
-  {id:'mini',   hs_mul:0.68, bs_mul:0.78, gap:4 },
+  // ปรับใหญ่ขึ้นทั้งชุด (มิ.ย.2569) — ภาพสวัสดีที่นิยมส่งต่อกันตัวหนังสือใหญ่ อ่านออกตั้งแต่ thumbnail ใน LINE
+  // ocDark = ขอบตัวอักษรสีเข้ม (ขาวขอบดำแบบภาพยอดนิยม) แทนขอบสีประจำวัน
+  {id:'normal', hs_mul:1.12, bs_mul:1.10, gap:8, outline:true },
+  {id:'hero',   hs_mul:1.45, bs_mul:1.05, gap:6, outline:true, ocDark:true },
+  {id:'compact',hs_mul:0.92, bs_mul:0.95, gap:5 },
+  {id:'wide',   hs_mul:1.25, bs_mul:1.25, gap:10, outline:true },
+  {id:'bold',   hs_mul:1.35, bs_mul:1.15, gap:7, outline:true, ocDark:true },
 ];
 const OVERLAYS=[
   {id:'none',    cssFilter:'', canvasFn:null},
@@ -840,10 +853,11 @@ function buildCard(cb,CW){
   const blEl=document.createElement('div');blEl.className='bless';blEl.style.fontSize=bsz+'px';
   blEl.innerHTML=_segHTML(bl);
   if(tx&&tx.outline){
-    const oc=M.color||'#c0392b';
-    const _ring=(c,w)=>`${-w}px ${-w}px 0 ${c},${w}px ${-w}px 0 ${c},${-w}px ${w}px 0 ${c},${w}px ${w}px 0 ${c}`;
-    h.style.textShadow=_ring(oc,Math.max(2,Math.round(hs/20)))+`,0 2px 10px rgba(0,0,0,.45)`;
-    blEl.style.textShadow=_ring(oc,Math.max(1,Math.round(bsz/24)))+`,0 1px 6px rgba(0,0,0,.5)`;
+    // ขอบตัวอักษรทึบ 8 ทิศ (แบบภาพสวัสดีไทยยอดนิยม) — ocDark = ขาวขอบดำ คมชัดบนพื้นหลังทุกแบบ
+    const oc=tx.ocDark?'rgba(18,12,6,.92)':(M.color||'#c0392b');
+    const _ring=(c,w)=>`${-w}px ${-w}px 0 ${c},${w}px ${-w}px 0 ${c},${-w}px ${w}px 0 ${c},${w}px ${w}px 0 ${c},0 ${-w}px 0 ${c},0 ${w}px 0 ${c},${-w}px 0 0 ${c},${w}px 0 0 ${c}`;
+    h.style.textShadow=_ring(oc,Math.max(2,Math.round(hs/16)))+`,0 3px 12px rgba(0,0,0,.5)`;
+    blEl.style.textShadow=_ring(oc,Math.max(2,Math.round(bsz/18)))+`,0 2px 8px rgba(0,0,0,.55)`;
   }
   const dt=document.createElement('div');dt.className='date';dt.textContent=M.dateThai;dt.style.fontSize=Math.round(bsz*0.62)+'px';
   tb.append(h,blEl,dt);content.appendChild(tb);card.appendChild(content);
