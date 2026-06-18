@@ -42,40 +42,36 @@ Supabase Edge Function  line-webhook  ──► เก็บ userId ลงตา
 
 ---
 
-## ขั้นที่ 2 — ติดตั้งหลังบ้านบน Supabase
+## ขั้นที่ 2 — หลังบ้านบน Supabase ✅ (ติดตั้งให้แล้ว)
 
-ใช้ [Supabase CLI](https://supabase.com/docs/guides/cli) (หรือทำผ่านหน้าเว็บ Dashboard ก็ได้)
+ติดตั้งให้เรียบร้อยแล้วบนโปรเจกต์ Supabase **`iuyiwpoupnuxnohpatyw`**:
+- ✅ สร้างตาราง `line_friends` (เปิด RLS — เข้าถึงเฉพาะ service role)
+- ✅ deploy Edge Function `line-webhook` (ปิด verify_jwt แล้ว)
+
+**Webhook URL** (ใช้ในขั้นที่ 3):
+```
+https://iuyiwpoupnuxnohpatyw.supabase.co/functions/v1/line-webhook
+```
+
+> หมายเหตุ: โปรเจกต์นี้ใช้ร่วมกับแอพอื่น (workplace-planner) แต่ตาราง/ฟังก์ชันของ LINE แยกอิสระ ไม่กระทบกัน ถ้าภายหลังอยากย้ายไปโปรเจกต์ของเว็บ (`bbtmcwydwscjjoxydbfp`) บอกได้ เดี๋ยวย้ายให้
+
+**สิ่งเดียวที่เหลือ:** เมื่อได้ token จากขั้นที่ 1 แล้ว ตั้ง secret 2 ตัวให้ Edge Function — ผ่าน Dashboard (**Edge Functions → line-webhook → Secrets / Manage secrets**) หรือ CLI:
 
 ```bash
-# ผูกกับโปรเจกต์ที่เว็บใช้ (เอา project-ref จาก SB_URL ใน index.html: https://<ref>.supabase.co)
-supabase login
-supabase link --project-ref <PROJECT_REF>
-
-# 2.1 สร้างตาราง line_friends
-supabase db push        # ใช้ migration ในโฟลเดอร์ supabase/migrations
-# หรือคัดลอก SQL จาก supabase/migrations/20260618000000_line_friends.sql ไปรันใน SQL Editor
-
-# 2.2 ตั้ง secret ของ Edge Function
+supabase link --project-ref iuyiwpoupnuxnohpatyw
 supabase secrets set \
   LINE_CHANNEL_SECRET="<channel secret จากขั้นที่ 1>" \
   LINE_CHANNEL_ACCESS_TOKEN="<channel access token จากขั้นที่ 1>"
-
-# 2.3 deploy webhook (สำคัญ: ใส่ --no-verify-jwt เพราะ LINE ไม่ได้แนบ JWT มา)
-supabase functions deploy line-webhook --no-verify-jwt
 ```
 
-จะได้ URL ของ webhook หน้าตาแบบนี้:
-
-```
-https://<PROJECT_REF>.supabase.co/functions/v1/line-webhook
-```
+> ถ้ายังไม่ตั้ง secret: webhook จะตอบ 401 ทุก request (เพราะตรวจลายเซ็นไม่ผ่าน) — ตั้งให้ครบก่อนกด Verify ในขั้นที่ 3
 
 ---
 
 ## ขั้นที่ 3 — ผูก Webhook กับ LINE
 
 1. ที่ LINE Developers Console → channel → แท็บ **Messaging API → Webhook URL**
-   - วาง URL จากขั้นที่ 2.3
+   - วาง URL จากขั้นที่ 2
    - กด **Verify** ควรขึ้น Success
    - เปิด **Use webhook = ON**
 2. ลองเอามือถือ **เพิ่ม OA เป็นเพื่อน** → ควรได้ข้อความต้อนรับกลับมา และมีแถวเพิ่มในตาราง `line_friends` (เช็คได้ใน Supabase → Table Editor)
@@ -89,8 +85,8 @@ https://<PROJECT_REF>.supabase.co/functions/v1/line-webhook
 | Secret | ค่า |
 |---|---|
 | `LINE_CHANNEL_ACCESS_TOKEN` | channel access token (ตัวเดียวกับขั้นที่ 1) |
-| `SUPABASE_URL` | `https://<PROJECT_REF>.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | service role key (Supabase → Project Settings → API → `service_role`) |
+| `SUPABASE_URL` | `https://iuyiwpoupnuxnohpatyw.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | service role key ของโปรเจกต์ `iuyiwpoupnuxnohpatyw` (Supabase → Project Settings → API → `service_role`) |
 
 > `service_role` เป็นคีย์ที่มีสิทธิ์เต็ม — ใส่เป็น GitHub Secret เท่านั้น อย่าวางในโค้ด
 
