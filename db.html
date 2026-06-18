@@ -145,6 +145,18 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
     <div id="content">
       <div class="loading"><div class="spin"></div>กำลังโหลด…</div>
     </div>
+
+    <!-- ทดสอบยิงข้อความรายคน (static — ไม่โดน auto-refresh 30 วิ) -->
+    <div id="lineTestPanel" class="panel full" style="margin-top:14px;display:none;border-color:#2f7d52">
+      <h3 style="color:#7fd1a0">🧪 ทดสอบยิงข้อความ — เลือกเพื่อนที่รู้จัก
+        <button class="chip" style="margin-left:8px;padding:3px 12px;font-size:12px" onclick="loadFriendsForTest()">↻ รีเฟรช</button>
+      </h3>
+      <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:10px">
+        ยิงการ์ด/รูปไปหา user รายคนเพื่อทดสอบก่อนส่งจริงตอนเช้า — ไม่กระทบสถิติ “ส่งถึงแล้ววันนี้”
+      </div>
+      <div id="testFriends" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div id="testResult" style="color:var(--mut);font-size:12px;margin-top:10px;min-height:18px"></div>
+    </div>
     </div><!-- /tabDash -->
 
     <!-- ═══ tab สอนระบบ — นิ่ง ไม่โดน auto-refresh 30 วิ (refresh เฉพาะ #content ใน tabDash) ═══ -->
@@ -202,6 +214,13 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
 const SB_URL  = "https://bbtmcwydwscjjoxydbfp.supabase.co";
 const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJidG1jd3lkd3NjampveHlkYmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzUyNDIsImV4cCI6MjA5NTY1MTI0Mn0.q_rVvMWenYI_dkc1JhSiXWgwWBqtGtgLYEVMqwBSZX0";
 
+// ── โปรเจกต์ LINE (เพื่อน + สถิติ + ยิงทดสอบ) แยกคนละ Supabase จากสถิติเว็บ ──
+const SB_LINE_URL  = "https://iuyiwpoupnuxnohpatyw.supabase.co";
+const SB_LINE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1eWl3cG91cG51eG5vaHBhdHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzEwOTcsImV4cCI6MjA5MDA0NzA5N30.FEi3t39fuuQChq0OMGtTYZe5dnHP5OVi82eXP75uUic";
+const LINE_STATS_TOKEN = "lstat_9f3c1ab27e5d4";   // อ่านสถิติ LINE (read-only)
+const LINE_ADMIN_TOKEN = "ladmin_4b8e2f1c9a7";    // ยิงทดสอบ/ดึงรายชื่อเพื่อน
+const LINE_FN = SB_LINE_URL + "/functions/v1";
+
 const todayISO = new Date().toLocaleDateString('sv-SE');
 let PASS='', DAYS=36500, DATE_FILTER=null, charts={}, _timer=null;
 const $=id=>document.getElementById(id);
@@ -218,6 +237,7 @@ function enter(){
   startAutoRefresh();
   load();
   loadRefs();   // โหลดครั้งเดียวตอนเข้า (ไม่ผูกกับ auto-refresh — รูปเยอะ ไม่ควรดึงซ้ำทุก 30 วิ)
+  loadFriendsForTest();   // รายชื่อเพื่อนสำหรับยิงทดสอบ — โหลดครั้งเดียว (static ไม่โดน refresh ทับ)
   renderLearned(); renderAiLog();   // เนื้อหานิ่งใน tab สอนระบบ — render ครั้งเดียว
   loadLiveLog();                    // log สดจาก pipeline — ดึงซ้ำเองทุก 5 นาที (เฉพาะข้อความ ไม่แตะส่วนอัปโหลด)
   if(_liveTimer) clearInterval(_liveTimer);
@@ -488,7 +508,8 @@ function render(d){
   const title = isDay ? `📆 ${d.target_date}` : `ช่วง ${d.range_days === 36500 ? 'ทั้งหมด' : d.range_days+' วัน'}`;
 
   let html = `
-    <div style="font-family:'Kanit';font-size:15px;color:var(--accent);margin-bottom:12px">${title}</div>
+    <div id="lineSection"></div>
+    <div style="font-family:'Kanit';font-size:15px;color:var(--accent);margin-bottom:12px">📊 สถิติเว็บ — ${title}</div>
     <div class="kpis">
       ${kpi(N(t.opens).toLocaleString(), 'เปิดใช้', true)}
       ${kpi(N(t.unique_visitors).toLocaleString(), 'ผู้ใช้ไม่ซ้ำ (visitor id)')}
@@ -585,6 +606,98 @@ function render(d){
   }
 
   renderPipeline(d.pipeline, isDay);
+
+  loadLine();   // แผง LINE (เพื่อน/การเติบโต/คลิกเข้าเว็บ) — รีเฟรชพร้อมกราฟเว็บ
+}
+
+/* ── แผง LINE Official: เพื่อนวันนี้ / เพิ่ม-ลด / คลิกเข้าเว็บ (RPC line_stats) ── */
+async function lineRpc(fn, body){
+  const r = await fetch(`${SB_LINE_URL}/rest/v1/rpc/${fn}`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_LINE_ANON,'Authorization':'Bearer '+SB_LINE_ANON},
+    body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error('http '+r.status);
+  return r.json();
+}
+const LINE_SRC_TH={rm_home:'เมนู·หน้าแรก',rm_cat:'เมนู·หมวด',morning_more:'การ์ดเช้า·ดูเพิ่ม',morning:'ข้อความเช้า',share:'แชร์ต่อ',test:'ทดสอบ'};
+async function loadLine(){
+  const host=$('lineSection'); if(!host) return;
+  try{
+    const body={ p_token:LINE_STATS_TOKEN, p_days: DATE_FILTER?1:DAYS };
+    if(DATE_FILTER) body.p_date=DATE_FILTER;
+    const d=await lineRpc('line_stats', body);
+    if(d?.error){ host.innerHTML=`<div class="panel full"><h3 style="color:#7fd1a0">💬 LINE Official</h3><div style="color:var(--mut);font-size:12px">เข้าถึงสถิติ LINE ไม่ได้ (${esc(d.error)})</div></div>`; return; }
+    renderLine(d, host);
+  }catch(e){ host.innerHTML=`<div class="panel full"><h3 style="color:#7fd1a0">💬 LINE Official</h3><div style="color:var(--mut);font-size:12px">โหลดสถิติ LINE ไม่สำเร็จ: ${esc(e.message)}</div></div>`; }
+}
+function renderLine(d, host){
+  const f=d.friends||{}, c=d.clicks||{};
+  const isDay=!!d.is_day_mode;
+  const netToday=N(f.new_today)-N(f.left_today);
+  const sub=isDay?('📆 '+esc(d.target_date)):('ช่วง '+(d.range_days===36500?'ทั้งหมด':d.range_days+' วัน'));
+  const avgClick=N(f.active_now)?(N(c.in_range)/N(f.active_now)).toFixed(1):'0';
+  host.innerHTML=`
+   <div class="panel full" style="border-color:#2f7d52;background:linear-gradient(180deg,rgba(47,125,82,.10),transparent);margin-bottom:14px">
+     <h3 style="color:#7fd1a0;font-size:15px">💬 LINE Official — ${sub}</h3>
+     <div class="kpis">
+       ${kpi(N(f.active_now).toLocaleString(),'เพื่อนตอนนี้',true)}
+       ${kpi((N(f.new_today)>0?'+':'')+N(f.new_today),'เพิ่มวันนี้',true)}
+       ${kpi((netToday>0?'+':'')+netToday,'สุทธิวันนี้ (เข้า−เลิก)')}
+       ${kpi(N(f.sent_today).toLocaleString(),'ส่งถึงแล้ววันนี้')}
+       ${kpi(N(f.new_in_range).toLocaleString(),'เพื่อนใหม่ในช่วง',true)}
+       ${kpi(N(f.left_in_range).toLocaleString(),'เลิกติดตามในช่วง')}
+       ${kpi(N(c.in_range).toLocaleString(),'คลิกเข้าเว็บ (ในช่วง)',true)}
+       ${kpi(avgClick,'คลิกเฉลี่ย/เพื่อน')}
+     </div>
+     <div class="grid" style="margin-top:6px">
+       <div class="panel"><h3>📈 เพื่อนเข้า/เลิก รายวัน</h3><div class="cbox"><canvas id="cLineGrowth"></canvas></div></div>
+       <div class="panel"><h3>👆 คลิกเข้าเว็บจาก LINE (แยกที่มา)</h3><div id="tmLineSrc" class="treemap"></div></div>
+     </div>
+   </div>`;
+  const days=d.by_day||[];
+  const o=chartOpts(); o.plugins.legend={display:true,labels:{color:TICK,boxWidth:12,font:{size:11}}};
+  mkChart('cLineGrowth',{type:'bar',data:{labels:days.map(x=>x.day.slice(5)),datasets:[
+    {label:'เข้าใหม่',data:days.map(x=>N(x.joins)),backgroundColor:'#7fd1a0',borderRadius:3},
+    {label:'เลิกติดตาม',data:days.map(x=>-N(x.leaves)),backgroundColor:'#e76e6e',borderRadius:3}
+  ]},options:o});
+  const PALL=['#7fd1a0','#6ea8e7','#b98fe7','#e7b96e','#e78f6e','#5bc4d4','#a0d96e','#e76e9c'];
+  let pi=0;
+  drawTreemap('tmLineSrc',(c.by_source||[]).map(x=>({label:LINE_SRC_TH[x.source]||x.source||'?',value:N(x.n),color:PALL[pi++%PALL.length]})));
+}
+
+/* ── ทดสอบยิงข้อความรายคน (เลือก user ที่รู้จัก) ผ่าน line-morning โหมด admin ── */
+async function loadFriendsForTest(){
+  const host=$('testFriends'); if(!host) return;
+  $('lineTestPanel').style.display='';
+  host.innerHTML='<div style="color:var(--mut);font-size:12px">กำลังโหลดรายชื่อ…</div>';
+  try{
+    const list=await lineRpc('line_friends_list',{ p_token:LINE_ADMIN_TOKEN });
+    if(list?.error){ host.innerHTML=`<div style="color:var(--red);font-size:12px">เข้าถึงรายชื่อไม่ได้ (${esc(list.error)})</div>`; return; }
+    if(!Array.isArray(list)||!list.length){ host.innerHTML='<div style="color:var(--mut);font-size:12px">ยังไม่มีเพื่อนในระบบ</div>'; return; }
+    host.innerHTML=list.map(u=>{
+      const nm=esc(u.name||('ผู้ใช้ …'+String(u.user_id||'').slice(-4)));
+      const uid=esc(u.user_id);
+      return `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:8px">
+        <span style="flex:1;min-width:130px;font-size:14px">${u.active?'🟢':'⚪'} ${nm}</span>
+        <button class="chip" onclick="sendTest('${uid}','การ์ด','cards',this)">🎴 การ์ด</button>
+        <button class="chip" onclick="sendTest('${uid}','รูปล้วน','images',this)">🖼️ รูปล้วน</button>
+      </div>`;
+    }).join('');
+  }catch(e){ host.innerHTML=`<div style="color:var(--red);font-size:12px">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`; }
+}
+async function sendTest(uid, label, style, btn){
+  const res=$('testResult'); const old=btn.textContent;
+  btn.disabled=true; btn.textContent='⏳';
+  res.style.color='var(--mut)'; res.textContent='กำลังยิง '+label+'…';
+  try{
+    const u=`${LINE_FN}/line-morning?token=${encodeURIComponent(LINE_ADMIN_TOKEN)}&to=${encodeURIComponent(uid)}&style=${style}`;
+    const r=await fetch(u,{method:'POST'});
+    const d=await r.json().catch(()=>({}));
+    if(r.ok && !d.error){ res.innerHTML=`<span style="color:#7fd1a0">✓ ส่ง ${esc(label)} แล้ว — ${N(d.ok)} ฉบับ (${N(d.cards)} รูป)</span>`; }
+    else { res.innerHTML=`<span style="color:var(--red)">✗ ไม่สำเร็จ: ${esc(d.error||('http '+r.status))}</span>`; }
+  }catch(e){ res.innerHTML=`<span style="color:var(--red)">✗ ${esc(e.message)}</span>`; }
+  finally{ btn.disabled=false; btn.textContent=old; }
 }
 
 /* ── pipeline (สถิติ gen รูปจาก GitHub Actions) ── */

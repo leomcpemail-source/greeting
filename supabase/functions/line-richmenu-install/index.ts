@@ -1,28 +1,26 @@
-// line-richmenu-install — ติดตั้ง Rich Menu 2 ระดับเข้า LINE OA
-//   • เมนูหลัก (greeting-main)       ขนาด 2500x843  (2 ปุ่มใหญ่: หน้าแรก / ตามหมวด)
-//   • เมนูหมวด (greeting-categories) ขนาด 2500x1686 (เต็มจอ — ปุ่มใหญ่ อ่าน/กดง่าย สำหรับผู้สูงอายุ)
-//   • ดึงรูปจาก repo (assets/richmenu/*.jpg) → resize อัตโนมัติ (ImageScript) → อัปโหลด + alias + ตั้ง default
+// line-richmenu-install — ติดตั้ง Rich Menu 2 ระดับเข้า LINE OA (ทั้งคู่เต็มจอ 2500x1686)
+//   • เมนูหลัก (greeting-main):       ซ้าย "หน้าแรก" → เว็บแอพ | ขวา "ตามหมวด" → สลับเมนูย่อย
+//   • เมนูหมวด (greeting-categories): แถบบน "‹ กลับ" → สลับกลับ + กริด 4×3 (12 หมวด) → เว็บแอพ ?cat=<id>
+//   • ดึงรูปจาก repo (assets/richmenu/*.jpg) → resize เป็น 2500x1686 (ImageScript) → อัปโหลด + alias + ตั้ง default
 //   • เรียกซ้ำเพื่ออัปเดตได้ (ลบของเดิมก่อน) ; กันเรียกมั่วด้วย header x-cron-key
 //
 // ENV: LINE_CHANNEL_ACCESS_TOKEN, CRON_KEY, (ออปชัน) APP_URL, RICHMENU_RAW_BASE
 //
-// โครงเมนู:
-//   เมนูหลัก: ซ้าย "หน้าแรก" → เว็บแอพ | ขวา "ตามหมวด" → สลับเมนูย่อย
-//   เมนูหมวด: แถบบน "‹ กลับ" → สลับกลับ + กริด 4×3 (12 หมวด) → เว็บแอพ ?cat=<id>
+// หมายเหตุ: รูปต้นฉบับควรมีสัดส่วน ~1.48:1 (เช่น 1527x1030 หรือ 2500x1686) เพื่อให้ไม่ยืด
 
 import { Image } from "https://deno.land/x/imagescript@1.2.17/mod.ts";
 
 const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") ?? "";
 const CRON_KEY = Deno.env.get("CRON_KEY") ?? "";
 const APP_URL = Deno.env.get("APP_URL") ?? "https://leomcpemail-source.github.io/greeting/";
+// ลิงก์เว็บวิ่งผ่าน line-go เพื่อเก็บ click-through (บันทึกคลิกแล้ว redirect เข้าเว็บ)
+const GO = (Deno.env.get("SUPABASE_URL") ?? "") + "/functions/v1/line-go";
 const RAW = Deno.env.get("RICHMENU_RAW_BASE") ??
   "https://raw.githubusercontent.com/leomcpemail-source/greeting/main/assets/richmenu";
 const IMG_MAIN = `${RAW}/main.jpg`;
 const IMG_CATS = `${RAW}/categories.jpg`;
 
-const W = 2500;
-const H_MAIN = 843;   // เมนูหลักครึ่งจอ
-const H_CATS = 1686;  // เมนูหมวดเต็มจอ
+const W = 2500, H = 1686;
 const ALIAS_MAIN = "greeting-main";
 const ALIAS_CATS = "greeting-categories";
 const API = "https://api.line.me";
@@ -37,13 +35,13 @@ const CATS = [
 ];
 
 const mainAreas = [
-  { bounds: { x: 0, y: 0, width: 1250, height: H_MAIN }, action: { type: "uri", uri: APP_URL } },
-  { bounds: { x: 1250, y: 0, width: 1250, height: H_MAIN }, action: { type: "richmenuswitch", richMenuAliasId: ALIAS_CATS, data: "to=categories" } },
+  { bounds: { x: 0, y: 0, width: 1250, height: H }, action: { type: "uri", uri: `${GO}?s=rm_home` } },
+  { bounds: { x: 1250, y: 0, width: 1250, height: H }, action: { type: "richmenuswitch", richMenuAliasId: ALIAS_CATS, data: "to=categories" } },
 ];
 
 function catAreas() {
-  // สัดส่วนเดียวกับรูป: header ~11% บนสุด, 3 แถวเท่ากัน (186 + 3×500 = 1686)
-  const BACK_H = 186, cols = 4, colW = 625, rowH = 500;
+  // แถบ "‹ กลับ" บนสุด ~9% + กริด 4×3 เท่า ๆ กัน (150 + 3×512 = 1686)
+  const BACK_H = 150, cols = 4, colW = 625, rowH = 512;
   const areas: unknown[] = [
     { bounds: { x: 0, y: 0, width: W, height: BACK_H }, action: { type: "richmenuswitch", richMenuAliasId: ALIAS_MAIN, data: "to=main" } },
   ];
@@ -51,17 +49,17 @@ function catAreas() {
     const col = i % cols, row = Math.floor(i / cols);
     const x = col * colW, y = BACK_H + row * rowH;
     const width = col === cols - 1 ? W - x : colW;
-    const height = row === 2 ? H_CATS - y : rowH;
-    areas.push({ bounds: { x, y, width, height }, action: { type: "uri", uri: `${APP_URL}?cat=${id}` } });
+    const height = row === 2 ? H - y : rowH;
+    areas.push({ bounds: { x, y, width, height }, action: { type: "uri", uri: `${GO}?c=${id}&s=rm_cat` } });
   });
   return areas;
 }
 
-async function fetchResized(url: string, h: number): Promise<Uint8Array> {
+async function fetchResized(url: string): Promise<Uint8Array> {
   const r = await fetch(url);
   if (!r.ok) throw new Error(`fetch image ${url} ${r.status}`);
   const img = await Image.decode(new Uint8Array(await r.arrayBuffer()));
-  img.resize(W, h);
+  img.resize(W, H);
   return await img.encodeJPEG(85);
 }
 
@@ -97,9 +95,9 @@ async function cleanup() {
   } catch { /* ignore */ }
 }
 
-async function createMenu(name: string, chatBarText: string, areas: unknown[], bytes: Uint8Array, h: number) {
+async function createMenu(name: string, chatBarText: string, areas: unknown[], bytes: Uint8Array) {
   const { richMenuId } = await lineJson("POST", "/v2/bot/richmenu", {
-    size: { width: W, height: h }, selected: true, name, chatBarText, areas,
+    size: { width: W, height: H }, selected: true, name, chatBarText, areas,
   });
   await uploadImage(richMenuId, bytes);
   return richMenuId as string;
@@ -108,14 +106,14 @@ async function createMenu(name: string, chatBarText: string, areas: unknown[], b
 Deno.serve(async (req) => {
   if (req.headers.get("x-cron-key") !== CRON_KEY) return new Response("unauthorized", { status: 401 });
   try {
-    const [mainImg, catsImg] = await Promise.all([fetchResized(IMG_MAIN, H_MAIN), fetchResized(IMG_CATS, H_CATS)]);
+    const [mainImg, catsImg] = await Promise.all([fetchResized(IMG_MAIN), fetchResized(IMG_CATS)]);
     await cleanup();
-    const idMain = await createMenu("greeting main", "เมนู ☰", mainAreas, mainImg, H_MAIN);
-    const idCats = await createMenu("greeting categories", "เลือกหมวด ☰", catAreas(), catsImg, H_CATS);
+    const idMain = await createMenu("greeting main", "เมนู ☰", mainAreas, mainImg);
+    const idCats = await createMenu("greeting categories", "เลือกหมวด ☰", catAreas(), catsImg);
     await lineJson("POST", "/v2/bot/richmenu/alias", { richMenuAliasId: ALIAS_MAIN, richMenuId: idMain });
     await lineJson("POST", "/v2/bot/richmenu/alias", { richMenuAliasId: ALIAS_CATS, richMenuId: idCats });
     await lineJson("POST", `/v2/bot/user/all/richmenu/${idMain}`);
-    return new Response(JSON.stringify({ ok: true, idMain, idCats, mainSize: `${W}x${H_MAIN}`, catsSize: `${W}x${H_CATS}` }), { headers: { "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ ok: true, idMain, idCats, size: `${W}x${H}` }), { headers: { "Content-Type": "application/json" } });
   } catch (e) {
     return new Response(JSON.stringify({ ok: false, error: String(e) }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
