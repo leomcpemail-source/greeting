@@ -115,15 +115,15 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
       <div class="updated" id="updated"></div>
     </div>
 
-    <!-- tab หลัก: Dashboard (refresh ทุก 30 วิ) / สอนระบบ (นิ่ง) -->
+    <!-- tab หลัก: Dashboard (เว็บ) / LINE / AI ระบบ -->
     <div class="dtabs">
       <button class="dtab on" id="dtabDash" onclick="switchDbTab('dash')">📊 Dashboard</button>
-      <button class="dtab" id="dtabTeach" onclick="switchDbTab('teach')">🧠 สอนระบบ</button>
+      <button class="dtab" id="dtabLine" onclick="switchDbTab('line')">💬 LINE</button>
+      <button class="dtab" id="dtabTeach" onclick="switchDbTab('teach')">🧠 AI ระบบ</button>
     </div>
 
-    <div id="tabDash">
-    <!-- filter bar -->
-    <div class="filter-bar">
+    <!-- filter bar (ใช้ร่วม Dashboard + LINE) -->
+    <div class="filter-bar" id="filterBar">
       <div class="filter-row">
         <span class="filter-label">ช่วงเวลา</span>
         <div class="chip-group">
@@ -141,26 +141,38 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
 
     <div class="err-bar" id="errBar"></div>
 
-    <!-- content -->
-    <div id="content">
-      <div class="loading"><div class="spin"></div>กำลังโหลด…</div>
-    </div>
-
-    <!-- ทดสอบยิงข้อความรายคน (static — ไม่โดน auto-refresh 30 วิ) -->
-    <div id="lineTestPanel" class="panel full" style="margin-top:14px;display:none;border-color:#2f7d52">
-      <h3 style="color:#7fd1a0">🧪 ทดสอบยิงข้อความ — เลือกเพื่อนที่รู้จัก
-        <button class="chip" style="margin-left:8px;padding:3px 12px;font-size:12px" onclick="loadFriendsForTest()">↻ รีเฟรช</button>
-      </h3>
-      <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:10px">
-        ยิงการ์ด/รูปไปหา user รายคนเพื่อทดสอบก่อนส่งจริงตอนเช้า — ไม่กระทบสถิติ “ส่งถึงแล้ววันนี้”
+    <!-- ═══ tab: Dashboard (สถิติเว็บ) ═══ -->
+    <div id="tabDash">
+      <div id="content">
+        <div class="loading"><div class="spin"></div>กำลังโหลด…</div>
       </div>
-      <div id="testFriends" style="display:flex;flex-direction:column;gap:8px"></div>
-      <div id="testResult" style="color:var(--mut);font-size:12px;margin-top:10px;min-height:18px"></div>
     </div>
-    </div><!-- /tabDash -->
 
-    <!-- ═══ tab สอนระบบ — นิ่ง ไม่โดน auto-refresh 30 วิ (refresh เฉพาะ #content ใน tabDash) ═══ -->
+    <!-- ═══ tab: LINE (สถิติเพื่อน + ทดสอบยิงข้อความ) ═══ -->
+    <div id="tabLine" style="display:none">
+      <div id="lineSection"><div class="loading"><div class="spin"></div>กำลังโหลด…</div></div>
+
+      <!-- ทดสอบยิงข้อความรายคน (static — ไม่โดน auto-refresh 30 วิ) -->
+      <div id="lineTestPanel" class="panel full" style="margin-top:14px;display:none;border-color:#2f7d52">
+        <h3 style="color:#7fd1a0">🧪 ทดสอบยิงข้อความ — เลือกเพื่อนที่รู้จัก
+          <button class="chip" style="margin-left:8px;padding:3px 12px;font-size:12px" onclick="loadFriendsForTest()">↻ รีเฟรช</button>
+        </h3>
+        <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:10px">
+          ยิงการ์ด/รูปไปหา user รายคนเพื่อทดสอบก่อนส่งจริงตอนเช้า — ไม่กระทบสถิติ “ส่งถึงแล้ววันนี้”
+        </div>
+        <div id="testFriends" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div id="testResult" style="color:var(--mut);font-size:12px;margin-top:10px;min-height:18px"></div>
+      </div>
+    </div><!-- /tabLine -->
+
+    <!-- ═══ tab: AI ระบบ — สอนระบบ + Pipeline สร้างรูป (refresh เฉพาะ #pxWrap จาก load()) ═══ -->
     <div id="tabTeach" style="display:none">
+
+      <!-- สถิติ pipeline การ generate รูป (อัปเดตตามตัวกรองช่วงเวลา) -->
+      <div class="panel" style="margin-bottom:14px">
+        <h3>🖼️ Pipeline สร้างรูป (GitHub Actions → Supabase)</h3>
+        <div id="pxWrap"><div style="color:var(--mut);font-size:12px">เปิดแท็บ Dashboard ค้างไว้สักครู่เพื่อให้ระบบดึงข้อมูล…</div></div>
+      </div>
 
       <!-- refs: ภาพต้นแบบสอนระบบเรียนรู้ -->
       <div class="panel" id="refsPanel">
@@ -268,9 +280,14 @@ async function loadLiveLog(){
 /* ── tab หลัก: dashboard refresh ทุก 30 วิเฉพาะ #content / tab สอนระบบนิ่งสนิท ── */
 function switchDbTab(t){
   $('tabDash').style.display  = t==='dash' ? '' : 'none';
+  $('tabLine').style.display  = t==='line' ? '' : 'none';
   $('tabTeach').style.display = t==='teach'? '' : 'none';
   $('dtabDash').classList.toggle('on', t==='dash');
+  $('dtabLine').classList.toggle('on', t==='line');
   $('dtabTeach').classList.toggle('on', t==='teach');
+  // filter bar ใช้กับ Dashboard + LINE เท่านั้น (tab AI ระบบ ไม่เกี่ยวกับช่วงเวลา)
+  $('filterBar').style.display = (t==='teach') ? 'none' : '';
+  if(t==='line') loadLine();   // เข้าแท็บ LINE แล้วโหลดสถิติทันที
 }
 
 /* ── บทเรียนที่ระบบเรียนรู้แล้ว — อัปเดตรายการนี้ทุกครั้งที่ได้บทเรียนใหม่ ──
@@ -508,7 +525,6 @@ function render(d){
   const title = isDay ? `📆 ${d.target_date}` : `ช่วง ${d.range_days === 36500 ? 'ทั้งหมด' : d.range_days+' วัน'}`;
 
   let html = `
-    <div id="lineSection"></div>
     <div style="font-family:'Kanit';font-size:15px;color:var(--accent);margin-bottom:12px">📊 สถิติเว็บ — ${title}</div>
     <div class="kpis">
       ${kpi(N(t.opens).toLocaleString(), 'เปิดใช้', true)}
@@ -542,10 +558,6 @@ function render(d){
       <div class="panel full" id="pnlLoad" style="display:none">
         <h3>📉 โหลดเว็บรายวัน — เปิดใช้ / ดาวน์โหลด / คัดลอก</h3>
         <div class="cbox"><canvas id="cLoad"></canvas></div>
-      </div>
-      <div class="panel full">
-        <h3>🖼️ Pipeline สร้างรูป (GitHub Actions → Supabase)</h3>
-        <div id="pxWrap"></div>
       </div>
     </div>`;
 
