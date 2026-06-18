@@ -1,21 +1,31 @@
 // supabase/functions/line-morning/index.ts
 // ส่งทุกเช้า 06:00 น. — สลับรูปแบบไปมากันกันเบื่อ (รูปล้วน ↔ การ์ด Flex) + ทักชื่อรายคน + ปุ่มแชร์
-// หลักการ: ขึ้นต้นด้วย "รูป" เสมอ (ฟอร์เวิร์ด/เซฟ/แชร์ง่าย) แล้วสลับรูปแบบการส่งไปมากันกันเบื่อ
-// ถูกเรียกโดย pg_cron (ผ่าน pg_net) 23:00 UTC = 06:00 น.(ไทย) ; กันเรียกมั่วด้วย header x-cron-key
-// ทดสอบ: เติม ?style=cards หรือ ?style=images เพื่อบังคับรูปแบบ ; ?dry=1 ดู payload โดยไม่ส่งจริง
+// auth: cron (header x-cron-key) หรือ admin (?token=) จาก db.html
+// ยิงรายคน: ?to=<userId> (โหมดทดสอบ ไม่อัปเดต last_sent_at) ; ?style=cards|images ; ?dry=1 ดู payload
+// ลิงก์ "ดูรูปอื่น" วิ่งผ่าน line-go เพื่อเก็บ click-through
 //
-// ENV: LINE_CHANNEL_ACCESS_TOKEN, CRON_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, (ออปชัน) APP_URL, CARDS_PER_DAY
+// ENV: LINE_CHANNEL_ACCESS_TOKEN, CRON_KEY, DASH_ADMIN_TOKEN, SUPABASE_URL,
+//      SUPABASE_SERVICE_ROLE_KEY, (ออปชัน) APP_URL, CARDS_PER_DAY
 
 const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") ?? "";
 const CRON_KEY = Deno.env.get("CRON_KEY") ?? "";
+const ADMIN_TOKEN = Deno.env.get("DASH_ADMIN_TOKEN") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const APP_URL = Deno.env.get("APP_URL") ?? "https://leomcpemail-source.github.io/greeting/";
 const CARDS_PER_DAY = Number(Deno.env.get("CARDS_PER_DAY") ?? "5");
+const GO = `${SUPABASE_URL}/functions/v1/line-go`;
 
 const REPO = "leomcpemail-source/greeting";
 const BRANCH = "daily-images";
 const BASE = `https://raw.githubusercontent.com/${REPO}/${BRANCH}`;
+
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "content-type, x-cron-key",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+};
+const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { "Content-Type": "application/json", ...CORS } });
 
 const WD = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 const FALLBACK_BLESS = [
@@ -38,7 +48,6 @@ function thaiDateISO(): string {
 function headlineToday(): string { return `สวัสดีวัน${WD[ictNow().getUTCDay()]}`; }
 function dayIndex(): number { const d = ictNow(); return Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / 86400000); }
 
-// ทำชื่อโปรไฟล์ให้สะอาด: ตัดวงเล็บ (...), ตัดอีโมจิ, จำกัดความยาว
 function cleanName(dn: string | null): string {
   if (!dn) return "";
   let n = dn.replace(/\([^)]*\)/g, " ");
@@ -56,7 +65,6 @@ async function fetchManifest(folder: string): Promise<any | null> {
   } catch { return null; }
 }
 
-// เลือกรูปไม่ซ้ำ n ใบ (เอาของวันนี้ก่อน ไม่พอค่อยเติมด้วย evergreen)
 async function pickCards(n: number): Promise<{ folder: string; file: string }[]> {
   const out: { folder: string; file: string }[] = [];
   const seen = new Set<string>();
@@ -106,7 +114,7 @@ function buildCarousel(cards: { folder: string; file: string }[], name: string) 
       ] },
       footer: { type: "box", layout: "vertical", spacing: "sm", contents: [
         { type: "button", style: "primary", color: "#06c755", height: "sm", action: { type: "uri", label: "ส่งต่อให้เพื่อน 💌", uri: sUrl } },
-        { type: "button", style: "link", height: "sm", action: { type: "uri", label: "ดูรูปอื่น ๆ", uri: APP_URL } },
+        { type: "button", style: "link", height: "sm", action: { type: "uri", label: "ดูรูปอื่น ๆ", uri: `${GO}?s=morning_more` } },
       ] },
     };
   });
@@ -117,14 +125,12 @@ function buildCarousel(cards: { folder: string; file: string }[], name: string) 
   };
 }
 
-// สร้างชุดข้อความตามสไตล์ของวัน (ขึ้นต้นด้วยรูปเสมอ เพื่อแชร์ง่าย) ; จำกัด ≤ 5 บับเบิล/ครั้ง
 function buildMessages(cards: { folder: string; file: string }[], name: string, style: "images" | "cards") {
   if (style === "cards") {
     const lead = cards[0];
     const rest = cards.slice(1);
     return [introMsg(name, "cards"), imageMsg(lead), buildCarousel(rest.length ? rest : cards, name)];
   }
-  // images: ข้อความทักทาย + รูปใหญ่เต็มจอสูงสุด 4 รูป (รวม 5 บับเบิล)
   return [introMsg(name, "images"), ...cards.slice(0, 4).map(imageMsg)];
 }
 
@@ -133,6 +139,14 @@ async function getActiveFriends(): Promise<{ user_id: string; display_name: stri
     headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` },
   });
   if (!r.ok) throw new Error(`load friends ${r.status} ${await r.text()}`);
+  return await r.json();
+}
+
+async function getFriendById(uid: string): Promise<{ user_id: string; display_name: string | null }[]> {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/line_friends?user_id=eq.${encodeURIComponent(uid)}&select=user_id,display_name`, {
+    headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` },
+  });
+  if (!r.ok) throw new Error(`load friend ${r.status} ${await r.text()}`);
   return await r.json();
 }
 
@@ -156,25 +170,34 @@ async function markSent(userIds: string[]) {
 }
 
 Deno.serve(async (req) => {
-  if (req.headers.get("x-cron-key") !== CRON_KEY) return new Response("unauthorized", { status: 401 });
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
+
   const url = new URL(req.url);
+  const token = url.searchParams.get("token");
+  const authed = req.headers.get("x-cron-key") === CRON_KEY || (token && token === ADMIN_TOKEN);
+  if (!authed) return json({ error: "unauthorized" }, 401);
+
   const force = url.searchParams.get("style");
   const dry = url.searchParams.get("dry") === "1";
+  const to = url.searchParams.get("to");   // ยิงรายคน (โหมดทดสอบ)
 
-  // สลับสไตล์ไปมากันกันวันคู่/วันคี่ (ไม่ซ้ำสองวันติด)
   const style: "images" | "cards" = force === "cards" || force === "images"
     ? force
     : (dayIndex() % 2 === 0 ? "images" : "cards");
 
   const cards = await pickCards(CARDS_PER_DAY);
-  if (!cards.length) return new Response(JSON.stringify({ error: "no images" }), { status: 200 });
+  if (!cards.length) return json({ error: "no images" });
 
-  if (dry) {
-    const sample = buildMessages(cards, "ตัวอย่าง", style);
-    return new Response(JSON.stringify({ style, cards: cards.length, messages: sample }, null, 2), { headers: { "Content-Type": "application/json" } });
+  if (dry) return json({ style, cards: cards.length, messages: buildMessages(cards, "ตัวอย่าง", style) });
+
+  let friends: { user_id: string; display_name: string | null }[];
+  if (to) {
+    friends = await getFriendById(to);
+    if (!friends.length) return json({ error: "friend_not_found" }, 404);
+  } else {
+    friends = await getActiveFriends();
   }
 
-  const friends = await getActiveFriends();
   let ok = 0;
   const sent: string[] = [];
   const failed: { userId: string; status?: number; body?: string }[] = [];
@@ -182,12 +205,10 @@ Deno.serve(async (req) => {
     const name = cleanName(f.display_name);
     const res = await pushToFriend(f.user_id, buildMessages(cards, name, style));
     if (res.ok) { ok++; sent.push(f.user_id); } else { failed.push({ userId: f.user_id, status: res.status, body: res.body }); }
-    await sleep(200);
+    await sleep(150);
   }
-  await markSent(sent);
+  // โหมดทดสอบรายคน (to) ไม่อัปเดต last_sent_at — สถิติ "ส่งถึงวันนี้" จะไม่รวมการทดสอบ
+  if (!to) await markSent(sent);
 
-  return new Response(
-    JSON.stringify({ style, cards: cards.length, total: friends.length, ok, failed }),
-    { headers: { "Content-Type": "application/json" } },
-  );
+  return json({ style, cards: cards.length, total: friends.length, ok, failed, test: !!to });
 });

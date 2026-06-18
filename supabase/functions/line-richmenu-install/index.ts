@@ -13,6 +13,8 @@ import { Image } from "https://deno.land/x/imagescript@1.2.17/mod.ts";
 const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") ?? "";
 const CRON_KEY = Deno.env.get("CRON_KEY") ?? "";
 const APP_URL = Deno.env.get("APP_URL") ?? "https://leomcpemail-source.github.io/greeting/";
+// ลิงก์เว็บวิ่งผ่าน line-go เพื่อเก็บ click-through (บันทึกคลิกแล้ว redirect เข้าเว็บ)
+const GO = (Deno.env.get("SUPABASE_URL") ?? "") + "/functions/v1/line-go";
 const RAW = Deno.env.get("RICHMENU_RAW_BASE") ??
   "https://raw.githubusercontent.com/leomcpemail-source/greeting/main/assets/richmenu";
 const IMG_MAIN = `${RAW}/main.jpg`;
@@ -33,7 +35,7 @@ const CATS = [
 ];
 
 const mainAreas = [
-  { bounds: { x: 0, y: 0, width: 1250, height: H }, action: { type: "uri", uri: APP_URL } },
+  { bounds: { x: 0, y: 0, width: 1250, height: H }, action: { type: "uri", uri: `${GO}?s=rm_home` } },
   { bounds: { x: 1250, y: 0, width: 1250, height: H }, action: { type: "richmenuswitch", richMenuAliasId: ALIAS_CATS, data: "to=categories" } },
 ];
 
@@ -48,7 +50,7 @@ function catAreas() {
     const x = col * colW, y = BACK_H + row * rowH;
     const width = col === cols - 1 ? W - x : colW;
     const height = row === 2 ? H - y : rowH;
-    areas.push({ bounds: { x, y, width, height }, action: { type: "uri", uri: `${APP_URL}?cat=${id}` } });
+    areas.push({ bounds: { x, y, width, height }, action: { type: "uri", uri: `${GO}?c=${id}&s=rm_cat` } });
   });
   return areas;
 }
