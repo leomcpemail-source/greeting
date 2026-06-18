@@ -42,57 +42,29 @@ Supabase Edge Function  line-webhook  ──► เก็บ userId ลงตา
 
 ---
 
-## ขั้นที่ 2 — หลังบ้านบน Supabase ✅ (ติดตั้งให้แล้ว)
+## ขั้นที่ 2–4 — หลังบ้านบน Supabase ✅ (ติดตั้ง + ตั้งค่า + ทดสอบให้แล้วทั้งหมด)
 
-ติดตั้งให้เรียบร้อยแล้วบนโปรเจกต์ Supabase **`iuyiwpoupnuxnohpatyw`**:
-- ✅ สร้างตาราง `line_friends` (เปิด RLS — เข้าถึงเฉพาะ service role)
-- ✅ deploy Edge Function `line-webhook` (ปิด verify_jwt แล้ว)
+ทำให้เรียบร้อยแล้วบนโปรเจกต์ Supabase **`iuyiwpoupnuxnohpatyw`**:
 
-**Webhook URL** (ใช้ในขั้นที่ 3):
-```
-https://iuyiwpoupnuxnohpatyw.supabase.co/functions/v1/line-webhook
-```
+- ✅ ตาราง `line_friends` (เปิด RLS — เข้าถึงเฉพาะ service role)
+- ✅ Edge Function `line-webhook` — รับ follow/unfollow/message (ฝัง channel secret + access token ไว้ในฟังก์ชัน ไม่ต้องตั้ง secret เอง)
+- ✅ ตั้ง **Webhook URL** ให้ LINE แล้ว + ทดสอบผ่าน (`success: true`) + `active: true`
+  ```
+  https://iuyiwpoupnuxnohpatyw.supabase.co/functions/v1/line-webhook
+  ```
+- ✅ Edge Function `line-morning` — ส่งรูป+คำอวยพรของวันหาเพื่อนทีละคน
+- ✅ ตั้ง **pg_cron** ยิงทุกวัน 23:00 UTC = **06:00 น. (ไทย)** อัตโนมัติ (ดู `supabase/cron/line_morning_schedule.sql`)
 
-> หมายเหตุ: โปรเจกต์นี้ใช้ร่วมกับแอพอื่น (workplace-planner) แต่ตาราง/ฟังก์ชันของ LINE แยกอิสระ ไม่กระทบกัน ถ้าภายหลังอยากย้ายไปโปรเจกต์ของเว็บ (`bbtmcwydwscjjoxydbfp`) บอกได้ เดี๋ยวย้ายให้
+> **ไม่ต้องตั้ง GitHub Secrets / Supabase secrets ใด ๆ เพิ่ม** — ตัวส่งตอนเช้าทำงานบน Supabase cron ทั้งหมด
+>
+> หมายเหตุความปลอดภัย: ตอนนี้ฝัง token/secret ไว้ในซอร์สของฟังก์ชันบน Supabase (ไม่ได้อยู่ใน git) เพื่อให้ใช้งานได้เลย ถ้าต้องการแบบมาตรฐานกว่า ย้ายไปตั้งเป็น Edge Function secrets (`LINE_CHANNEL_SECRET`, `LINE_CHANNEL_ACCESS_TOKEN`, `CRON_KEY`) แล้ว deploy ไฟล์ในโฟลเดอร์ `supabase/functions/` ทับได้ (ฟังก์ชันอ่าน ENV ก่อนเสมอ)
+>
+> โปรเจกต์นี้ใช้ร่วมกับ workplace-planner แต่ตาราง/ฟังก์ชันของ LINE แยกอิสระ ถ้าอยากย้ายไปโปรเจกต์ของเว็บ (`bbtmcwydwscjjoxydbfp`) บอกได้
 
-**สิ่งเดียวที่เหลือ:** เมื่อได้ token จากขั้นที่ 1 แล้ว ตั้ง secret 2 ตัวให้ Edge Function — ผ่าน Dashboard (**Edge Functions → line-webhook → Secrets / Manage secrets**) หรือ CLI:
-
-```bash
-supabase link --project-ref iuyiwpoupnuxnohpatyw
-supabase secrets set \
-  LINE_CHANNEL_SECRET="<channel secret จากขั้นที่ 1>" \
-  LINE_CHANNEL_ACCESS_TOKEN="<channel access token จากขั้นที่ 1>"
-```
-
-> ถ้ายังไม่ตั้ง secret: webhook จะตอบ 401 ทุก request (เพราะตรวจลายเซ็นไม่ผ่าน) — ตั้งให้ครบก่อนกด Verify ในขั้นที่ 3
-
----
-
-## ขั้นที่ 3 — ผูก Webhook กับ LINE
-
-1. ที่ LINE Developers Console → channel → แท็บ **Messaging API → Webhook URL**
-   - วาง URL จากขั้นที่ 2
-   - กด **Verify** ควรขึ้น Success
-   - เปิด **Use webhook = ON**
-2. ลองเอามือถือ **เพิ่ม OA เป็นเพื่อน** → ควรได้ข้อความต้อนรับกลับมา และมีแถวเพิ่มในตาราง `line_friends` (เช็คได้ใน Supabase → Table Editor)
-
----
-
-## ขั้นที่ 4 — ตั้งค่าให้ GitHub Actions ส่งตอนเช้า
-
-ที่ repo บน GitHub → **Settings → Secrets and variables → Actions → New repository secret** เพิ่ม 3 ตัว:
-
-| Secret | ค่า |
-|---|---|
-| `LINE_CHANNEL_ACCESS_TOKEN` | channel access token (ตัวเดียวกับขั้นที่ 1) |
-| `SUPABASE_URL` | `https://iuyiwpoupnuxnohpatyw.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | service role key ของโปรเจกต์ `iuyiwpoupnuxnohpatyw` (Supabase → Project Settings → API → `service_role`) |
-
-> `service_role` เป็นคีย์ที่มีสิทธิ์เต็ม — ใส่เป็น GitHub Secret เท่านั้น อย่าวางในโค้ด
-
-เสร็จแล้ว workflow `.github/workflows/line-morning.yml` จะรันอัตโนมัติ **ทุกวัน 23:00 UTC = 06:00 น. (ไทย)**
-
-ทดสอบเลยได้โดยไม่ต้องรอเช้า: ไปที่แท็บ **Actions → LINE Morning Greeting → Run workflow**
+**เหลือฝั่ง LINE ที่ต้องกดเองในคอนโซล (ทำครั้งเดียว):**
+1. แท็บ **Messaging API → Use webhook = ON** ✅ (เปิดแล้ว)
+2. (แนะนำ) **Response mode = Bot** และปิด **Auto-reply / Greeting message** ที่ LINE OA Manager → *Settings → Response settings* เพื่อไม่ให้ข้อความอัตโนมัติของ LINE ชนกับ webhook
+3. **เพิ่ม OA เป็นเพื่อน** เพื่อทดสอบ → จะได้ข้อความต้อนรับ และมีแถวเพิ่มใน `line_friends`
 
 ---
 
@@ -156,6 +128,6 @@ supabase secrets set \
 
 - **ส่งทีละคน:** ใช้ LINE push API ยิงรายคน (ไม่ใช่ broadcast) ตามที่ต้องการ — เผื่ออนาคตอยากใส่ชื่อ/ปรับข้อความเฉพาะคน
 - **คนบล็อก/ลบเพื่อน:** webhook จับ `unfollow` แล้วตั้ง `active=false` ให้เอง จะได้ไม่ส่งซ้ำ (ถ้าส่งไปโดน error ก็ข้ามคนนั้น ไม่ล้มทั้งรอบ)
-- **เปลี่ยนเวลา/ข้อความ:** แก้ `cron` ใน `line-morning.yml` และข้อความใน `scripts/line_morning.mjs` (ฟังก์ชัน `composeText`)
+- **เปลี่ยนเวลา:** แก้ schedule ใน `cron.schedule('line-morning-0600th', ...)` (รัน `supabase/cron/line_morning_schedule.sql` ใหม่) — **เปลี่ยนข้อความ:** แก้ `composeText` ใน `supabase/functions/line-morning/index.ts` แล้ว `supabase functions deploy line-morning`
 - **โควตาข้อความ:** LINE OA แบบฟรีมีโควตา push ต่อเดือนจำกัด ถ้าเพื่อนเยอะให้ดูแพ็กเกจของ LINE OA
 - **รูปของวัน:** หยิบจาก branch `daily-images` โฟลเดอร์วันนี้ (ตามเวลาไทย) ไม่มีก็ใช้ `evergreen` — เป็นรูปที่ baked ข้อความเสร็จแล้ว ส่งเป็นรูปได้เลย พร้อมแนบข้อความคำอวยพรอีกหนึ่งบับเบิล
