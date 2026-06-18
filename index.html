@@ -1228,6 +1228,20 @@ async function boot(){
     if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>requestAnimationFrame(relayout));
   }));
   buildCatGrid();
+  openDeepLink();
+}
+/* deep-link สำหรับ Rich Menu ของ LINE: ?cat=<id หรือชื่อหมวด> เปิดเข้าหมวดนั้นเลย
+   ?cat=all / ?cat=category = ไปหน้าเลือกหมวด ; ไม่มีพารามิเตอร์ = หน้าแรกตามปกติ (ของเดิมไม่กระทบ) */
+function openDeepLink(){
+  try{
+    const p=new URLSearchParams(location.search);
+    let want=p.get('cat')||(location.hash.match(/cat=([^&]+)/)||[])[1]||'';
+    want=decodeURIComponent(want||'').trim();
+    if(!want)return;
+    if(want==='all'||want==='category'){switchTab('category');return;}
+    const cat=CATEGORIES.find(c=>c.id===want||c.label===want);
+    if(cat)openCategory(cat);else switchTab('category');
+  }catch(e){}
 }
 window.addEventListener('resize',()=>requestAnimationFrame(relayout));
 window.addEventListener('load',()=>{if(CW>0)requestAnimationFrame(relayout);});
