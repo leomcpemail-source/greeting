@@ -9,10 +9,12 @@
 import { Resvg, initWasm } from "https://esm.sh/@resvg/resvg-wasm@2.6.2";
 import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 
-const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") ?? "";
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const INTERNAL_TOKEN = Deno.env.get("MKCARD_TOKEN") ?? "";
+// secrets: env (ถ้ามี) หรือ globalThis.__SEC ที่ loader ใส่ให้ (ดู DEPLOY.md)
+const G = (globalThis as any).__SEC ?? {};
+const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") || G.AT || "";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || G.URL || "https://iuyiwpoupnuxnohpatyw.supabase.co";
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || G.SK || "";
+const INTERNAL_TOKEN = Deno.env.get("MKCARD_TOKEN") || G.MK || "";
 const BUCKET = "usercards";
 const BASE = "https://raw.githubusercontent.com/leomcpemail-source/greeting/daily-images";
 const FONT_URL = "https://raw.githubusercontent.com/google/fonts/main/ofl/sarabun/Sarabun-Bold.ttf";
@@ -51,6 +53,21 @@ function shapeThai(s: string): string {
     .replace(/ำ/g, "ํา");                   // อำ → นิคหิต+สระอา (เช่น กำ ทำ คำ จำ)
 }
 const tx = (s: string) => esc(shapeThai(s));
+// ลายน้ำแบรนด์ (มุมบนกลาง — ตรงข้ามกับคำอวยพรที่อยู่ครึ่งล่างของการ์ด) จาง ~60%
+function watermark(): string {
+  const fs = 22, text = "น้องใส่ใจ · สวัสดีทุกวัน";
+  const adv = [...text].filter((c) => !/[ัิ-ฺ็-๎]/.test(c)).length;
+  const textW = Math.round(adv * fs * 0.6);
+  const padL = 11, icon = 34, gap = 11, padR = 15, h = 48;
+  const w = padL + icon + gap + textW + padR;
+  const x = Math.round(500 - w / 2), y = 34, iy = y + (h - icon) / 2, ix = x + padL;
+  return `<g opacity="0.6">
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${h / 2}" fill="#000000" fill-opacity="0.34"/>
+    <rect x="${ix}" y="${iy}" width="${icon}" height="${icon}" rx="${Math.round(icon * 0.28)}" fill="#06C755"/>
+    <text x="${ix + icon / 2}" y="${iy + icon * 0.66}" font-family="Sarabun" font-weight="700" font-size="${Math.round(icon * 0.36)}" fill="#ffffff" text-anchor="middle">LINE</text>
+    <text x="${x + padL + icon + gap}" y="${y + h / 2 + 8}" font-family="Sarabun" font-weight="700" font-size="${fs}" fill="#ffffff">${tx(text)}</text>
+  </g>`;
+}
 
 async function loadDay() {
   const wd = ictNow().getUTCDay();
@@ -117,6 +134,7 @@ function buildSvg(photoDataUri: string, day: { headline: string; bless: string; 
     ${headline}
     ${blessText}
     <text x="500" y="930" font-family="Sarabun" font-weight="700" font-size="26" fill="#ffffff" fill-opacity="0.95" text-anchor="middle" stroke="${col2}" stroke-opacity="0.7" stroke-width="3" paint-order="stroke">${tx(day.dateThai)}</text>
+    ${watermark()}
   </svg>`;
 }
 
