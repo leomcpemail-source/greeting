@@ -95,12 +95,14 @@ async function verifySignature(rawBody: string, signature: string): Promise<bool
 }
 
 // ── LINE API ──
-async function lineReply(replyToken: string, messages: unknown[]) {
+// silent=true → notificationDisabled: ข้อความยังขึ้นในแชตปกติ แต่ไม่เด้ง push/ไม่มีเสียงเตือน
+//   (เหมาะกับบทสนทนา: user กำลังเปิดแชตคุยอยู่แล้ว ไม่ต้องรบกวนด้วยเสียงเตือนซ้ำ)
+async function lineReply(replyToken: string, messages: unknown[], silent = true) {
   if (!ACCESS_TOKEN) return;
   await fetch("https://api.line.me/v2/bot/message/reply", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${ACCESS_TOKEN}` },
-    body: JSON.stringify({ replyToken, messages: messages.slice(0, 5) }),
+    body: JSON.stringify({ replyToken, messages: messages.slice(0, 5), notificationDisabled: silent }),
   }).catch(() => {});
 }
 const textMsg = (text: string) => ({ type: "text", text: text.slice(0, 4900) });
