@@ -198,17 +198,18 @@ async function replyGreetingImages(replyToken: string, catId: string | null) {
   await lineReply(replyToken, msgs);
 }
 
-// ── (เฟสถัดไป) ผู้ใช้ส่งรูปตัวเองมา → ใส่คำอวยพรประจำวันแล้วส่งกลับ ──
-// แผน: ดาวน์โหลดรูปจาก https://api-data.line.me/v2/bot/message/{messageId}/content
-//      → overlay headline/พรประจำวัน (ต้องเรนเดอร์ฟอนต์ไทย — ทำใน pipeline canvas) → อัปโหลด → ส่ง image กลับ
+// ── ผู้ใช้ส่งรูปมา → ชมรูปก่อน แล้วถามว่าจะให้ทำอะไร (ขั้น generate กำลังต่อ) ──
 async function handleUserPhoto(replyToken: string) {
-  const data = await loadManifest();
-  const headline = (data?.m?.headline || "").trim() || "อรุณสวัสดิ์";
   await lineReply(replyToken, [textMsg(
-    `ได้รับรูปสวย ๆ ของคุณแล้วค่ะ 🥰\n` +
-    `เร็ว ๆ นี้น้องใส่ใจจะช่วยใส่คำอวยพร “${headline}” ลงบนรูปของคุณ แล้วส่งกลับไปให้เลยนะคะ!\n` +
-    `ระหว่างนี้พิมพ์ “ขอรูปสวัสดี” หรือชื่อหมวด (เช่น ดอกไม้, สุขภาพ, วันเกิด) มาได้เลย เดี๋ยวหารูปสวย ๆ ให้ค่ะ ☀️`,
+    "ว้าว~ รูปสวยจังเลยค่ะ 😍✨ ถ่าย/เลือกได้ดีมากเลยน้า\n\n" +
+    "น้องใส่ใจช่วยอะไรกับรูปนี้ดีคะ?\n" +
+    "📸 อยากได้เป็น “ภาพสวัสดี” (ใส่คำอวยพร + กรอบสวย ๆ ประจำวัน) — พิมพ์ว่า “ทำภาพสวัสดี” ได้เลยค่ะ\n" +
+    "หรือบอกน้องใส่ใจได้เลยว่าอยากให้ช่วยอะไร 💛",
   )]);
+}
+// ผู้ใช้ตอบว่าอยากทำภาพสวัสดีจากรูป (ขั้น generate กำลังต่อ — ต้องใช้ตัว render เบราว์เซอร์เหมือนการ์ดรายวัน)
+function wantsPhotoGreeting(t: string): boolean {
+  return /(ทำภาพสวัสดี|ทำสวัสดี|ใส่คำอวยพร|ใส่ตัวหนังสือ|ทำการ์ด)/.test(t);
 }
 
 const WELCOME = [
@@ -238,6 +239,13 @@ async function handleEvent(ev: any) {
   }
 
   const text = String(msg.text || "").trim();
+  if (wantsPhotoGreeting(text)) {
+    await lineReply(ev.replyToken, [textMsg(
+      "โอ๊ย อยากทำให้เลยตอนนี้! 🥹 น้องใส่ใจกำลังฝึกใส่ตัวอักษร + กรอบสวย ๆ ลงบนรูปของคุณอยู่ค่ะ ใกล้เปิดให้ใช้แล้วน้า ✨\n" +
+      "ระหว่างนี้พิมพ์ “ขอรูปสวัสดี” รับการ์ดสวย ๆ ไปก่อนได้เลยค่ะ 🌸",
+    )]);
+    return;
+  }
   const catId = detectCategory(text);
   if (wantsImage(text, catId)) { await replyGreetingImages(ev.replyToken, catId); return; }
 
