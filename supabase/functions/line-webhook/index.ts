@@ -254,29 +254,58 @@ function isAck(t: string): boolean {
 }
 // ข้อความจากปุ่ม rich menu "ส่งรูปทำภาพสวัสดี" — เป็น "จุดเริ่ม" ไม่ใช่คำสั่งทำกับรูปเก่า
 const MENU_PHOTO_TRIGGER = "อยากทำภาพสวัสดีจากรูปของฉัน 📷";
+const MENU_STAGE = "-"; // ค่าใน staged เมื่อเป็นการกดเมนู (ยังไม่มีรูปใหม่)
 const SEND_PHOTO_PROMPT =
   "ได้เลยค่ะ! 📷 ส่งรูปถ่ายที่อยากให้น้องใส่ใจช่วยทำเป็น “ภาพสวัสดี” มาได้เลยนะคะ\n" +
   "(เลือกรูปสวย ๆ ที่ยังไม่มีตัวหนังสือนะคะ เดี๋ยวหนูใส่คำอวยพร + กรอบประจำวันให้สวย ๆ ค่ะ 💛)";
+// ถาม user เมื่อมี "ภาพเดิมค้างอยู่" แล้วส่งรูปใหม่ / กดเมนูเข้ามาอีก
+const CONFLICT_NEW_PHOTO =
+  "น้องใส่ใจเห็นว่ามี “ภาพเดิม” ที่ส่งมาก่อนหน้านี้ค้างอยู่ค่ะ 🖼️\n" +
+  "อยากให้หนู “ทำใหม่” โดยใช้รูปที่เพิ่งส่งมา หรือ “ใช้ภาพเดิม” ดีคะ?\n" +
+  "พิมพ์ว่า “ทำใหม่” หรือ “ใช้ภาพเดิม” มาได้เลยนะคะ 💛";
+const CONFLICT_MENU =
+  "ตอนนี้ยังมี “ภาพเดิม” ที่ส่งมาค้างอยู่ค่ะ 🖼️\n" +
+  "อยากให้หนู “ใช้ภาพเดิม” ทำภาพสวัสดีต่อ หรือ “ทำใหม่” (ส่งรูปใหม่) ดีคะ?\n" +
+  "พิมพ์ว่า “ใช้ภาพเดิม” หรือ “ทำใหม่” มาได้เลยนะคะ 💛";
+const REDO_NEW = /(ทำใหม่|รูปใหม่|ภาพใหม่|อันใหม่|เริ่มใหม่|ส่งใหม่|ใช้.*ใหม่|ลบ)/;
+const USE_OLD = /(ใช้.*(เดิม|เก่า)|ภาพเดิม|รูปเดิม|อันเดิม|ของเดิม|เดิม|อันเก่า|เก่า)/;
 
-// จำรูปล่าสุดที่ user ส่งมา (ตาราง line_photo_pending) เพื่อใช้ตอนยืนยัน
+// จำรูปล่าสุดที่ user ส่งมา (ตาราง line_photo_pending) เพื่อใช้ตอนยืนยัน ; เคลียร์ staged ทุกครั้งที่ตั้งรูป active ใหม่
 async function upsertPhotoPending(userId: string, messageId: string) {
   await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending`, {
     method: "POST",
     headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "resolution=merge-duplicates,return=minimal" },
-    body: JSON.stringify({ user_id: userId, message_id: messageId, created_at: new Date().toISOString() }),
+    body: JSON.stringify({ user_id: userId, message_id: messageId, created_at: new Date().toISOString(), staged_message_id: null, staged_at: null }),
+  }).catch(() => {});
+}
+// พักรูป/คำขอใหม่ไว้ "รอ user ตัดสินใจ" (staged) โดยไม่ทับรูป active เดิม
+async function stagePhoto(userId: string, stagedId: string) {
+  await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending?user_id=eq.${encodeURIComponent(userId)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" },
+    body: JSON.stringify({ staged_message_id: stagedId, staged_at: new Date().toISOString() }),
+  }).catch(() => {});
+}
+async function clearStaged(userId: string) {
+  await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending?user_id=eq.${encodeURIComponent(userId)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" },
+    body: JSON.stringify({ staged_message_id: null, staged_at: null }),
   }).catch(() => {});
 }
 // รูปที่เพิ่งส่งใช้ทำภาพได้ภายในกรอบเวลานี้ — กันการหยิบ "รูปเก่า" ที่ค้างมาทำซ้ำ (บั๊กถามวน/เตือนผิด)
-const PENDING_FRESH_MS = 30 * 60 * 1000; // 30 นาที
-async function getPhotoPending(userId: string): Promise<{ id: string; fresh: boolean } | null> {
+const PENDING_FRESH_MS = 5 * 60 * 1000; // 5 นาที
+async function getPhotoPending(userId: string): Promise<{ id: string; fresh: boolean; staged: string | null; stagedFresh: boolean } | null> {
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending?user_id=eq.${encodeURIComponent(userId)}&select=message_id,created_at`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending?user_id=eq.${encodeURIComponent(userId)}&select=message_id,created_at,staged_message_id,staged_at`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
     if (!r.ok) return null;
     const row = (await r.json())?.[0];
     if (!row?.message_id) return null;
     const ts = Date.parse(row.created_at || "");
     const fresh = Number.isFinite(ts) ? (Date.now() - ts) <= PENDING_FRESH_MS : true;
-    return { id: row.message_id, fresh };
+    const sts = Date.parse(row.staged_at || "");
+    const stagedFresh = Number.isFinite(sts) ? (Date.now() - sts) <= PENDING_FRESH_MS : false;
+    return { id: row.message_id, fresh, staged: row.staged_message_id || null, stagedFresh };
   } catch { return null; }
 }
 async function deletePhotoPending(userId: string) {
@@ -363,6 +392,13 @@ async function handleEvent(ev: any) {
       await lineReply(ev.replyToken, [textMsg(WARN_TEXTED)]);
       return;
     }
+    // ถ้ายังมี "ภาพเดิม" ค้างอยู่ (ภายใน 5 นาที) → ไม่ทับทันที แต่ถาม user ก่อน
+    const cur = userId ? await getPhotoPending(userId) : null;
+    if (cur && cur.fresh && userId && msg.id) {
+      await stagePhoto(userId, msg.id);   // พักรูปใหม่ไว้ รอ user ตัดสินใจ
+      await lineReply(ev.replyToken, [textMsg(CONFLICT_NEW_PHOTO)]);
+      return;
+    }
     if (userId && msg.id) await upsertPhotoPending(userId, msg.id);   // จำรูปไว้เผื่อสั่งทำภาพสวัสดี
     await handleUserPhoto(ev.replyToken);
     return;
@@ -378,9 +414,37 @@ async function handleEvent(ev: any) {
   const freshPhoto = pendingRow && pendingRow.fresh ? pendingRow.id : null;
   const noPhotoMsg = "ส่งรูปถ่ายที่อยากทำเป็นภาพสวัสดีมาก่อนนะคะ 📷 (เป็นรูปที่ยังไม่มีตัวหนังสือ) แล้วบอกหนูได้เลยค่ะ 🌸";
 
-  // ปุ่ม rich menu = จุดเริ่ม → ถ้ายังไม่มีรูปที่เพิ่งส่ง ให้ชวนส่งรูปก่อน (อย่าหยิบรูปเก่ามาทำ)
-  if (text === MENU_PHOTO_TRIGGER && !freshPhoto) {
-    await lineReply(ev.replyToken, [textMsg(SEND_PHOTO_PROMPT)]);
+  // ── กำลังรอ user ตัดสินใจเรื่อง "ภาพเดิมค้างอยู่" (staged) → จัดการคำตอบก่อนอย่างอื่น ──
+  if (userId && pendingRow && pendingRow.fresh && pendingRow.staged && pendingRow.stagedFresh) {
+    if (REDO_NEW.test(text)) {
+      if (pendingRow.staged === MENU_STAGE) {        // กดเมนู (ไม่มีรูปใหม่) → ลบของเดิม ชวนส่งรูปใหม่
+        await deletePhotoPending(userId);
+        await lineReply(ev.replyToken, [textMsg(SEND_PHOTO_PROMPT)]);
+      } else {                                         // มีรูปใหม่รออยู่ → เลื่อนเป็น active แล้วทำเลย
+        await upsertPhotoPending(userId, pendingRow.staged);
+        await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 ใช้รูปใหม่ทำภาพสวัสดี กำลังทำให้เลย รอแป๊บนะคะ ✨")]);
+        await triggerMakeCard(userId, pendingRow.staged);
+      }
+      return;
+    }
+    if (USE_OLD.test(text)) {                          // ใช้ภาพเดิม → ทิ้ง staged แล้วทำจากรูปเดิม
+      await upsertPhotoPending(userId, pendingRow.id); // ต่ออายุ + เคลียร์ staged
+      await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ ใช้ภาพเดิมนะคะ 🎨 กำลังทำภาพสวัสดีให้เลย รอแป๊บนะคะ ✨")]);
+      await triggerMakeCard(userId, pendingRow.id);
+      return;
+    }
+    // ตอบไม่ตรง → เคลียร์สถานะรอเลือก แล้วทำงานปกติต่อ (กันค้างวน)
+    await clearStaged(userId);
+  }
+
+  // ปุ่ม rich menu = จุดเริ่ม → ไม่มีรูปสด: ชวนส่งรูป ; มีรูปเดิมค้าง: ถามก่อนว่าจะใช้เดิมหรือทำใหม่
+  if (text === MENU_PHOTO_TRIGGER) {
+    if (freshPhoto && userId) {
+      await stagePhoto(userId, MENU_STAGE);
+      await lineReply(ev.replyToken, [textMsg(CONFLICT_MENU)]);
+    } else {
+      await lineReply(ev.replyToken, [textMsg(SEND_PHOTO_PROMPT)]);
+    }
     return;
   }
 
