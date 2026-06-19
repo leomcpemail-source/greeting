@@ -44,6 +44,13 @@ function dateThaiToday() { const d = ictNow(); return `วัน${WD[d.getUTCDay
 const pick = (a: any[]) => a[Math.floor(Math.random() * a.length)];
 const esc = (s: string) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 const isHex = (v: any) => typeof v === "string" && /^#[0-9a-f]{3,8}$/i.test(v);
+// แก้ปัญหา resvg เรนเดอร์ "สระอำ" (ำ U+0E33) ซ้อนทับพยัญชนะ → แตกเป็น นิคหิต + สระอา ให้จัดตำแหน่งด้วย mark-positioning
+function shapeThai(s: string): string {
+  return String(s)
+    .replace(/([่-๋])ำ/g, "ํ$1า") // (วรรณยุกต์)+อำ → นิคหิต+วรรณยุกต์+สระอา (เช่น น้ำ ค่ำ ซ้ำ)
+    .replace(/ำ/g, "ํา");                   // อำ → นิคหิต+สระอา (เช่น กำ ทำ คำ จำ)
+}
+const tx = (s: string) => esc(shapeThai(s));
 
 async function loadDay() {
   const wd = ictNow().getUTCDay();
@@ -85,12 +92,12 @@ function buildSvg(photoDataUri: string, day: { headline: string; bless: string; 
   // หัวข้อ: ฮาโลสีเข้มประจำวัน (อ่านง่าย) + ตัวขาวขอบสีประจำวัน
   const tA = `font-family="Sarabun" font-weight="700" font-size="${hSize}" text-anchor="middle" stroke-linejoin="round"`;
   const headline =
-    `<text x="500" y="${hY}" ${tA} fill="none" stroke="${col2}" stroke-opacity="0.92" stroke-width="17" paint-order="stroke">${esc(hl)}</text>` +
-    `<text x="500" y="${hY}" ${tA} fill="#ffffff" stroke="${col}" stroke-width="6" paint-order="stroke">${esc(hl)}</text>`;
+    `<text x="500" y="${hY}" ${tA} fill="none" stroke="${col2}" stroke-opacity="0.92" stroke-width="17" paint-order="stroke">${tx(hl)}</text>` +
+    `<text x="500" y="${hY}" ${tA} fill="#ffffff" stroke="${col}" stroke-width="6" paint-order="stroke">${tx(hl)}</text>`;
   const blLines = wrap2(day.bless, 30);
   let by = 855 - (blLines.length - 1) * 26;
   const blessText = blLines.map((ln) => {
-    const t = `<text x="500" y="${by}" font-family="Sarabun" font-weight="700" font-size="40" fill="#ffffff" text-anchor="middle" stroke="${col2}" stroke-opacity="0.85" stroke-width="6" paint-order="stroke">${esc(ln)}</text>`;
+    const t = `<text x="500" y="${by}" font-family="Sarabun" font-weight="700" font-size="40" fill="#ffffff" text-anchor="middle" stroke="${col2}" stroke-opacity="0.85" stroke-width="6" paint-order="stroke">${tx(ln)}</text>`;
     by += 52; return t;
   }).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
@@ -109,7 +116,7 @@ function buildSvg(photoDataUri: string, day: { headline: string; bless: string; 
     <rect x="40" y="40" width="${W - 80}" height="${H - 80}" fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="2.5" rx="20"/>
     ${headline}
     ${blessText}
-    <text x="500" y="930" font-family="Sarabun" font-weight="700" font-size="26" fill="#ffffff" fill-opacity="0.95" text-anchor="middle" stroke="${col2}" stroke-opacity="0.7" stroke-width="3" paint-order="stroke">${esc(day.dateThai)}</text>
+    <text x="500" y="930" font-family="Sarabun" font-weight="700" font-size="26" fill="#ffffff" fill-opacity="0.95" text-anchor="middle" stroke="${col2}" stroke-opacity="0.7" stroke-width="3" paint-order="stroke">${tx(day.dateThai)}</text>
   </svg>`;
 }
 
@@ -203,6 +210,14 @@ Deno.serve(async (req) => {
   let body: any = {};
   try { body = await req.json(); } catch { /* */ }
   if (body.token !== INTERNAL_TOKEN) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
+  if (body.preview) { // โหมดทดสอบเรนเดอร์ (ไม่ push LINE) — คืน URL รูปทันที เพื่อตรวจสระอำ
+    const day = await loadDay();
+    if (body.bless) day.bless = String(body.bless);
+    if (body.headline) day.headline = String(body.headline);
+    const rr = await fetch("https://picsum.photos/900");
+    const png = await renderCard(new Uint8Array(await rr.arrayBuffer()), "image/jpeg", day);
+    return new Response(JSON.stringify({ url: await uploadCard(png) }), { headers: { "Content-Type": "application/json" } });
+  }
   const userId = String(body.userId || "");
   if (!userId) return new Response(JSON.stringify({ error: "no userId" }), { status: 400, headers: { "Content-Type": "application/json" } });
   const p = job(userId, String(body.messageId || ""), !!body.test, String(body.bless || "").slice(0, 120));
