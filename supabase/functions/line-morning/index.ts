@@ -150,11 +150,13 @@ async function getFriendById(uid: string): Promise<{ user_id: string; display_na
   return await r.json();
 }
 
-async function pushToFriend(userId: string, messages: unknown[]) {
+// silent=true → notificationDisabled: การ์ดยังส่งเข้าแชตปกติ แต่ไม่เด้ง push/ไม่มีเสียง
+//   ใช้กับรอบส่งเช้า 06:00 เพื่อไม่ให้เสียงเตือนไปปลุก user (เห็นการ์ดเองตอนตื่น)
+async function pushToFriend(userId: string, messages: unknown[], silent = false) {
   const r = await fetch("https://api.line.me/v2/bot/message/push", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${ACCESS_TOKEN}` },
-    body: JSON.stringify({ to: userId, messages }),
+    body: JSON.stringify({ to: userId, messages, notificationDisabled: silent }),
   });
   return r.ok ? { ok: true } : { ok: false, status: r.status, body: await r.text().catch(() => "") };
 }
@@ -198,12 +200,15 @@ Deno.serve(async (req) => {
     friends = await getActiveFriends();
   }
 
+  // รอบส่งเช้าจริง (broadcast ทุกคน) = เงียบ ไม่ปลุก user ; โหมดทดสอบรายคน (?to=) = มี notification ให้แอดมินเห็นว่าเข้าจริง
+  const silent = !to;
+
   let ok = 0;
   const sent: string[] = [];
   const failed: { userId: string; status?: number; body?: string }[] = [];
   for (const f of friends) {
     const name = cleanName(f.display_name);
-    const res = await pushToFriend(f.user_id, buildMessages(cards, name, style));
+    const res = await pushToFriend(f.user_id, buildMessages(cards, name, style), silent);
     if (res.ok) { ok++; sent.push(f.user_id); } else { failed.push({ userId: f.user_id, status: res.status, body: res.body }); }
     await sleep(150);
   }
