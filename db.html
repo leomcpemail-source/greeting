@@ -160,14 +160,25 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
         <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:10px">
           ค้นหาแล้วเลือกยิงการ์ด/รูปไปหา user ทีละคนเพื่อทดสอบ — ไม่กระทบสถิติ “ส่งถึงแล้ววันนี้”
         </div>
-        <input id="testSearch" type="text" autocomplete="off" placeholder="🔍 พิมพ์ชื่อ หรือรหัส user เพื่อค้นหา (กรอง dropdown)…"
-          oninput="renderTestFriends()"
+        <input id="testSearch" type="text" autocomplete="off" placeholder="🔍 พิมพ์ชื่อ หรือรหัส user เพื่อค้นหา…"
+          oninput="_testPage=1;renderTestTable()"
           style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:#0c0f18;color:var(--ink);font-family:'Sarabun';font-size:14px;outline:none;margin-bottom:8px">
-        <div id="testCount" style="color:var(--mut);font-size:12px;margin-bottom:6px"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <select id="testSelect" style="flex:1;min-width:200px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0c0f18;color:var(--ink);font-family:'Sarabun';font-size:14px;outline:none"></select>
-          <button class="chip" onclick="sendTestSelected('การ์ด','cards',this)">🎴 การ์ด</button>
-          <button class="chip" onclick="sendTestSelected('รูปล้วน','images',this)">🖼️ รูปล้วน</button>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+          <span id="testCount" style="color:var(--mut);font-size:12px"></span>
+          <span style="margin-left:auto;color:var(--mut);font-size:12px">แสดงทีละ</span>
+          <select id="testPageSize" onchange="testSetPageSize(this.value)"
+            style="padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:#0c0f18;color:var(--ink);font-family:'Sarabun';font-size:13px;outline:none">
+            <option value="5">5</option><option value="20" selected>20</option><option value="30">30</option><option value="100">100</option>
+          </select>
+          <span style="color:var(--mut);font-size:12px">รายการ</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="testTable" style="width:100%;border-collapse:collapse;font-size:13px"></table>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:10px">
+          <button class="chip" onclick="testGoPage(_testPage-1)">‹ ก่อนหน้า</button>
+          <span id="testPageInfo" style="color:var(--mut);font-size:12px"></span>
+          <button class="chip" onclick="testGoPage(_testPage+1)">ถัดไป ›</button>
         </div>
         <div id="testResult" style="color:var(--mut);font-size:12px;margin-top:10px;min-height:18px"></div>
       </div>
@@ -686,39 +697,70 @@ function renderLine(d, host){
   drawTreemap('tmLineSrc',(c.by_source||[]).map(x=>({label:LINE_SRC_TH[x.source]||x.source||'?',value:N(x.n),color:PALL[pi++%PALL.length]})));
 }
 
-/* ── ทดสอบยิงข้อความรายคน (เลือก user ที่รู้จัก) ผ่าน line-morning โหมด admin ── */
-let _testFriends=[];
-const TEST_OPTS_MAX=500;   // จำนวน option สูงสุดใน dropdown — พิมพ์ค้นหาเพื่อกรองให้แคบลง
+/* ── ทดสอบยิงข้อความรายคน (ตาราง: ค้นหา/เรียง/แบ่งหน้า) ผ่าน line-morning โหมด admin ── */
+let _testFriends=[], _testPage=1, _testPageSize=20, _testSort={key:'followed_at',dir:'desc'};
 async function loadFriendsForTest(){
   $('lineTestPanel').style.display='';
-  const sel=$('testSelect'); if(sel) sel.innerHTML='<option value="">กำลังโหลดรายชื่อ…</option>';
+  const tbl=$('testTable'); if(tbl) tbl.innerHTML='<tr><td style="color:var(--mut);padding:10px">กำลังโหลดรายชื่อ…</td></tr>';
   try{
     const list=await lineRpc('line_friends_list',{ p_token:LINE_ADMIN_TOKEN });
-    if(list?.error){ _testFriends=[]; if(sel) sel.innerHTML=`<option value="">เข้าถึงรายชื่อไม่ได้ (${esc(list.error)})</option>`; return; }
-    _testFriends=Array.isArray(list)?list:[];
-    renderTestFriends();
-  }catch(e){ if(sel) sel.innerHTML=`<option value="">โหลดไม่สำเร็จ: ${esc(e.message)}</option>`; }
+    if(list?.error){ _testFriends=[]; if(tbl) tbl.innerHTML=`<tr><td style="color:var(--red);padding:10px">เข้าถึงรายชื่อไม่ได้ (${esc(list.error)})</td></tr>`; return; }
+    _testFriends=Array.isArray(list)?list:[]; _testPage=1;
+    renderTestTable();
+  }catch(e){ if(tbl) tbl.innerHTML=`<tr><td style="color:var(--red);padding:10px">โหลดไม่สำเร็จ: ${esc(e.message)}</td></tr>`; }
 }
-function renderTestFriends(){
-  const sel=$('testSelect'); if(!sel) return;
-  const cnt=$('testCount');
-  if(!_testFriends.length){ if(cnt)cnt.textContent=''; sel.innerHTML='<option value="">— ยังไม่มีเพื่อนในระบบ —</option>'; return; }
+function _testFiltered(){
   const q=(($('testSearch')||{}).value||'').trim().toLowerCase();
   let list=_testFriends;
   if(q) list=list.filter(u=>(String(u.name||'')+' '+String(u.user_id||'')).toLowerCase().includes(q));
-  // active ก่อน แล้วเรียงตามเข้าใหม่ล่าสุด
-  list=[...list].sort((a,b)=>((b.active?1:0)-(a.active?1:0)) || (String(b.followed_at||'')).localeCompare(String(a.followed_at||'')));
-  if(cnt) cnt.textContent = `ทั้งหมด ${_testFriends.length} คน`+(q?` · ตรงคำค้น ${list.length} คน`:'')+(list.length>TEST_OPTS_MAX?` (แสดง ${TEST_OPTS_MAX} แรกใน dropdown — พิมพ์ค้นหาเพื่อแคบลง)`:'');
-  if(!list.length){ sel.innerHTML='<option value="">— ไม่พบ user ที่ค้นหา —</option>'; return; }
-  sel.innerHTML=list.slice(0,TEST_OPTS_MAX).map(u=>{
-    const nm=esc(u.name||('ผู้ใช้ …'+String(u.user_id||'').slice(-4)));
-    return `<option value="${esc(u.user_id)}">${u.active?'🟢':'⚪'} ${nm}</option>`;
-  }).join('');
+  const {key,dir}=_testSort, s=dir==='asc'?1:-1;
+  return [...list].sort((a,b)=>{
+    let av,bv;
+    if(key==='name'){ av=String(a.name||'').toLowerCase(); bv=String(b.name||'').toLowerCase(); }
+    else if(key==='active'){ av=a.active?1:0; bv=b.active?1:0; }
+    else { av=String(a.followed_at||''); bv=String(b.followed_at||''); }
+    return av<bv?-s:av>bv?s:0;
+  });
 }
-async function sendTestSelected(label, style, btn){
-  const sel=$('testSelect'); const uid=sel?sel.value:'';
-  if(!uid){ const res=$('testResult'); res.innerHTML='<span style="color:var(--red)">เลือก user จาก dropdown ก่อนนะคะ</span>'; return; }
-  return sendTest(uid, label, style, btn);
+function testSetSort(k){ if(_testSort.key===k)_testSort.dir=_testSort.dir==='asc'?'desc':'asc'; else _testSort={key:k,dir:(k==='followed_at'?'desc':'asc')}; renderTestTable(); }
+function testGoPage(p){ _testPage=p; renderTestTable(); }
+function testSetPageSize(v){ _testPageSize=+v||20; _testPage=1; renderTestTable(); }
+function renderTestTable(){
+  const tbl=$('testTable'); if(!tbl) return;
+  const cnt=$('testCount'), info=$('testPageInfo');
+  if(!_testFriends.length){ if(cnt)cnt.textContent=''; if(info)info.textContent=''; tbl.innerHTML='<tr><td style="color:var(--mut);padding:10px">ยังไม่มีเพื่อนในระบบ</td></tr>'; return; }
+  const list=_testFiltered();
+  const ps=_testPageSize, total=list.length, pages=Math.max(1,Math.ceil(total/ps));
+  if(_testPage>pages)_testPage=pages; if(_testPage<1)_testPage=1;
+  const start=(_testPage-1)*ps, rows=list.slice(start,start+ps);
+  const q=(($('testSearch')||{}).value||'').trim();
+  if(cnt) cnt.textContent=`ทั้งหมด ${_testFriends.length} คน`+(q?` · ตรงคำค้น ${total} คน`:'');
+  if(info) info.textContent=`หน้า ${_testPage}/${pages}`;
+  const arr=k=> _testSort.key===k ? (_testSort.dir==='asc'?' ▲':' ▼') : '';
+  const thS='cursor:pointer;text-align:left;padding:7px 8px;border-bottom:2px solid var(--line);color:var(--mut);white-space:nowrap;user-select:none';
+  const thP='text-align:left;padding:7px 8px;border-bottom:2px solid var(--line);color:var(--mut);white-space:nowrap';
+  let html=`<thead><tr>
+    <th style="${thP};width:42px">#</th>
+    <th style="${thS}" onclick="testSetSort('name')">ชื่อ${arr('name')}</th>
+    <th style="${thS}" onclick="testSetSort('followed_at')">เข้าเมื่อ${arr('followed_at')}</th>
+    <th style="${thS}" onclick="testSetSort('active')">สถานะ${arr('active')}</th>
+    <th style="${thP}">ทดสอบยิง</th>
+  </tr></thead><tbody>`;
+  rows.forEach((u,i)=>{
+    const nm=esc(u.name||('ผู้ใช้ …'+String(u.user_id||'').slice(-4)));
+    const uid=esc(u.user_id);
+    const dt=u.followed_at?esc(new Date(u.followed_at).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})):'—';
+    html+=`<tr style="border-bottom:1px solid var(--line)">
+      <td style="padding:7px 8px;color:var(--mut)">${start+i+1}</td>
+      <td style="padding:7px 8px">${nm}</td>
+      <td style="padding:7px 8px;white-space:nowrap;color:var(--mut)">${dt}</td>
+      <td style="padding:7px 8px;white-space:nowrap">${u.active?'🟢 active':'⚪ เลิก'}</td>
+      <td style="padding:7px 8px;white-space:nowrap">
+        <button class="chip" title="ยิงการ์ด" style="padding:3px 10px;font-size:13px" onclick="sendTest('${uid}','การ์ด','cards',this)">🎴</button>
+        <button class="chip" title="ยิงรูปล้วน" style="padding:3px 10px;font-size:13px" onclick="sendTest('${uid}','รูปล้วน','images',this)">🖼️</button>
+      </td></tr>`;
+  });
+  tbl.innerHTML=html+'</tbody>';
 }
 async function sendTest(uid, label, style, btn){
   const res=$('testResult'); const old=btn.textContent;
