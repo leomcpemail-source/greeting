@@ -239,10 +239,48 @@ async function triggerMakeCard(userId: string, messageId: string, bless = "") {
     body: JSON.stringify({ token: MKCARD_TOKEN, userId, messageId, bless }),
   }).catch(() => {});
 }
-// แยกคำอวยพรที่ user อยากแก้: "แก้คำอวยพรเป็น ..." / "เปลี่ยนข้อความเป็น ..."
+// แยกคำอวยพรที่ user อยากแก้: "แก้คำอวยพรเป็น ..." / "เปลี่ยนข้อความเป็น ..." (fallback ถ้า LLM ล่ม)
 function parseCustomBless(t: string): string | null {
-  const m = t.match(/(?:แก้|เปลี่ยน|ขอแก้|ขอเปลี่ยน)\s*(?:คำอวยพร|ข้อความ|คำ)\s*(?:ใหม่)?\s*(?:เป็น|ว่า|:)\s*(.+)/);
+  const m = t.match(/(?:แก้|เปลี่ยน|ขอแก้|ขอเปลี่ยน)\s*(?:ไข|คำ)?\s*(?:คำอวยพร|ข้อความ|คำ)\s*(?:ใหม่)?\s*(?:เป็น|ว่า|:)\s*(.+)/);
   return m && m[1] && m[1].trim() ? m[1].trim().slice(0, 120) : null;
+}
+
+const CATS_SET = new Set(["flowers", "dharma", "inspire", "miss", "birthday", "elderly", "health", "festival", "family", "pets", "coffee", "nature"]);
+
+// ── ตัวจำแนกเจตนา (intent) ด้วย ThaiLLM — ตีความแม้พิมพ์ไม่เป๊ะ + รู้บริบทว่าเพิ่งส่งรูปไหม ──
+const INTENT_SYS = [
+  "คุณคือ “น้องใส่ใจ” ผู้ช่วยสาวอายุ 20 ของ LINE “สวัสดีทุกวัน” พูดจาอบอุ่นน่ารัก ลงท้าย ค่ะ/นะคะ",
+  "หน้าที่: วิเคราะห์ “เจตนา” ของผู้ใช้จากข้อความ (ผู้ใช้พิมพ์ไม่เป๊ะ มีคำผิดได้ ให้ตีความตามความหมาย) แล้วตอบกลับเป็น JSON ล้วน ๆ เท่านั้น ห้ามมีข้อความอื่นนอก JSON",
+  'รูปแบบ: {"action":"make_card|edit_blessing|get_image|chat","blessing":"","category":"","reply":""}',
+  "- make_card: อยากให้เอา “รูปที่ส่งมา” มาทำเป็นภาพสวัสดี (ใส่คำอวยพร+กรอบ) เช่น ทำภาพสวัสดี, ทำการ์ดให้หน่อย, เอารูปนี้ทำสวัสดี, สร้างให้หน่อย, เอาเลย",
+  '- edit_blessing: อยากแก้/เปลี่ยน “คำอวยพรบนภาพ” → ดึงข้อความคำอวยพรใหม่ใส่ใน "blessing" (เช่น แก้ไขคำอวยพรเป็น..., เปลี่ยนข้อความเป็น..., ขอข้อความว่า..., ไม่เอาอันเดิมขอเป็น...)',
+  '- get_image: ขอ “รูปสวัสดีจากคลัง” (ไม่เกี่ยวกับรูปที่ส่งมา) เช่น ขอรูปสวัสดี, ขอรูปดอกไม้ → ถ้าระบุหมวดใส่รหัสใน "category" จาก flowers,dharma,inspire,miss,birthday,elderly,health,festival,family,pets,coffee,nature ไม่ระบุใส่ ""',
+  '- chat: พูดคุย/ถามทั่วไป → เขียนคำตอบแบบน้องใส่ใจสั้น ๆ อบอุ่นใน "reply" (ถ้าไม่รู้จริงห้ามมั่ว)',
+  "สำคัญ: ถ้าผู้ใช้ “มีรูปที่เพิ่งส่งมา” และข้อความสื่อถึงการทำภาพ/ใส่คำ/แก้คำ ให้เลือก make_card หรือ edit_blessing (อย่าเลือก get_image)",
+  "ตอบ JSON อย่างเดียว",
+].join("\n");
+
+function extractJson(s: string): any | null {
+  const m = String(s).match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try { return JSON.parse(m[0]); } catch { return null; }
+}
+async function classifyIntent(text: string, hasPhoto: boolean): Promise<any | null> {
+  if (!THAILLM_KEY) return null;
+  const sys = `${INTENT_SYS}\nบริบท: ผู้ใช้ตอนนี้${hasPhoto ? "มีรูปที่เพิ่งส่งมา รอทำเป็นภาพสวัสดี" : "ยังไม่ได้ส่งรูปเข้ามา"} · วันนี้คือ ${nowContextTH()}`;
+  const body = JSON.stringify({ model: THAILLM_MODEL, messages: [{ role: "system", content: sys }, { role: "user", content: String(text).slice(0, 800) }], max_tokens: 400, temperature: 0.2 });
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch(THAILLM_URL, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${THAILLM_KEY}` }, body, signal: AbortSignal.timeout(18000) });
+      if (r.ok) {
+        const j = await r.json();
+        const obj = extractJson(j?.choices?.[0]?.message?.content || "");
+        if (obj && typeof obj.action === "string") return obj;
+      }
+    } catch (_e) { /* retry */ }
+    if (attempt === 0) await new Promise((res) => setTimeout(res, 600));
+  }
+  return null;
 }
 
 const WELCOME = [
@@ -276,32 +314,46 @@ async function handleEvent(ev: any) {
   }
 
   const text = String(msg.text || "").trim();
-  // แก้คำอวยพรบนภาพ (ใช้รูปล่าสุดที่เคยส่งมา)
-  const cb = parseCustomBless(text);
-  if (cb) {
-    const mid = userId ? await getPhotoPending(userId) : null;
-    if (mid) {
-      await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 น้องใส่ใจกำลังแก้คำอวยพรบนภาพให้ใหม่ รอแป๊บนะคะ ✨")]);
-      await triggerMakeCard(userId!, mid, cb);
-    } else {
-      await lineReply(ev.replyToken, [textMsg("ส่งรูปที่อยากทำเป็นภาพสวัสดีมาก่อนนะคะ 📷 แล้วค่อยบอกคำอวยพรที่อยากได้ น้องใส่ใจจะจัดให้เลยค่ะ 🌸")]);
+  const pending = userId ? await getPhotoPending(userId) : null;
+  const noPhotoMsg = "ส่งรูปถ่ายที่อยากทำเป็นภาพสวัสดีมาก่อนนะคะ 📷 (เป็นรูปที่ยังไม่มีตัวหนังสือ) แล้วบอกหนูได้เลยค่ะ 🌸";
+
+  // ── ให้ ThaiLLM ตีความเจตนาก่อน (พิมพ์ไม่เป๊ะก็เข้าใจ) ──
+  const intent = await classifyIntent(text, !!pending);
+  if (intent && intent.action) {
+    const act = intent.action;
+    if (act === "edit_blessing" || act === "make_card") {
+      if (pending) {
+        const bless = act === "edit_blessing" ? String(intent.blessing || "").trim().slice(0, 120) : "";
+        await lineReply(ev.replyToken, [textMsg(bless
+          ? "ได้เลยค่ะ! 🎨 กำลังแก้คำอวยพรบนภาพให้ใหม่ รอแป๊บนะคะ ✨"
+          : "ได้เลยค่ะ! 🎨 กำลังทำภาพสวัสดีจากรูปของคุณ รอแป๊บนะคะ ส่งให้ภายในไม่กี่อึดใจ ✨")]);
+        await triggerMakeCard(userId!, pending, bless);
+      } else {
+        await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]);
+      }
+      return;
     }
+    if (act === "get_image") {
+      await replyGreetingImages(ev.replyToken, CATS_SET.has(intent.category) ? intent.category : null);
+      return;
+    }
+    // action=chat → ตอบด้วย persona เต็มของน้องใส่ใจ (ใช้ reply จาก classifier เป็นสำรอง)
+    const a = await askThaiLLM(text);
+    await lineReply(ev.replyToken, [textMsg(a || String(intent.reply || "").trim() ||
+      "ตอนนี้น้องใส่ใจคิดไม่ทันนิดนึงค่ะ 🥺 ลองพิมพ์ใหม่อีกครั้งนะคะ")]);
     return;
   }
+
+  // ── LLM ล่ม → ใช้ regex สำรอง ──
+  const cb = parseCustomBless(text);
+  if (cb && pending) { await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 กำลังแก้คำอวยพรบนภาพให้ใหม่ รอแป๊บนะคะ ✨")]); await triggerMakeCard(userId!, pending, cb); return; }
   if (wantsPhotoGreeting(text)) {
-    const mid = userId ? await getPhotoPending(userId) : null;
-    if (mid) {
-      await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 น้องใส่ใจกำลังทำภาพสวัสดีจากรูปของคุณ รอแป๊บนะคะ ส่งให้ภายในไม่กี่อึดใจ ✨")]);
-      await triggerMakeCard(userId!, mid);   // เก็บรูป pending ไว้ เผื่อขอแก้คำอวยพร
-    } else {
-      await lineReply(ev.replyToken, [textMsg("ส่งรูปที่อยากทำเป็นภาพสวัสดีมาก่อนนะคะ 📷 แล้วพิมพ์ “ทำภาพสวัสดี” น้องใส่ใจจะจัดให้เลยค่ะ 🌸")]);
-    }
+    if (pending) { await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 กำลังทำภาพสวัสดีจากรูปของคุณ รอแป๊บนะคะ ✨")]); await triggerMakeCard(userId!, pending); }
+    else await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]);
     return;
   }
   const catId = detectCategory(text);
   if (wantsImage(text, catId)) { await replyGreetingImages(ev.replyToken, catId); return; }
-
-  // คุย/ถามทั่วไป → ThaiLLM ในบทบาทน้องใส่ใจ
   const answer = await askThaiLLM(text);
   await lineReply(ev.replyToken, [textMsg(answer ||
     "ตอนนี้น้องใส่ใจคิดไม่ทันนิดนึงค่ะ 🥺 ลองพิมพ์ถามใหม่อีกครั้ง หรือพิมพ์ “ขอรูปสวัสดี” มาได้เลยนะคะ 🌸")]);
