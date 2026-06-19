@@ -19,6 +19,7 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const THAILLM_URL = Deno.env.get("THAILLM_URL") ?? "http://thaillm.or.th/api/v1/chat/completions";
 const THAILLM_KEY = Deno.env.get("THAILLM_API_KEY") ?? "";
 const THAILLM_MODEL = Deno.env.get("THAILLM_MODEL") ?? "typhoon-s-thaillm-8b-instruct";
+const MKCARD_TOKEN = Deno.env.get("MKCARD_TOKEN") ?? "";   // internal token เรียก line-make-card
 
 const BASE = "https://raw.githubusercontent.com/leomcpemail-source/greeting/daily-images";
 
@@ -207,9 +208,36 @@ async function handleUserPhoto(replyToken: string) {
     "หรือบอกน้องใส่ใจได้เลยว่าอยากให้ช่วยอะไร 💛",
   )]);
 }
-// ผู้ใช้ตอบว่าอยากทำภาพสวัสดีจากรูป (ขั้น generate กำลังต่อ — ต้องใช้ตัว render เบราว์เซอร์เหมือนการ์ดรายวัน)
+// ผู้ใช้ตอบว่าอยากทำภาพสวัสดีจากรูป
 function wantsPhotoGreeting(t: string): boolean {
-  return /(ทำภาพสวัสดี|ทำสวัสดี|ใส่คำอวยพร|ใส่ตัวหนังสือ|ทำการ์ด)/.test(t);
+  return /(ทำภาพสวัสดี|ทำสวัสดี|ใส่คำอวยพร|ใส่ตัวหนังสือ|ทำการ์ด|ทำเลย)/.test(t);
+}
+
+// จำรูปล่าสุดที่ user ส่งมา (ตาราง line_photo_pending) เพื่อใช้ตอนยืนยัน
+async function upsertPhotoPending(userId: string, messageId: string) {
+  await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({ user_id: userId, message_id: messageId, created_at: new Date().toISOString() }),
+  }).catch(() => {});
+}
+async function getPhotoPending(userId: string): Promise<string | null> {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending?user_id=eq.${encodeURIComponent(userId)}&select=message_id`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
+    if (!r.ok) return null;
+    const a = await r.json();
+    return a?.[0]?.message_id || null;
+  } catch { return null; }
+}
+async function deletePhotoPending(userId: string) {
+  await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending?user_id=eq.${encodeURIComponent(userId)}`, { method: "DELETE", headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" } }).catch(() => {});
+}
+async function triggerMakeCard(userId: string, messageId: string) {
+  await fetch(`${SUPABASE_URL}/functions/v1/line-make-card`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: MKCARD_TOKEN, userId, messageId }),
+  }).catch(() => {});
 }
 
 const WELCOME = [
@@ -232,7 +260,11 @@ async function handleEvent(ev: any) {
   if (userId) await lineLoading(userId);   // โชว์ "กำลังพิมพ์…" ทันที = น้องใส่ใจเห็นข้อความแล้ว
 
   const msg = ev.message || {};
-  if (msg.type === "image") { await handleUserPhoto(ev.replyToken); return; }
+  if (msg.type === "image") {
+    if (userId && msg.id) await upsertPhotoPending(userId, msg.id);   // จำรูปไว้เผื่อสั่งทำภาพสวัสดี
+    await handleUserPhoto(ev.replyToken);
+    return;
+  }
   if (msg.type !== "text") {
     await lineReply(ev.replyToken, [textMsg("ขอบคุณนะคะ 😊 พิมพ์ข้อความคุยกับน้องใส่ใจ หรือพิมพ์ “ขอรูปสวัสดี” มาได้เลยค่ะ 🌸")]);
     return;
@@ -240,10 +272,14 @@ async function handleEvent(ev: any) {
 
   const text = String(msg.text || "").trim();
   if (wantsPhotoGreeting(text)) {
-    await lineReply(ev.replyToken, [textMsg(
-      "โอ๊ย อยากทำให้เลยตอนนี้! 🥹 น้องใส่ใจกำลังฝึกใส่ตัวอักษร + กรอบสวย ๆ ลงบนรูปของคุณอยู่ค่ะ ใกล้เปิดให้ใช้แล้วน้า ✨\n" +
-      "ระหว่างนี้พิมพ์ “ขอรูปสวัสดี” รับการ์ดสวย ๆ ไปก่อนได้เลยค่ะ 🌸",
-    )]);
+    const mid = userId ? await getPhotoPending(userId) : null;
+    if (mid) {
+      await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 น้องใส่ใจกำลังทำภาพสวัสดีจากรูปของคุณ รอแป๊บนะคะ ส่งให้ภายในไม่กี่อึดใจ ✨")]);
+      if (userId) await deletePhotoPending(userId);
+      await triggerMakeCard(userId!, mid);
+    } else {
+      await lineReply(ev.replyToken, [textMsg("ส่งรูปที่อยากทำเป็นภาพสวัสดีมาก่อนนะคะ 📷 แล้วพิมพ์ “ทำภาพสวัสดี” น้องใส่ใจจะจัดให้เลยค่ะ 🌸")]);
+    }
     return;
   }
   const catId = detectCategory(text);
