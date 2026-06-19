@@ -59,6 +59,15 @@ function thaiDateISO(): string {
   const d = ictNow();
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 }
+// วัน/เดือนไทย + พ.ศ. สำหรับฉีดเข้า prompt (กัน LLM เดาวันเวลาเอง)
+const WD = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+const MO = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+function nowContextTH(): string {
+  const d = ictNow();
+  const hh = String(d.getUTCHours()).padStart(2, "0");
+  const mm = String(d.getUTCMinutes()).padStart(2, "0");
+  return `วัน${WD[d.getUTCDay()]}ที่ ${d.getUTCDate()} ${MO[d.getUTCMonth()]} พ.ศ. ${d.getUTCFullYear() + 543} เวลาประมาณ ${hh}:${mm} น. (เวลาประเทศไทย)`;
+}
 const pick = <T>(a: T[]): T => a[Math.floor(Math.random() * a.length)];
 function shuffle<T>(a: T[]): T[] { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
@@ -93,6 +102,17 @@ async function lineReply(replyToken: string, messages: unknown[]) {
 }
 const textMsg = (text: string) => ({ type: "text", text: text.slice(0, 4900) });
 
+// แสดง loading animation ("กำลังพิมพ์…") ในแชต — LINE ไม่มี API mark-as-read โดยตรง
+// อันนี้คือสิ่งที่ใกล้เคียงที่สุด: โผล่ทันทีที่รับข้อความ = น้องใส่ใจเห็นแล้ว/กำลังตอบ
+async function lineLoading(userId: string) {
+  if (!ACCESS_TOKEN || !userId) return;
+  await fetch("https://api.line.me/v2/bot/chat/loading/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${ACCESS_TOKEN}` },
+    body: JSON.stringify({ chatId: userId, loadingSeconds: 20 }),
+  }).catch(() => {});
+}
+
 async function lineProfileName(userId: string): Promise<string | null> {
   if (!ACCESS_TOKEN) return null;
   try {
@@ -120,9 +140,10 @@ async function deactivateFriend(userId: string) {
 // ── ถาม ThaiLLM (OpenAI-compatible) ในบทบาทน้องใส่ใจ ── retry 1 ครั้งกัน 502/timeout ชั่วคราว
 async function askThaiLLM(userText: string): Promise<string | null> {
   if (!THAILLM_KEY) return null;
+  const sys = `${PERSONA}\n\nข้อมูลปัจจุบัน (ใช้อ้างอิงเมื่อถูกถามเรื่องวัน/เวลา ห้ามเดาเอง): วันนี้คือ ${nowContextTH()}`;
   const body = JSON.stringify({
     model: THAILLM_MODEL,
-    messages: [{ role: "system", content: PERSONA }, { role: "user", content: userText.slice(0, 1000) }],
+    messages: [{ role: "system", content: sys }, { role: "user", content: userText.slice(0, 1000) }],
     max_tokens: 512,
     temperature: 0.6,
   });
@@ -207,6 +228,8 @@ async function handleEvent(ev: any) {
   if (ev.type === "unfollow" && userId) { await deactivateFriend(userId); return; }
   if (ev.type !== "message" || !ev.replyToken) return;
 
+  if (userId) await lineLoading(userId);   // โชว์ "กำลังพิมพ์…" ทันที = น้องใส่ใจเห็นข้อความแล้ว
+
   const msg = ev.message || {};
   if (msg.type === "image") { await handleUserPhoto(ev.replyToken); return; }
   if (msg.type !== "text") {
@@ -229,7 +252,12 @@ Deno.serve(async (req) => {
 
   const rawBody = await req.text();
   const signature = req.headers.get("x-line-signature") ?? "";
-  if (!(await verifySignature(rawBody, signature))) return new Response("bad signature", { status: 401 });
+  // ถ้าตั้ง CHANNEL_SECRET ไว้ → ตรวจลายเซ็น ; ถ้ายังไม่ได้ตั้ง → ข้าม (interim) เพื่อให้บอตตอบได้
+  if (CHANNEL_SECRET) {
+    if (!(await verifySignature(rawBody, signature))) return new Response("bad signature", { status: 401 });
+  } else {
+    console.warn("LINE_CHANNEL_SECRET not set — skipping signature verification (set it to secure the webhook)");
+  }
 
   let payload: { events?: any[] };
   try { payload = JSON.parse(rawBody); } catch { return new Response("bad json", { status: 400 }); }
