@@ -154,13 +154,17 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
 
       <!-- ทดสอบยิงข้อความรายคน (static — ไม่โดน auto-refresh 30 วิ) -->
       <div id="lineTestPanel" class="panel full" style="margin-top:14px;display:none;border-color:#2f7d52">
-        <h3 style="color:#7fd1a0">🧪 ทดสอบยิงข้อความ — เลือกเพื่อนที่รู้จัก
+        <h3 style="color:#7fd1a0">🧪 ทดสอบยิงข้อความ — เลือก user รายคน
           <button class="chip" style="margin-left:8px;padding:3px 12px;font-size:12px" onclick="loadFriendsForTest()">↻ รีเฟรช</button>
         </h3>
         <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:10px">
-          ยิงการ์ด/รูปไปหา user รายคนเพื่อทดสอบก่อนส่งจริงตอนเช้า — ไม่กระทบสถิติ “ส่งถึงแล้ววันนี้”
+          ค้นหาแล้วเลือกยิงการ์ด/รูปไปหา user ทีละคนเพื่อทดสอบ — ไม่กระทบสถิติ “ส่งถึงแล้ววันนี้”
         </div>
-        <div id="testFriends" style="display:flex;flex-direction:column;gap:8px"></div>
+        <input id="testSearch" type="text" autocomplete="off" placeholder="🔍 พิมพ์ชื่อ หรือรหัส user เพื่อค้นหา…"
+          oninput="renderTestFriends()"
+          style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:#0c0f18;color:var(--ink);font-family:'Sarabun';font-size:14px;outline:none;margin-bottom:8px">
+        <div id="testCount" style="color:var(--mut);font-size:12px;margin-bottom:6px"></div>
+        <div id="testFriends" style="display:flex;flex-direction:column;gap:8px;max-height:430px;overflow-y:auto"></div>
         <div id="testResult" style="color:var(--mut);font-size:12px;margin-top:10px;min-height:18px"></div>
       </div>
     </div><!-- /tabLine -->
@@ -679,24 +683,40 @@ function renderLine(d, host){
 }
 
 /* ── ทดสอบยิงข้อความรายคน (เลือก user ที่รู้จัก) ผ่าน line-morning โหมด admin ── */
+let _testFriends=[];
+const TEST_LIMIT=80;   // แสดงสูงสุดต่อครั้ง (กันหน้าหนักเมื่อ user เยอะมาก) — ใช้ค้นหากรองต่อ
 async function loadFriendsForTest(){
   const host=$('testFriends'); if(!host) return;
   $('lineTestPanel').style.display='';
   host.innerHTML='<div style="color:var(--mut);font-size:12px">กำลังโหลดรายชื่อ…</div>';
   try{
     const list=await lineRpc('line_friends_list',{ p_token:LINE_ADMIN_TOKEN });
-    if(list?.error){ host.innerHTML=`<div style="color:var(--red);font-size:12px">เข้าถึงรายชื่อไม่ได้ (${esc(list.error)})</div>`; return; }
-    if(!Array.isArray(list)||!list.length){ host.innerHTML='<div style="color:var(--mut);font-size:12px">ยังไม่มีเพื่อนในระบบ</div>'; return; }
-    host.innerHTML=list.map(u=>{
-      const nm=esc(u.name||('ผู้ใช้ …'+String(u.user_id||'').slice(-4)));
-      const uid=esc(u.user_id);
-      return `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:8px">
-        <span style="flex:1;min-width:130px;font-size:14px">${u.active?'🟢':'⚪'} ${nm}</span>
-        <button class="chip" onclick="sendTest('${uid}','การ์ด','cards',this)">🎴 การ์ด</button>
-        <button class="chip" onclick="sendTest('${uid}','รูปล้วน','images',this)">🖼️ รูปล้วน</button>
-      </div>`;
-    }).join('');
+    if(list?.error){ _testFriends=[]; host.innerHTML=`<div style="color:var(--red);font-size:12px">เข้าถึงรายชื่อไม่ได้ (${esc(list.error)})</div>`; return; }
+    _testFriends=Array.isArray(list)?list:[];
+    renderTestFriends();
   }catch(e){ host.innerHTML=`<div style="color:var(--red);font-size:12px">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`; }
+}
+function renderTestFriends(){
+  const host=$('testFriends'); if(!host) return;
+  const cnt=$('testCount');
+  if(!_testFriends.length){ if(cnt)cnt.textContent=''; host.innerHTML='<div style="color:var(--mut);font-size:12px">ยังไม่มีเพื่อนในระบบ</div>'; return; }
+  const q=(($('testSearch')||{}).value||'').trim().toLowerCase();
+  let list=_testFriends;
+  if(q) list=list.filter(u=>(String(u.name||'')+' '+String(u.user_id||'')).toLowerCase().includes(q));
+  // active ก่อน แล้วเรียงตามเข้าใหม่ล่าสุด
+  list=[...list].sort((a,b)=>((b.active?1:0)-(a.active?1:0)) || (String(b.followed_at||'')).localeCompare(String(a.followed_at||'')));
+  const shown=Math.min(list.length, TEST_LIMIT);
+  if(cnt) cnt.textContent = `ทั้งหมด ${_testFriends.length} คน`+(q?` · ตรงคำค้น ${list.length} คน`:'')+(list.length>TEST_LIMIT?` (แสดง ${TEST_LIMIT} แรก พิมพ์ค้นหาเพื่อแคบลง)`:'');
+  if(!list.length){ host.innerHTML='<div style="color:var(--mut);font-size:12px">ไม่พบ user ที่ค้นหา</div>'; return; }
+  host.innerHTML=list.slice(0,TEST_LIMIT).map(u=>{
+    const nm=esc(u.name||('ผู้ใช้ …'+String(u.user_id||'').slice(-4)));
+    const uid=esc(u.user_id);
+    return `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:8px">
+      <span style="flex:1;min-width:130px;font-size:14px">${u.active?'🟢':'⚪'} ${nm}</span>
+      <button class="chip" onclick="sendTest('${uid}','การ์ด','cards',this)">🎴 การ์ด</button>
+      <button class="chip" onclick="sendTest('${uid}','รูปล้วน','images',this)">🖼️ รูปล้วน</button>
+    </div>`;
+  }).join('');
 }
 async function sendTest(uid, label, style, btn){
   const res=$('testResult'); const old=btn.textContent;
