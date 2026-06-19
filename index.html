@@ -866,6 +866,24 @@ function buildCard(cb,CW){
   }
   const dt=document.createElement('div');dt.className='date';dt.textContent=M.dateThai;dt.style.fontSize=Math.round(bsz*0.62)+'px';
   tb.append(h,blEl,dt);content.appendChild(tb);card.appendChild(content);
+  // ── ลายน้ำแบรนด์ (มุม "ตรงข้าม" กับข้อความสวัสดีเสมอ: สวัสดีล่าง→ลายน้ำบน, สวัสดีซ้ายล่าง→ลายน้ำขวาบน) ──
+  (function(){
+    const off=Math.max(_fi,16);
+    const wmV=vpos==='bottom'?'top':(vpos==='top'?'bottom':'top');
+    const wmH=hpos==='left'?'right':(hpos==='right'?'left':'center');
+    const fs=Math.max(13,Math.round(CW*0.0258)),ic=Math.round(fs*1.5);
+    let pos=(wmV==='top'?`top:${off}px;`:`bottom:${off}px;`);
+    pos+=(wmH==='left'?`left:${off}px;`:wmH==='right'?`right:${off}px;`:`left:50%;transform:translateX(-50%);`);
+    const wm=document.createElement('div');
+    wm.style.cssText=`position:absolute;${pos}z-index:5;opacity:.6;display:flex;align-items:center;gap:${Math.round(fs*0.5)}px;background:rgba(0,0,0,.34);border-radius:999px;padding:${Math.round(fs*0.32)}px ${Math.round(fs*0.68)}px ${Math.round(fs*0.32)}px ${Math.round(fs*0.32)}px;white-space:nowrap`;
+    const icon=document.createElement('div');
+    icon.style.cssText=`width:${ic}px;height:${ic}px;border-radius:${Math.round(ic*0.28)}px;background:#06C755;display:flex;align-items:center;justify-content:center;flex:0 0 auto`;
+    icon.innerHTML=`<span style="font-family:'Sarabun',sans-serif;font-weight:700;color:#fff;font-size:${Math.round(ic*0.36)}px;letter-spacing:-.5px">LINE</span>`;
+    const txt=document.createElement('span');
+    txt.style.cssText=`font-family:'Sarabun',sans-serif;font-weight:700;color:#fff;font-size:${fs}px`;
+    txt.textContent='น้องใส่ใจ · สวัสดีทุกวัน';
+    wm.append(icon,txt);card.appendChild(wm);
+  })();
   for(let i=0;i<7;i++){
     const s=document.createElement('div');s.className='sparkle';
     s.style.cssText=`left:${8+Math.random()*84}%;top:${8+Math.random()*84}%;opacity:${.4+Math.random()*.6};transform:scale(${.6+Math.random()})`;
