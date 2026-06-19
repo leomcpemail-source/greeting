@@ -140,6 +140,18 @@ async function deactivateFriend(userId: string) {
   }).catch(() => {});
 }
 
+// ── บันทึก "คำขอ/พฤติกรรม" ของ user ในแชต เพื่อวัดสถิติใน db.html (treemap แท็บ LINE) ──
+//   action: make_card | edit_blessing | get_image | photo_upload | chat | ack ; cat = หมวดรูป (เฉพาะ get_image)
+//   ไม่เก็บ PII (ไม่เก็บ user_id/ข้อความ) — เก็บเฉพาะประเภทคำขอ + เวลา
+async function logIntent(action: string, cat: string | null = null) {
+  if (!SERVICE_KEY) return;
+  await fetch(`${SUPABASE_URL}/rest/v1/line_intents`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" },
+    body: JSON.stringify({ action, cat, ts: new Date().toISOString() }),
+  }).catch(() => {});
+}
+
 // ── ถาม ThaiLLM (OpenAI-compatible) ในบทบาทน้องใส่ใจ ── retry 1 ครั้งกัน 502/timeout ชั่วคราว
 async function askThaiLLM(userText: string): Promise<string | null> {
   if (!THAILLM_KEY) return null;
@@ -394,6 +406,7 @@ async function handleEvent(ev: any) {
       await lineReply(ev.replyToken, [textMsg(WARN_TEXTED)]);
       return;
     }
+    await logIntent("photo_upload");   // user ส่งรูปเข้ามา (ใช้ทำภาพสวัสดีได้)
     // ถ้ายังมี "ภาพเดิม" ค้างอยู่ (ภายใน 5 นาที) → ไม่ทับทันที แต่ถาม user ก่อน
     const cur = userId ? await getPhotoPending(userId) : null;
     if (cur && cur.fresh && userId && msg.id) {
@@ -441,6 +454,7 @@ async function handleEvent(ev: any) {
 
   // ปุ่ม rich menu = จุดเริ่ม → ไม่มีรูปสด: ชวนส่งรูป ; มีรูปเดิมค้าง: ถามก่อนว่าจะใช้เดิมหรือทำใหม่
   if (text === MENU_PHOTO_TRIGGER) {
+    await logIntent("make_card");   // กดเมนู "ทำภาพสวัสดีจากรูป" = ขอสร้างรูป
     if (freshPhoto && userId) {
       await stagePhoto(userId, MENU_STAGE);
       await lineReply(ev.replyToken, [textMsg(CONFLICT_MENU)]);
@@ -452,6 +466,7 @@ async function handleEvent(ev: any) {
 
   // ผู้ใช้แค่ชม/ขอบคุณ (เช่น "เยี่ยมมาก") → คุยตอบ ไม่สร้างภาพซ้ำ แม้จะมีรูป pending อยู่
   if (isAck(text)) {
+    await logIntent("ack");   // ชม/ขอบคุณ/ตอบรับสั้น ๆ
     const a = await askThaiLLM(text);
     await lineReply(ev.replyToken, [textMsg(a || "ขอบคุณนะคะ 🥰 ถ้าอยากให้น้องใส่ใจช่วยอะไรอีก บอกได้เลยค่ะ 💛")]);
     return;
@@ -462,6 +477,7 @@ async function handleEvent(ev: any) {
   if (intent && intent.action) {
     const act = intent.action;
     if (act === "edit_blessing" || act === "make_card") {
+      await logIntent(act);   // ขอสร้าง/แก้ภาพสวัสดี (วัดคำขอแม้ยังไม่ได้ส่งรูป)
       if (freshPhoto) {
         const bless = act === "edit_blessing" ? String(intent.blessing || "").trim().slice(0, 120) : "";
         await lineReply(ev.replyToken, [textMsg(bless
@@ -475,10 +491,13 @@ async function handleEvent(ev: any) {
       return;
     }
     if (act === "get_image") {
-      await replyGreetingImages(ev.replyToken, CATS_SET.has(intent.category) ? intent.category : null);
+      const cat = CATS_SET.has(intent.category) ? intent.category : null;
+      await logIntent("get_image", cat);   // ขอรูปจากคลัง (เก็บหมวดที่ขอด้วย)
+      await replyGreetingImages(ev.replyToken, cat);
       return;
     }
     // action=chat → ตอบด้วย persona เต็มของน้องใส่ใจ (ใช้ reply จาก classifier เป็นสำรอง)
+    await logIntent("chat");
     const a = await askThaiLLM(text);
     await lineReply(ev.replyToken, [textMsg(a || String(intent.reply || "").trim() ||
       "ตอนนี้น้องใส่ใจคิดไม่ทันนิดนึงค่ะ 🥺 ลองพิมพ์ใหม่อีกครั้งนะคะ")]);
@@ -487,14 +506,16 @@ async function handleEvent(ev: any) {
 
   // ── LLM ล่ม → ใช้ regex สำรอง ──
   const cb = parseCustomBless(text);
-  if (cb && freshPhoto) { await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 กำลังแก้คำอวยพรบนภาพให้ใหม่ รอแป๊บนะคะ ✨")]); if (userId) await upsertPhotoPending(userId, freshPhoto); await triggerMakeCard(userId!, freshPhoto, cb); return; }
+  if (cb && freshPhoto) { await logIntent("edit_blessing"); await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 กำลังแก้คำอวยพรบนภาพให้ใหม่ รอแป๊บนะคะ ✨")]); if (userId) await upsertPhotoPending(userId, freshPhoto); await triggerMakeCard(userId!, freshPhoto, cb); return; }
   if (wantsPhotoGreeting(text)) {
+    await logIntent("make_card");
     if (freshPhoto) { await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 กำลังทำภาพสวัสดีจากรูปของคุณ รอแป๊บนะคะ ✨")]); if (userId) await upsertPhotoPending(userId, freshPhoto); await triggerMakeCard(userId!, freshPhoto); }
     else await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]);
     return;
   }
   const catId = detectCategory(text);
-  if (wantsImage(text, catId)) { await replyGreetingImages(ev.replyToken, catId); return; }
+  if (wantsImage(text, catId)) { await logIntent("get_image", catId); await replyGreetingImages(ev.replyToken, catId); return; }
+  await logIntent("chat");
   const answer = await askThaiLLM(text);
   await lineReply(ev.replyToken, [textMsg(answer ||
     "ตอนนี้น้องใส่ใจคิดไม่ทันนิดนึงค่ะ 🥺 ลองพิมพ์ถามใหม่อีกครั้ง หรือพิมพ์ “ขอรูปสวัสดี” มาได้เลยนะคะ 🌸")]);

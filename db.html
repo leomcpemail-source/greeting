@@ -652,6 +652,9 @@ async function lineRpc(fn, body){
   return r.json();
 }
 const LINE_SRC_TH={rm_home:'เมนู·หน้าแรก',rm_cat:'เมนู·หมวด',morning_more:'การ์ดเช้า·ดูเพิ่ม',morning:'ข้อความเช้า',share:'แชร์ต่อ',test:'ทดสอบ'};
+// ประเภทคำขอ/พฤติกรรมที่ user พิมพ์คุยกับน้องใส่ใจในแชต (จากตาราง line_intents)
+const LINE_INTENT_TH={make_card:'ขอทำภาพสวัสดีจากรูป',edit_blessing:'ขอแก้คำอวยพร',get_image:'ขอรูปจากคลัง',photo_upload:'ส่งรูปเข้ามา',chat:'พูดคุย/ถามทั่วไป',ack:'ชม/ขอบคุณ'};
+const LINE_INTENT_C={make_card:'#7fd1a0',edit_blessing:'#6ee7c4',get_image:'#6ea8e7',photo_upload:'#b98fe7',chat:'#e7b96e',ack:'#e78f6e'};
 async function loadLine(){
   const host=$('lineSection'); if(!host) return;
   try{
@@ -663,11 +666,37 @@ async function loadLine(){
   }catch(e){ host.innerHTML=`<div class="panel full"><h3 style="color:#7fd1a0">💬 LINE Official</h3><div style="color:var(--mut);font-size:12px">โหลดสถิติ LINE ไม่สำเร็จ: ${esc(e.message)}</div></div>`; }
 }
 function renderLine(d, host){
-  const f=d.friends||{}, c=d.clicks||{};
+  const f=d.friends||{}, c=d.clicks||{}, b=d.behaviors||{};
   const isDay=!!d.is_day_mode;
   const netToday=N(f.new_today)-N(f.left_today);
   const sub=isDay?('📆 '+esc(d.target_date)):('ช่วง '+(d.range_days===36500?'ทั้งหมด':d.range_days+' วัน'));
   const avgClick=N(f.active_now)?(N(c.in_range)/N(f.active_now)).toFixed(1):'0';
+
+  // ── พฤติกรรมในแชต: user ขออะไรบ้าง (จาก line_intents) — แสดงเป็น treemap เหมือนสถิติรูป ──
+  const ba=Array.isArray(b.by_action)?b.by_action:[];
+  const actN=a=>N((ba.find(x=>x.action===a)||{}).n);
+  const makeReq=actN('make_card')+actN('edit_blessing');   // ขอสร้าง/แก้ภาพ
+  const getReq=actN('get_image');                          // ขอรูปจากคลัง
+  const chatReq=actN('chat')+actN('ack');                  // พูดคุย/ชม
+  const hasBeh=ba.length||N(b.in_range);
+  const behHtml = hasBeh ? `
+     <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:14px">
+       <h3 style="color:#7fd1a0;font-size:14px">🙋 พฤติกรรมในแชต — user ขออะไรน้องใส่ใจบ้าง</h3>
+       <div style="color:var(--mut);font-size:12px;line-height:1.6;margin:4px 0 10px">
+         วัดจากข้อความที่ user พิมพ์คุยกับน้องใส่ใจ — ขอให้สร้างรูป/ทำภาพสวัสดี กี่ครั้ง และมีคำขออื่น ๆ อะไรบ้าง
+       </div>
+       <div class="kpis">
+         ${kpi(N(b.in_range).toLocaleString(),'คำขอรวม (ในช่วง)',true)}
+         ${kpi(makeReq.toLocaleString(),'ขอสร้าง/แก้รูป',true)}
+         ${kpi(getReq.toLocaleString(),'ขอรูปจากคลัง')}
+         ${kpi(chatReq.toLocaleString(),'พูดคุย/ทักทาย')}
+       </div>
+       <div class="grid" style="margin-top:6px">
+         <div class="panel"><h3>🙋 ประเภทคำขอของ user</h3><div id="tmLineIntent" class="treemap"></div></div>
+         <div class="panel"><h3>🏷️ หมวดรูปที่ขอบ่อย</h3><div id="tmLineIntentCat" class="treemap"></div></div>
+       </div>
+     </div>` : '';
+
   host.innerHTML=`
    <div class="panel full" style="border-color:#2f7d52;background:linear-gradient(180deg,rgba(47,125,82,.10),transparent);margin-bottom:14px">
      <h3 style="color:#7fd1a0;font-size:15px">💬 LINE Official — ${sub}</h3>
@@ -685,6 +714,7 @@ function renderLine(d, host){
        <div class="panel"><h3>📈 เพื่อนเข้า/เลิก รายวัน</h3><div class="cbox"><canvas id="cLineGrowth"></canvas></div></div>
        <div class="panel"><h3>👆 คลิกเข้าเว็บจาก LINE (แยกที่มา)</h3><div id="tmLineSrc" class="treemap"></div></div>
      </div>
+     ${behHtml}
    </div>`;
   const days=d.by_day||[];
   const o=chartOpts(); o.plugins.legend={display:true,labels:{color:TICK,boxWidth:12,font:{size:11}}};
@@ -695,6 +725,14 @@ function renderLine(d, host){
   const PALL=['#7fd1a0','#6ea8e7','#b98fe7','#e7b96e','#e78f6e','#5bc4d4','#a0d96e','#e76e9c'];
   let pi=0;
   drawTreemap('tmLineSrc',(c.by_source||[]).map(x=>({label:LINE_SRC_TH[x.source]||x.source||'?',value:N(x.n),color:PALL[pi++%PALL.length]})));
+
+  // treemap พฤติกรรมในแชต: ประเภทคำขอ + หมวดรูปที่ขอ (เหมือนสถิติจำนวนรูป)
+  if(hasBeh){
+    let qi=0;
+    drawTreemap('tmLineIntent', ba.map(x=>({label:LINE_INTENT_TH[x.action]||x.action||'?',value:N(x.n),color:LINE_INTENT_C[x.action]||PALL[qi++%PALL.length]})));
+    let ci=0;
+    drawTreemap('tmLineIntentCat', (b.by_cat||[]).map(x=>({label:CAT_TH[x.cat]||x.cat||'?',value:N(x.n),color:PALL[ci++%PALL.length]})));
+  }
 }
 
 /* ── ทดสอบยิงข้อความรายคน (ตาราง: ค้นหา/เรียง/แบ่งหน้า) ผ่าน line-morning โหมด admin ── */
