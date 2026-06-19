@@ -1,10 +1,10 @@
 // supabase/functions/line-make-card/index.ts
-// เอารูปของ user มาใส่คำอวยพร + กรอบประจำวัน → อัปโหลด storage → push กลับทาง LINE (ไม่เก็บเข้าคลัง)
+// เอารูปของ user มาใส่คำอวยพร + กรอบประจำวัน (สีตามวัน) → อัปโหลด storage → push กลับทาง LINE (ไม่เก็บเข้าคลัง)
 // เรียกจาก line-webhook ด้วย internal token ; ตอบ 200 เร็ว แล้ว render+push เบื้องหลัง (EdgeRuntime.waitUntil)
-// render ตัวอักษรไทย + กรอบด้วย resvg-wasm (ไม่ต้องใช้เบราว์เซอร์)
+// รองรับคำอวยพร custom (body.bless) — ให้ user แก้ข้อความเองได้
 //
 // ENV: LINE_CHANNEL_ACCESS_TOKEN, MKCARD_TOKEN, (แพลตฟอร์มใส่ให้) SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
-// หมายเหตุ: Storage รับ service key (sb_secret) ทาง header `apikey` เท่านั้น (ไม่ใช่ Authorization Bearer)
+// หมายเหตุ: Storage รับ service key (sb_secret) ทาง header `apikey` เท่านั้น
 
 import { Resvg, initWasm } from "https://esm.sh/@resvg/resvg-wasm@2.6.2";
 import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
@@ -24,6 +24,8 @@ const FALLBACK_BLESS = [
 ];
 const WD = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 const MO = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+// สีประจำวัน (เข้ม, เข้มกว่า) ใช้เป็น fallback ถ้า manifest ไม่มี color
+const DAY_COL = [["#e0322f", "#7d1715"], ["#f2b705", "#8a6800"], ["#e84f9c", "#7d2256"], ["#2faa5d", "#155c31"], ["#ef8a21", "#8a4a08"], ["#1f73c4", "#0f4677"], ["#7a4fc0", "#3d2569"]];
 
 let _wasm: Promise<void> | null = null;
 function ensureWasm() { if (!_wasm) _wasm = initWasm(fetch("https://unpkg.com/@resvg/resvg-wasm@2.6.2/index_bg.wasm")); return _wasm; }
@@ -36,8 +38,11 @@ function headlineToday() { return `สวัสดีวัน${WD[ictNow().getU
 function dateThaiToday() { const d = ictNow(); return `วัน${WD[d.getUTCDay()]}ที่ ${d.getUTCDate()} ${MO[d.getUTCMonth()]} ${d.getUTCFullYear() + 543}`; }
 const pick = (a: any[]) => a[Math.floor(Math.random() * a.length)];
 const esc = (s: string) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+const isHex = (v: any) => typeof v === "string" && /^#[0-9a-f]{3,8}$/i.test(v);
 
 async function loadDay() {
+  const wd = ictNow().getUTCDay();
+  const dc = DAY_COL[wd];
   for (const folder of [thaiDateISO(), "evergreen"]) {
     try {
       const r = await fetch(`${BASE}/img/${folder}/manifest.json?v=${Date.now()}`, { cache: "no-store" });
@@ -47,11 +52,13 @@ async function loadDay() {
           headline: (m.headline || "").trim() || headlineToday(),
           bless: (Array.isArray(m.blessings) && m.blessings.length ? pick(m.blessings) : pick(FALLBACK_BLESS)),
           dateThai: (m.dateThai || "").trim() || dateThaiToday(),
+          color: isHex(m.color) ? m.color : dc[0],
+          color2: isHex(m.color2) ? m.color2 : dc[1],
         };
       }
     } catch (_e) { /* next */ }
   }
-  return { headline: headlineToday(), bless: pick(FALLBACK_BLESS), dateThai: dateThaiToday() };
+  return { headline: headlineToday(), bless: pick(FALLBACK_BLESS), dateThai: dateThaiToday(), color: dc[0], color2: dc[1] };
 }
 
 function wrap2(t: string, maxLen: number): string[] {
@@ -64,14 +71,21 @@ function wrap2(t: string, maxLen: number): string[] {
   return l2 ? [l1, l2] : [l1];
 }
 
-function buildSvg(photoDataUri: string, day: { headline: string; bless: string; dateThai: string }) {
+function buildSvg(photoDataUri: string, day: { headline: string; bless: string; dateThai: string; color: string; color2: string }) {
   const W = 1000, H = 1000;
+  const col = day.color, col2 = day.color2;
   const hl = day.headline;
   const hSize = hl.length <= 10 ? 104 : hl.length <= 14 ? 86 : 70;
+  const hY = 760;
+  // หัวข้อ: ฮาโลสีเข้มประจำวัน (อ่านง่าย) + ตัวขาวขอบสีประจำวัน
+  const tA = `font-family="Sarabun" font-weight="700" font-size="${hSize}" text-anchor="middle" stroke-linejoin="round"`;
+  const headline =
+    `<text x="500" y="${hY}" ${tA} fill="none" stroke="${col2}" stroke-opacity="0.92" stroke-width="17" paint-order="stroke">${esc(hl)}</text>` +
+    `<text x="500" y="${hY}" ${tA} fill="#ffffff" stroke="${col}" stroke-width="6" paint-order="stroke">${esc(hl)}</text>`;
   const blLines = wrap2(day.bless, 30);
   let by = 855 - (blLines.length - 1) * 26;
   const blessText = blLines.map((ln) => {
-    const t = `<text x="500" y="${by}" font-family="Sarabun" font-weight="700" font-size="40" fill="#fff7e6" text-anchor="middle" stroke="#000" stroke-opacity="0.55" stroke-width="3" paint-order="stroke">${esc(ln)}</text>`;
+    const t = `<text x="500" y="${by}" font-family="Sarabun" font-weight="700" font-size="40" fill="#ffffff" text-anchor="middle" stroke="${col2}" stroke-opacity="0.85" stroke-width="6" paint-order="stroke">${esc(ln)}</text>`;
     by += 52; return t;
   }).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
@@ -86,11 +100,11 @@ function buildSvg(photoDataUri: string, day: { headline: string; bless: string; 
     <rect width="${W}" height="${H}" fill="#222"/>
     <image href="${photoDataUri}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>
     <rect width="${W}" height="${H}" fill="url(#scrim)"/>
-    <rect x="22" y="22" width="${W - 44}" height="${H - 44}" fill="none" stroke="#e7c46a" stroke-width="8" rx="28"/>
-    <rect x="38" y="38" width="${W - 76}" height="${H - 76}" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="2.5" rx="20"/>
-    <text x="500" y="760" font-family="Sarabun" font-weight="700" font-size="${hSize}" fill="#ffffff" text-anchor="middle" stroke="#000" stroke-opacity="0.6" stroke-width="6" paint-order="stroke">${esc(hl)}</text>
+    <rect x="22" y="22" width="${W - 44}" height="${H - 44}" fill="none" stroke="${col}" stroke-width="10" rx="28"/>
+    <rect x="40" y="40" width="${W - 80}" height="${H - 80}" fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="2.5" rx="20"/>
+    ${headline}
     ${blessText}
-    <text x="500" y="930" font-family="Sarabun" font-weight="700" font-size="26" fill="#ffffff" fill-opacity="0.92" text-anchor="middle" stroke="#000" stroke-opacity="0.4" stroke-width="2" paint-order="stroke">${esc(day.dateThai)}</text>
+    <text x="500" y="930" font-family="Sarabun" font-weight="700" font-size="26" fill="#ffffff" fill-opacity="0.95" text-anchor="middle" stroke="${col2}" stroke-opacity="0.7" stroke-width="3" paint-order="stroke">${esc(day.dateThai)}</text>
   </svg>`;
 }
 
@@ -128,7 +142,7 @@ async function push(userId: string, messages: unknown[]) {
   }).catch(() => {});
 }
 
-async function job(userId: string, messageId: string, test: boolean) {
+async function job(userId: string, messageId: string, test: boolean, customBless: string) {
   try {
     let photo: Uint8Array, mime: string;
     if (test) {
@@ -138,11 +152,15 @@ async function job(userId: string, messageId: string, test: boolean) {
       const d = await downloadPhoto(messageId); photo = d.buf; mime = d.mime;
     }
     const day = await loadDay();
+    if (customBless) day.bless = customBless;
     const png = await renderCard(photo, mime, day);
     const url = await uploadCard(png);
+    const hint = customBless
+      ? "แก้ให้เรียบร้อยแล้วค่ะ! 💛 ถ้าอยากเปลี่ยนคำอวยพรอีก พิมพ์ “แก้คำอวยพรเป็น …” ตามด้วยข้อความใหม่ได้เลยนะคะ ✨"
+      : "เสร็จแล้วค่ะ! ✨ ภาพสวัสดีจากรูปของคุณ 🌸\nอยากได้คำอวยพรแบบไหนเป็นพิเศษ บอกหนูได้เลยค่ะ — พิมพ์ว่า “แก้คำอวยพรเป็น …” ตามด้วยข้อความที่อยากได้ แล้วหนูจะทำให้ใหม่ทันทีเลยนะคะ 💛";
     await push(userId, [
       { type: "image", originalContentUrl: url, previewImageUrl: url },
-      { type: "text", text: `เสร็จแล้วค่ะ! ✨ ภาพสวัสดีจากรูปของคุณ 🌸\nกดค้างที่รูปเพื่อบันทึกหรือส่งต่อให้คนที่คุณรักได้เลยนะคะ 💛` },
+      { type: "text", text: hint },
     ]);
   } catch (e) {
     await push(userId, [{ type: "text", text: "ขอโทษนะคะ น้องใส่ใจทำภาพไม่สำเร็จนิดหนึ่ง ลองส่งรูปใหม่อีกครั้งได้ไหมคะ 🙏" }]).catch(() => {});
@@ -156,7 +174,7 @@ Deno.serve(async (req) => {
   if (body.token !== INTERNAL_TOKEN) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
   const userId = String(body.userId || "");
   if (!userId) return new Response(JSON.stringify({ error: "no userId" }), { status: 400, headers: { "Content-Type": "application/json" } });
-  const p = job(userId, String(body.messageId || ""), !!body.test);
+  const p = job(userId, String(body.messageId || ""), !!body.test, String(body.bless || "").slice(0, 120));
   // @ts-ignore EdgeRuntime มีบน Supabase
   if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) EdgeRuntime.waitUntil(p); else await p;
   return new Response(JSON.stringify({ accepted: true }), { headers: { "Content-Type": "application/json" } });

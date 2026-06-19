@@ -232,12 +232,17 @@ async function getPhotoPending(userId: string): Promise<string | null> {
 async function deletePhotoPending(userId: string) {
   await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending?user_id=eq.${encodeURIComponent(userId)}`, { method: "DELETE", headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" } }).catch(() => {});
 }
-async function triggerMakeCard(userId: string, messageId: string) {
+async function triggerMakeCard(userId: string, messageId: string, bless = "") {
   await fetch(`${SUPABASE_URL}/functions/v1/line-make-card`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: MKCARD_TOKEN, userId, messageId }),
+    body: JSON.stringify({ token: MKCARD_TOKEN, userId, messageId, bless }),
   }).catch(() => {});
+}
+// แยกคำอวยพรที่ user อยากแก้: "แก้คำอวยพรเป็น ..." / "เปลี่ยนข้อความเป็น ..."
+function parseCustomBless(t: string): string | null {
+  const m = t.match(/(?:แก้|เปลี่ยน|ขอแก้|ขอเปลี่ยน)\s*(?:คำอวยพร|ข้อความ|คำ)\s*(?:ใหม่)?\s*(?:เป็น|ว่า|:)\s*(.+)/);
+  return m && m[1] && m[1].trim() ? m[1].trim().slice(0, 120) : null;
 }
 
 const WELCOME = [
@@ -271,12 +276,23 @@ async function handleEvent(ev: any) {
   }
 
   const text = String(msg.text || "").trim();
+  // แก้คำอวยพรบนภาพ (ใช้รูปล่าสุดที่เคยส่งมา)
+  const cb = parseCustomBless(text);
+  if (cb) {
+    const mid = userId ? await getPhotoPending(userId) : null;
+    if (mid) {
+      await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 น้องใส่ใจกำลังแก้คำอวยพรบนภาพให้ใหม่ รอแป๊บนะคะ ✨")]);
+      await triggerMakeCard(userId!, mid, cb);
+    } else {
+      await lineReply(ev.replyToken, [textMsg("ส่งรูปที่อยากทำเป็นภาพสวัสดีมาก่อนนะคะ 📷 แล้วค่อยบอกคำอวยพรที่อยากได้ น้องใส่ใจจะจัดให้เลยค่ะ 🌸")]);
+    }
+    return;
+  }
   if (wantsPhotoGreeting(text)) {
     const mid = userId ? await getPhotoPending(userId) : null;
     if (mid) {
       await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 น้องใส่ใจกำลังทำภาพสวัสดีจากรูปของคุณ รอแป๊บนะคะ ส่งให้ภายในไม่กี่อึดใจ ✨")]);
-      if (userId) await deletePhotoPending(userId);
-      await triggerMakeCard(userId!, mid);
+      await triggerMakeCard(userId!, mid);   // เก็บรูป pending ไว้ เผื่อขอแก้คำอวยพร
     } else {
       await lineReply(ev.replyToken, [textMsg("ส่งรูปที่อยากทำเป็นภาพสวัสดีมาก่อนนะคะ 📷 แล้วพิมพ์ “ทำภาพสวัสดี” น้องใส่ใจจะจัดให้เลยค่ะ 🌸")]);
     }
