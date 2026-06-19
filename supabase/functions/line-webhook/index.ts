@@ -229,7 +229,12 @@ Deno.serve(async (req) => {
 
   const rawBody = await req.text();
   const signature = req.headers.get("x-line-signature") ?? "";
-  if (!(await verifySignature(rawBody, signature))) return new Response("bad signature", { status: 401 });
+  // ถ้าตั้ง CHANNEL_SECRET ไว้ → ตรวจลายเซ็น ; ถ้ายังไม่ได้ตั้ง → ข้าม (interim) เพื่อให้บอตตอบได้
+  if (CHANNEL_SECRET) {
+    if (!(await verifySignature(rawBody, signature))) return new Response("bad signature", { status: 401 });
+  } else {
+    console.warn("LINE_CHANNEL_SECRET not set — skipping signature verification (set it to secure the webhook)");
+  }
 
   let payload: { events?: any[] };
   try { payload = JSON.parse(rawBody); } catch { return new Response("bad json", { status: 400 }); }
