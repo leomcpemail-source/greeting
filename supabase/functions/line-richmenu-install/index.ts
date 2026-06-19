@@ -34,9 +34,11 @@ const CATS = [
   "family", "pets", "coffee", "nature",
 ];
 
+// เมนูหน้าแรก 3 ปุ่ม (รูป main.jpg แบ่ง 3 คอลัมน์): หน้าแรก | ตามหมวด | ส่งรูปทำภาพสวัสดี
 const mainAreas = [
-  { bounds: { x: 0, y: 0, width: 1250, height: H }, action: { type: "uri", uri: `${GO}?s=rm_home` } },
-  { bounds: { x: 1250, y: 0, width: 1250, height: H }, action: { type: "richmenuswitch", richMenuAliasId: ALIAS_CATS, data: "to=categories" } },
+  { bounds: { x: 0, y: 0, width: 833, height: H }, action: { type: "uri", uri: `${GO}?s=rm_home` } },
+  { bounds: { x: 833, y: 0, width: 834, height: H }, action: { type: "richmenuswitch", richMenuAliasId: ALIAS_CATS, data: "to=categories" } },
+  { bounds: { x: 1667, y: 0, width: 833, height: H }, action: { type: "message", text: "อยากทำภาพสวัสดีจากรูปของฉัน 📷" } },
 ];
 
 function catAreas() {
