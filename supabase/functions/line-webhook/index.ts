@@ -93,6 +93,17 @@ async function lineReply(replyToken: string, messages: unknown[]) {
 }
 const textMsg = (text: string) => ({ type: "text", text: text.slice(0, 4900) });
 
+// แสดง loading animation ("กำลังพิมพ์…") ในแชต — LINE ไม่มี API mark-as-read โดยตรง
+// อันนี้คือสิ่งที่ใกล้เคียงที่สุด: โผล่ทันทีที่รับข้อความ = น้องใส่ใจเห็นแล้ว/กำลังตอบ
+async function lineLoading(userId: string) {
+  if (!ACCESS_TOKEN || !userId) return;
+  await fetch("https://api.line.me/v2/bot/chat/loading/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${ACCESS_TOKEN}` },
+    body: JSON.stringify({ chatId: userId, loadingSeconds: 20 }),
+  }).catch(() => {});
+}
+
 async function lineProfileName(userId: string): Promise<string | null> {
   if (!ACCESS_TOKEN) return null;
   try {
@@ -206,6 +217,8 @@ async function handleEvent(ev: any) {
   }
   if (ev.type === "unfollow" && userId) { await deactivateFriend(userId); return; }
   if (ev.type !== "message" || !ev.replyToken) return;
+
+  if (userId) await lineLoading(userId);   // โชว์ "กำลังพิมพ์…" ทันที = น้องใส่ใจเห็นข้อความแล้ว
 
   const msg = ev.message || {};
   if (msg.type === "image") { await handleUserPhoto(ev.replyToken); return; }
