@@ -11,15 +11,17 @@
 //   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (แพลตฟอร์มใส่ให้อัตโนมัติ)
 // deploy: --no-verify-jwt (LINE ไม่ได้แนบ JWT)
 
-const CHANNEL_SECRET = Deno.env.get("LINE_CHANNEL_SECRET") ?? "";
-const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") ?? "";
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+// secrets: รับจาก env (ถ้าตั้งไว้) ไม่งั้นจาก globalThis.__SEC ที่ตัว loader ใส่ให้ (ดู deploy)
+const G = (globalThis as any).__SEC ?? {};
+const CHANNEL_SECRET = Deno.env.get("LINE_CHANNEL_SECRET") || G.SECRET || "";
+const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") || G.AT || "";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || G.URL || "https://iuyiwpoupnuxnohpatyw.supabase.co";
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || G.SK || "";
 
-const THAILLM_URL = Deno.env.get("THAILLM_URL") ?? "http://thaillm.or.th/api/v1/chat/completions";
-const THAILLM_KEY = Deno.env.get("THAILLM_API_KEY") ?? "";
-const THAILLM_MODEL = Deno.env.get("THAILLM_MODEL") ?? "typhoon-s-thaillm-8b-instruct";
-const MKCARD_TOKEN = Deno.env.get("MKCARD_TOKEN") ?? "";   // internal token เรียก line-make-card
+const THAILLM_URL = Deno.env.get("THAILLM_URL") || G.LLM_URL || "http://thaillm.or.th/api/v1/chat/completions";
+const THAILLM_KEY = Deno.env.get("THAILLM_API_KEY") || G.TK || "";
+const THAILLM_MODEL = Deno.env.get("THAILLM_MODEL") || G.LLM_MODEL || "typhoon-s-thaillm-8b-instruct";
+const MKCARD_TOKEN = Deno.env.get("MKCARD_TOKEN") || G.MK || "";   // internal token เรียก line-make-card
 
 const BASE = "https://raw.githubusercontent.com/leomcpemail-source/greeting/daily-images";
 
