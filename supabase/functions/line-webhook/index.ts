@@ -199,6 +199,39 @@ async function replyGreetingImages(replyToken: string, catId: string | null) {
   await lineReply(replyToken, msgs);
 }
 
+// อ่านขนาดภาพจาก header (JPEG/PNG) — ใช้เดาว่าเป็น "การ์ดมีตัวหนังสือแล้ว" (รูปจัตุรัส 1:1)
+function imageSize(b: Uint8Array): { w: number; h: number } | null {
+  if (b.length > 24 && b[0] === 0x89 && b[1] === 0x50) { // PNG
+    return { w: (b[16] << 24) | (b[17] << 16) | (b[18] << 8) | b[19], h: (b[20] << 24) | (b[21] << 16) | (b[22] << 8) | b[23] };
+  }
+  if (b.length > 4 && b[0] === 0xFF && b[1] === 0xD8) { // JPEG
+    let i = 2;
+    while (i + 9 < b.length) {
+      if (b[i] !== 0xFF) { i++; continue; }
+      const m = b[i + 1];
+      if (m >= 0xC0 && m <= 0xCF && m !== 0xC4 && m !== 0xC8 && m !== 0xCC) {
+        return { h: (b[i + 5] << 8) | b[i + 6], w: (b[i + 7] << 8) | b[i + 8] };
+      }
+      i += 2 + ((b[i + 2] << 8) | b[i + 3]);
+    }
+  }
+  return null;
+}
+// ดาวน์โหลดรูปแล้วเช็คว่าน่าจะเป็น "การ์ดที่มีตัวหนังสือแล้ว" (จัตุรัสเกือบเป๊ะ) ; null = เช็คไม่ได้
+async function photoLooksTexted(messageId: string): Promise<boolean | null> {
+  if (!ACCESS_TOKEN || !messageId) return null;
+  try {
+    const r = await fetch(`https://api-data.line.me/v2/bot/message/${messageId}/content`, { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return null;
+    const s = imageSize(new Uint8Array(await r.arrayBuffer()));
+    if (!s || s.w <= 0 || s.h <= 0) return null;
+    return Math.abs(s.w / s.h - 1) <= 0.05;
+  } catch { return null; }
+}
+const WARN_TEXTED =
+  "ขออภัยนะคะ 🙏 ภาพนี้มีข้อความอยู่แล้ว น้องใส่ใจเลยใส่คำอวยพรเพิ่มให้ไม่ได้ค่ะ (ของเดิมก็สวยอยู่แล้วน้า)\n" +
+  "ถ้าอยากให้หนูช่วยใส่คำอวยพรดี ๆ ลองส่ง “รูปถ่ายที่ยังไม่มีตัวหนังสือ” มาได้เลยนะคะ เดี๋ยวหนูจัดให้สวย ๆ ค่ะ 💛";
+
 // ── ผู้ใช้ส่งรูปมา → ชมรูปก่อน แล้วถามว่าจะให้ทำอะไร (ขั้น generate กำลังต่อ) ──
 async function handleUserPhoto(replyToken: string) {
   await lineReply(replyToken, [textMsg(
@@ -212,6 +245,11 @@ async function handleUserPhoto(replyToken: string) {
 function wantsPhotoGreeting(t: string): boolean {
   return /(ทำภาพสวัสดี|ทำสวัสดี|ใส่คำอวยพร|ใส่ตัวหนังสือ|ทำการ์ด|ทำเลย)/.test(t);
 }
+// ข้อความจากปุ่ม rich menu "ส่งรูปทำภาพสวัสดี" — เป็น "จุดเริ่ม" ไม่ใช่คำสั่งทำกับรูปเก่า
+const MENU_PHOTO_TRIGGER = "อยากทำภาพสวัสดีจากรูปของฉัน 📷";
+const SEND_PHOTO_PROMPT =
+  "ได้เลยค่ะ! 📷 ส่งรูปถ่ายที่อยากให้น้องใส่ใจช่วยทำเป็น “ภาพสวัสดี” มาได้เลยนะคะ\n" +
+  "(เลือกรูปสวย ๆ ที่ยังไม่มีตัวหนังสือนะคะ เดี๋ยวหนูใส่คำอวยพร + กรอบประจำวันให้สวย ๆ ค่ะ 💛)";
 
 // จำรูปล่าสุดที่ user ส่งมา (ตาราง line_photo_pending) เพื่อใช้ตอนยืนยัน
 async function upsertPhotoPending(userId: string, messageId: string) {
@@ -221,12 +259,17 @@ async function upsertPhotoPending(userId: string, messageId: string) {
     body: JSON.stringify({ user_id: userId, message_id: messageId, created_at: new Date().toISOString() }),
   }).catch(() => {});
 }
-async function getPhotoPending(userId: string): Promise<string | null> {
+// รูปที่เพิ่งส่งใช้ทำภาพได้ภายในกรอบเวลานี้ — กันการหยิบ "รูปเก่า" ที่ค้างมาทำซ้ำ (บั๊กถามวน/เตือนผิด)
+const PENDING_FRESH_MS = 30 * 60 * 1000; // 30 นาที
+async function getPhotoPending(userId: string): Promise<{ id: string; fresh: boolean } | null> {
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending?user_id=eq.${encodeURIComponent(userId)}&select=message_id`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending?user_id=eq.${encodeURIComponent(userId)}&select=message_id,created_at`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
     if (!r.ok) return null;
-    const a = await r.json();
-    return a?.[0]?.message_id || null;
+    const row = (await r.json())?.[0];
+    if (!row?.message_id) return null;
+    const ts = Date.parse(row.created_at || "");
+    const fresh = Number.isFinite(ts) ? (Date.now() - ts) <= PENDING_FRESH_MS : true;
+    return { id: row.message_id, fresh };
   } catch { return null; }
 }
 async function deletePhotoPending(userId: string) {
@@ -304,6 +347,13 @@ async function handleEvent(ev: any) {
 
   const msg = ev.message || {};
   if (msg.type === "image") {
+    // ถ้ารูปนี้ "มีตัวหนังสืออยู่แล้ว" (จัตุรัส ~1:1) → เตือนทันที + ไม่เก็บเป็น pending (กันถามวน/ทำซ้อนตัวอักษร)
+    const texted = userId && msg.id ? await photoLooksTexted(msg.id) : null;
+    if (texted === true) {
+      if (userId) await deletePhotoPending(userId);
+      await lineReply(ev.replyToken, [textMsg(WARN_TEXTED)]);
+      return;
+    }
     if (userId && msg.id) await upsertPhotoPending(userId, msg.id);   // จำรูปไว้เผื่อสั่งทำภาพสวัสดี
     await handleUserPhoto(ev.replyToken);
     return;
@@ -314,20 +364,29 @@ async function handleEvent(ev: any) {
   }
 
   const text = String(msg.text || "").trim();
-  const pending = userId ? await getPhotoPending(userId) : null;
+  // ใช้เฉพาะ "รูปที่เพิ่งส่งมา" เท่านั้น (รูปเก่าค้าง = ไม่นับ) เพื่อกันการทำซ้ำ/เตือนผิดกับรูปเดิม
+  const pendingRow = userId ? await getPhotoPending(userId) : null;
+  const freshPhoto = pendingRow && pendingRow.fresh ? pendingRow.id : null;
   const noPhotoMsg = "ส่งรูปถ่ายที่อยากทำเป็นภาพสวัสดีมาก่อนนะคะ 📷 (เป็นรูปที่ยังไม่มีตัวหนังสือ) แล้วบอกหนูได้เลยค่ะ 🌸";
 
+  // ปุ่ม rich menu = จุดเริ่ม → ถ้ายังไม่มีรูปที่เพิ่งส่ง ให้ชวนส่งรูปก่อน (อย่าหยิบรูปเก่ามาทำ)
+  if (text === MENU_PHOTO_TRIGGER && !freshPhoto) {
+    await lineReply(ev.replyToken, [textMsg(SEND_PHOTO_PROMPT)]);
+    return;
+  }
+
   // ── ให้ ThaiLLM ตีความเจตนาก่อน (พิมพ์ไม่เป๊ะก็เข้าใจ) ──
-  const intent = await classifyIntent(text, !!pending);
+  const intent = await classifyIntent(text, !!freshPhoto);
   if (intent && intent.action) {
     const act = intent.action;
     if (act === "edit_blessing" || act === "make_card") {
-      if (pending) {
+      if (freshPhoto) {
         const bless = act === "edit_blessing" ? String(intent.blessing || "").trim().slice(0, 120) : "";
         await lineReply(ev.replyToken, [textMsg(bless
           ? "ได้เลยค่ะ! 🎨 กำลังแก้คำอวยพรบนภาพให้ใหม่ รอแป๊บนะคะ ✨"
           : "ได้เลยค่ะ! 🎨 กำลังทำภาพสวัสดีจากรูปของคุณ รอแป๊บนะคะ ส่งให้ภายในไม่กี่อึดใจ ✨")]);
-        await triggerMakeCard(userId!, pending, bless);
+        if (userId) await upsertPhotoPending(userId, freshPhoto); // ต่ออายุ session แก้ไข
+        await triggerMakeCard(userId!, freshPhoto, bless);
       } else {
         await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]);
       }
@@ -346,9 +405,9 @@ async function handleEvent(ev: any) {
 
   // ── LLM ล่ม → ใช้ regex สำรอง ──
   const cb = parseCustomBless(text);
-  if (cb && pending) { await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 กำลังแก้คำอวยพรบนภาพให้ใหม่ รอแป๊บนะคะ ✨")]); await triggerMakeCard(userId!, pending, cb); return; }
+  if (cb && freshPhoto) { await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 กำลังแก้คำอวยพรบนภาพให้ใหม่ รอแป๊บนะคะ ✨")]); if (userId) await upsertPhotoPending(userId, freshPhoto); await triggerMakeCard(userId!, freshPhoto, cb); return; }
   if (wantsPhotoGreeting(text)) {
-    if (pending) { await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 กำลังทำภาพสวัสดีจากรูปของคุณ รอแป๊บนะคะ ✨")]); await triggerMakeCard(userId!, pending); }
+    if (freshPhoto) { await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 กำลังทำภาพสวัสดีจากรูปของคุณ รอแป๊บนะคะ ✨")]); if (userId) await upsertPhotoPending(userId, freshPhoto); await triggerMakeCard(userId!, freshPhoto); }
     else await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]);
     return;
   }
