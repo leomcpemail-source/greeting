@@ -59,6 +59,15 @@ function thaiDateISO(): string {
   const d = ictNow();
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 }
+// วัน/เดือนไทย + พ.ศ. สำหรับฉีดเข้า prompt (กัน LLM เดาวันเวลาเอง)
+const WD = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+const MO = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+function nowContextTH(): string {
+  const d = ictNow();
+  const hh = String(d.getUTCHours()).padStart(2, "0");
+  const mm = String(d.getUTCMinutes()).padStart(2, "0");
+  return `วัน${WD[d.getUTCDay()]}ที่ ${d.getUTCDate()} ${MO[d.getUTCMonth()]} พ.ศ. ${d.getUTCFullYear() + 543} เวลาประมาณ ${hh}:${mm} น. (เวลาประเทศไทย)`;
+}
 const pick = <T>(a: T[]): T => a[Math.floor(Math.random() * a.length)];
 function shuffle<T>(a: T[]): T[] { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
@@ -131,9 +140,10 @@ async function deactivateFriend(userId: string) {
 // ── ถาม ThaiLLM (OpenAI-compatible) ในบทบาทน้องใส่ใจ ── retry 1 ครั้งกัน 502/timeout ชั่วคราว
 async function askThaiLLM(userText: string): Promise<string | null> {
   if (!THAILLM_KEY) return null;
+  const sys = `${PERSONA}\n\nข้อมูลปัจจุบัน (ใช้อ้างอิงเมื่อถูกถามเรื่องวัน/เวลา ห้ามเดาเอง): วันนี้คือ ${nowContextTH()}`;
   const body = JSON.stringify({
     model: THAILLM_MODEL,
-    messages: [{ role: "system", content: PERSONA }, { role: "user", content: userText.slice(0, 1000) }],
+    messages: [{ role: "system", content: sys }, { role: "user", content: userText.slice(0, 1000) }],
     max_tokens: 512,
     temperature: 0.6,
   });
