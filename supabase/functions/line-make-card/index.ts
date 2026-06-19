@@ -17,6 +17,11 @@ const BUCKET = "usercards";
 const BASE = "https://raw.githubusercontent.com/leomcpemail-source/greeting/daily-images";
 const FONT_URL = "https://raw.githubusercontent.com/google/fonts/main/ofl/sarabun/Sarabun-Bold.ttf";
 
+// ข้อความเตือนเมื่อรูปที่ส่งมา "มีตัวหนังสืออยู่แล้ว" (กันทำตัวอักษรซ้อนกันดูรก)
+const WARN_TEXTED =
+  "ขออภัยนะคะ 🙏 ภาพนี้มีข้อความอยู่แล้ว น้องใส่ใจเลยแก้ไขให้ไม่ได้ค่ะ (ของเดิมก็สวยอยู่แล้วน้า)\n" +
+  "ถ้าอยากให้หนูช่วยใส่คำอวยพรดี ๆ ลองส่ง “รูปถ่ายที่ยังไม่มีตัวหนังสือ” มาได้เลยนะคะ เดี๋ยวหนูจัดให้สวย ๆ ค่ะ 💛";
+
 const FALLBACK_BLESS = [
   "ขอให้วันนี้เป็นวันที่ดี สุขกายสบายใจนะคะ",
   "อรุณสวัสดิ์ ขอให้มีรอยยิ้มทั้งวันนะคะ",
@@ -116,6 +121,31 @@ async function renderCard(photo: Uint8Array, mime: string, day: any): Promise<Ui
   return resvg.render().asPng();
 }
 
+// อ่านขนาดภาพจาก header (JPEG/PNG) แบบเบา ๆ — ใช้เดาว่าน่าจะเป็น "การ์ดมีตัวหนังสือ" (รูปจัตุรัส 1:1)
+function imageSize(b: Uint8Array): { w: number; h: number } | null {
+  if (b.length > 24 && b[0] === 0x89 && b[1] === 0x50) { // PNG
+    return { w: (b[16] << 24) | (b[17] << 16) | (b[18] << 8) | b[19], h: (b[20] << 24) | (b[21] << 16) | (b[22] << 8) | b[23] };
+  }
+  if (b.length > 4 && b[0] === 0xFF && b[1] === 0xD8) { // JPEG
+    let i = 2;
+    while (i + 9 < b.length) {
+      if (b[i] !== 0xFF) { i++; continue; }
+      const m = b[i + 1];
+      if (m >= 0xC0 && m <= 0xCF && m !== 0xC4 && m !== 0xC8 && m !== 0xCC) {
+        return { h: (b[i + 5] << 8) | b[i + 6], w: (b[i + 7] << 8) | b[i + 8] };
+      }
+      i += 2 + ((b[i + 2] << 8) | b[i + 3]);
+    }
+  }
+  return null;
+}
+// รูปจัตุรัสเกือบเป๊ะ = น่าจะเป็นการ์ดของระบบ (มีตัวหนังสือแล้ว)
+function looksLikeCard(b: Uint8Array): boolean {
+  const s = imageSize(b);
+  if (!s || s.w <= 0 || s.h <= 0) return false;
+  return Math.abs(s.w / s.h - 1) <= 0.05;
+}
+
 async function downloadPhoto(messageId: string): Promise<{ buf: Uint8Array; mime: string }> {
   const r = await fetch(`https://api-data.line.me/v2/bot/message/${messageId}/content`, { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } });
   if (!r.ok) throw new Error("content " + r.status);
@@ -150,6 +180,7 @@ async function job(userId: string, messageId: string, test: boolean, customBless
       photo = new Uint8Array(await r.arrayBuffer()); mime = (r.headers.get("content-type") || "image/jpeg").split(";")[0];
     } else {
       const d = await downloadPhoto(messageId); photo = d.buf; mime = d.mime;
+      if (looksLikeCard(photo)) { await push(userId, [{ type: "text", text: WARN_TEXTED }]); return; }
     }
     const day = await loadDay();
     if (customBless) day.bless = customBless;
