@@ -341,7 +341,31 @@ html,body{
 /* ── LINE DETECTION ── */
 const IS_LINE = /\bLine\b/i.test(navigator.userAgent) || /FBAN|FBAV|Instagram/i.test(navigator.userAgent);
 const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const IS_ANDROID = /Android/i.test(navigator.userAgent);
 if(IS_LINE)document.getElementById('appEl').classList.add('line-browser');
+
+/* Android ในแอป LINE ดาวน์โหลด/แสดงผลไม่สมบูรณ์ (ข้อจำกัดของ LINE) → ขึ้นหน้าเต็มจอให้ไปเปิดเบราว์เซอร์ปกติ */
+function openExternalBrowser(){
+  try{ const u=new URL(location.href); u.searchParams.set('openExternalBrowser','1'); location.href=u.toString(); }
+  catch(e){ location.href=location.href+(location.href.includes('?')?'&':'?')+'openExternalBrowser=1'; }
+}
+function showLineAndroidGate(){
+  if(!(IS_LINE && IS_ANDROID)) return;
+  try{ if(new URLSearchParams(location.search).get('openExternalBrowser')==='1') return; }catch(e){}
+  const ov=document.createElement('div'); ov.id='extGate';
+  ov.style.cssText='position:fixed;inset:0;z-index:100000;background:linear-gradient(180deg,#eaf3fb,#fdf6ea);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;gap:16px;';
+  ov.innerHTML=
+    '<div style="font-size:54px">🌸</div>'
+    +'<div style="font-family:Chonburi,serif;font-size:21px;color:#2f5b86;line-height:1.45">เปิดในเบราว์เซอร์ปกติ<br>เพื่อใช้งานได้เต็มที่ค่ะ</div>'
+    +'<div style="font-family:Sarabun,sans-serif;font-size:15px;color:#5a6b7d;line-height:1.75;max-width:340px">หน้านี้เปิดในเบราว์เซอร์ของแอป LINE บนแอนดรอยด์ จะ <b>บันทึกรูปไม่ได้</b> และแสดงผลไม่ครบค่ะ<br>แตะปุ่มด้านล่างเพื่อเปิดในเบราว์เซอร์ปกติ (Chrome)</div>'
+    +'<button id="extGateBtn" style="font-family:Kanit,sans-serif;font-size:18px;font-weight:600;background:#06c755;color:#fff;border:none;border-radius:16px;padding:15px 36px;box-shadow:0 6px 18px rgba(6,199,85,.35);cursor:pointer">เปิดในเบราว์เซอร์ →</button>'
+    +'<div style="font-family:Sarabun,sans-serif;font-size:13px;color:#9aa6b2;line-height:1.7;max-width:330px">ถ้าปุ่มไม่ทำงาน: แตะ <b>⋮</b> มุมขวาบน → เลือก <b>“เปิดในเบราว์เซอร์อื่น”</b></div>'
+    +'<a id="extGateSkip" style="font-family:Sarabun,sans-serif;font-size:13px;color:#9aa6b2;text-decoration:underline;cursor:pointer;margin-top:4px">ใช้ต่อในแอป LINE ก่อน</a>';
+  document.body.appendChild(ov);
+  document.getElementById('extGateBtn').onclick=openExternalBrowser;
+  document.getElementById('extGateSkip').onclick=()=>ov.remove();
+}
+showLineAndroidGate();
 // ข้อความแนะนำในแอป LINE ต่างกันตามระบบ: iOS ต้องแตะรูปค้าง / Android เซฟลงเครื่องได้เลย
 
 /* ── CONFIG ── */
