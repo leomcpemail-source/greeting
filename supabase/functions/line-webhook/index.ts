@@ -234,18 +234,30 @@ const WARN_TEXTED =
   "ขออภัยนะคะ 🙏 ภาพนี้มีข้อความอยู่แล้ว น้องใส่ใจเลยใส่คำอวยพรเพิ่มให้ไม่ได้ค่ะ (ของเดิมก็สวยอยู่แล้วน้า)\n" +
   "ถ้าอยากให้หนูช่วยใส่คำอวยพรดี ๆ ลองส่ง “รูปถ่ายที่ยังไม่มีตัวหนังสือ” มาได้เลยนะคะ เดี๋ยวหนูจัดให้สวย ๆ ค่ะ 💛";
 
-// ── ผู้ใช้ส่งรูปมา → ชมรูปก่อน แล้วถามว่าจะให้ทำอะไร (ขั้น generate กำลังต่อ) ──
+// ── ผู้ใช้ส่งรูปมา → ชมรูป แล้ว “ถามคำอวยพรของผู้ใช้ก่อน” (ส่วนใหญ่อยากใส่เอง) ──
+//    ถ้าไม่อยากใส่เอง → พิมพ์ “ใส่ให้เลย” แล้วระบบจะคิดคำอวยพรประจำวันให้
+const ASK_BLESSING =
+  "ว้าว~ รูปสวยจังเลยค่ะ 😍✨\n\n" +
+  "น้องใส่ใจจะทำให้เป็น “ภาพสวัสดี” (ใส่คำอวยพร + กรอบสวย ๆ ประจำวัน) ให้นะคะ 🖼️\n\n" +
+  "อยากใส่ “คำอวยพรของคุณเอง” ไหมคะ? พิมพ์ข้อความที่อยากให้อยู่บนภาพมาได้เลยค่ะ\n" +
+  "เช่น “สุขสันต์วันเกิดนะลูก” หรือ “คิดถึงเสมอนะ” 💛\n\n" +
+  "หรือถ้าอยากให้น้องใส่ใจคิดคำอวยพรให้ พิมพ์ว่า “ใส่ให้เลย” ได้เลยนะคะ ✨";
 async function handleUserPhoto(replyToken: string) {
-  await lineReply(replyToken, [textMsg(
-    "ว้าว~ รูปสวยจังเลยค่ะ 😍✨ ถ่าย/เลือกได้ดีมากเลยน้า\n\n" +
-    "น้องใส่ใจช่วยอะไรกับรูปนี้ดีคะ?\n" +
-    "📸 อยากได้เป็น “ภาพสวัสดี” (ใส่คำอวยพร + กรอบสวย ๆ ประจำวัน) — พิมพ์ว่า “ทำภาพสวัสดี” ได้เลยค่ะ\n" +
-    "หรือบอกน้องใส่ใจได้เลยว่าอยากให้ช่วยอะไร 💛",
-  )]);
+  await lineReply(replyToken, [textMsg(ASK_BLESSING)]);
 }
 // ผู้ใช้ตอบว่าอยากทำภาพสวัสดีจากรูป
 function wantsPhotoGreeting(t: string): boolean {
   return /(ทำภาพสวัสดี|ทำสวัสดี|ใส่คำอวยพร|ใส่ตัวหนังสือ|ทำการ์ด|ทำเลย)/.test(t);
+}
+// ผู้ใช้บอกให้ “น้องใส่ใจคิดคำอวยพรให้เอง” (ไม่ใส่เอง) → ทำภาพแบบสร้างคำให้อัตโนมัติ
+const AUTO_BLESS = /(ใส่ให้เลย|ใส่ให้หน่อย|ช่วยใส่ให้|คิดให้|ช่วยคิด|ให้น้อง.*คิด|แล้วแต่|อะไรก็ได้|จัดให้|จัดเลย|ไม่ใส่เอง|ไม่ใส่คำ)/;
+// fallback (ใช้ตอน LLM ล่ม): เพิ่งส่งรูป + พิมพ์ข้อความที่ดูเป็น “คำอวยพร” (ไม่ใช่คำถาม/ขอรูป) → ใช้เป็นคำอวยพรเอง
+function looksLikeBlessing(t: string): boolean {
+  const s = t.trim();
+  if (!s || s.length > 80) return false;
+  if (/[?]|ไหม|มั้ย|หรือเปล่า|อะไร|ทำไม|เมื่อไหร่|ที่ไหน|ยังไง|อย่างไร|กี่|ใคร/.test(s)) return false; // คำถาม = คุยเล่น
+  if (/(รูป|ภาพ|การ์ด)/.test(s) && /(ขอ|อยากได้|ส่ง|หา|เอา)/.test(s)) return false;                    // ขอรูปจากคลัง
+  return true;
 }
 // คำชม/ขอบคุณ/ตอบรับสั้น ๆ — ไม่ใช่คำสั่งให้ทำภาพ (กันระบบสร้างภาพซ้ำตอน user แค่ชม)
 function isAck(t: string): boolean {
@@ -333,13 +345,13 @@ const INTENT_SYS = [
   "คุณคือ “น้องใส่ใจ” ผู้ช่วยสาวอายุ 20 ของ LINE “สวัสดีทุกวัน” พูดจาอบอุ่นน่ารัก ลงท้าย ค่ะ/นะคะ",
   "หน้าที่: วิเคราะห์ “เจตนา” ของผู้ใช้จากข้อความ (ผู้ใช้พิมพ์ไม่เป๊ะ มีคำผิดได้ ให้ตีความตามความหมาย) แล้วตอบกลับเป็น JSON ล้วน ๆ เท่านั้น ห้ามมีข้อความอื่นนอก JSON",
   'รูปแบบ: {"action":"make_card|edit_blessing|get_image|chat","blessing":"","category":"","reply":""}',
-  "- make_card: อยากให้เอา “รูปที่ส่งมา” มาทำเป็นภาพสวัสดี (ใส่คำอวยพร+กรอบ) เช่น ทำภาพสวัสดี, ทำการ์ดให้หน่อย, เอารูปนี้ทำสวัสดี, สร้างให้หน่อย, เอาเลย",
-  '- edit_blessing: อยากแก้/เปลี่ยน “คำอวยพรบนภาพ” → ดึงข้อความคำอวยพรใหม่ใส่ใน "blessing" (เช่น แก้ไขคำอวยพรเป็น..., เปลี่ยนข้อความเป็น..., ขอข้อความว่า..., ไม่เอาอันเดิมขอเป็น...)',
+  "- make_card: อยากทำภาพสวัสดีจากรูปที่ส่งมา โดย “ให้น้องใส่ใจคิดคำอวยพรให้เอง” (ไม่ใส่คำเอง) เช่น ทำภาพสวัสดี, ใส่ให้เลย, ช่วยคิดให้, แล้วแต่เลย, อะไรก็ได้, จัดให้, เอาเลย → blessing เว้นว่าง",
+  '- edit_blessing: ผู้ใช้ “ให้คำอวยพรของตัวเอง” ที่จะใส่บนภาพ → ดึงถ้อยคำนั้นทั้งหมดใส่ใน "blessing" ครอบคลุมทั้ง (ก) สั่งแก้/เปลี่ยน เช่น แก้ไขคำอวยพรเป็น..., เปลี่ยนข้อความเป็น..., ขอข้อความว่า... และ (ข) พิมพ์ “ถ้อยคำอวยพร/คำพูดที่อยากให้อยู่บนภาพ” มาตรง ๆ เช่น “สุขสันต์วันเกิดนะลูก”, “Happy holiday!!”, “คิดถึงเสมอนะ”, “ขอให้สุขภาพแข็งแรง” (โดยเฉพาะเมื่อเพิ่งส่งรูปและน้องใส่ใจเพิ่งถามว่าจะใส่คำอวยพรเองไหม)',
   '- get_image: ขอ “รูปสวัสดีจากคลัง” (ไม่เกี่ยวกับรูปที่ส่งมา) เช่น ขอรูปสวัสดี, ขอรูปดอกไม้ → ถ้าระบุหมวดใส่รหัสใน "category" จาก flowers,dharma,inspire,miss,birthday,elderly,health,festival,family,pets,coffee,nature ไม่ระบุใส่ ""',
   '- chat: พูดคุย/ถามทั่วไป รวมถึง “คำชม/ขอบคุณ/ตอบรับ” (เช่น เยี่ยมมาก, ดีมาก, สวยจัง, ขอบคุณ, โอเค) → เขียนคำตอบแบบน้องใส่ใจสั้น ๆ อบอุ่นใน "reply" (ถ้าไม่รู้จริงห้ามมั่ว)',
   "สำคัญมาก: คำชม/ขอบคุณ/ตอบรับ (เยี่ยม, ดีมาก, สวยจัง, ขอบคุณ, โอเค ฯลฯ) = chat เสมอ ห้ามตีความเป็น make_card/edit_blessing แม้จะเพิ่งส่งรูปมา",
-  "make_card เลือกเฉพาะเมื่อผู้ใช้ “สั่งให้ทำ/สร้าง” ภาพชัดเจนเท่านั้น ; edit_blessing เฉพาะเมื่อมีข้อความคำอวยพรใหม่จริง ๆ",
-  "ถ้า “มีรูปที่เพิ่งส่งมา” และข้อความสั่งทำ/ใส่คำ/แก้คำชัดเจน ให้เลือก make_card หรือ edit_blessing (อย่าเลือก get_image)",
+  "เมื่อ “เพิ่งส่งรูปมา” และน้องใส่ใจเพิ่งถามว่าจะใส่คำอวยพรเองไหม: ถ้าผู้ใช้พิมพ์ถ้อยคำที่ใช้เป็นคำอวยพรได้ = edit_blessing (ใส่ข้อความนั้นใน blessing) ; ถ้าบอกให้น้องคิดให้เอง = make_card ; ถ้าเป็นคำถาม/คุยเล่น = chat",
+  "ถ้า “มีรูปที่เพิ่งส่งมา” อย่าเลือก get_image เด็ดขาด (รูปที่ส่งมาใช้ทำภาพ ไม่ใช่ขอรูปจากคลัง)",
   "ตอบ JSON อย่างเดียว",
 ].join("\n");
 
@@ -350,7 +362,7 @@ function extractJson(s: string): any | null {
 }
 async function classifyIntent(text: string, hasPhoto: boolean): Promise<any | null> {
   if (!THAILLM_KEY) return null;
-  const sys = `${INTENT_SYS}\nบริบท: ผู้ใช้ตอนนี้${hasPhoto ? "มีรูปที่เพิ่งส่งมา รอทำเป็นภาพสวัสดี" : "ยังไม่ได้ส่งรูปเข้ามา"} · วันนี้คือ ${nowContextTH()}`;
+  const sys = `${INTENT_SYS}\nบริบท: ผู้ใช้ตอนนี้${hasPhoto ? "เพิ่งส่งรูปมา และน้องใส่ใจเพิ่งถามว่าจะ “ใส่คำอวยพรเอง” ไหม — ข้อความถัดมาที่เป็นถ้อยคำอวยพรให้ถือเป็น edit_blessing" : "ยังไม่ได้ส่งรูปเข้ามา"} · วันนี้คือ ${nowContextTH()}`;
   const body = JSON.stringify({ model: THAILLM_MODEL, messages: [{ role: "system", content: sys }, { role: "user", content: String(text).slice(0, 800) }], max_tokens: 400, temperature: 0.2 });
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
@@ -465,8 +477,8 @@ async function handleEvent(ev: any) {
       if (freshPhoto) {
         const bless = act === "edit_blessing" ? String(intent.blessing || "").trim().slice(0, 120) : "";
         await lineReply(ev.replyToken, [textMsg(bless
-          ? "ได้เลยค่ะ! 🎨 กำลังแก้คำอวยพรบนภาพให้ใหม่ รอแป๊บนะคะ ✨"
-          : "ได้เลยค่ะ! 🎨 กำลังทำภาพสวัสดีจากรูปของคุณ รอแป๊บนะคะ ส่งให้ภายในไม่กี่อึดใจ ✨")]);
+          ? `ได้เลยค่ะ! 🎨 กำลังทำภาพสวัสดีพร้อมคำอวยพร “${bless}” ให้เลย รอแป๊บนะคะ ✨`
+          : "ได้เลยค่ะ! 🎨 น้องใส่ใจขอคิดคำอวยพรประจำวันให้นะคะ กำลังทำภาพให้เลย รอแป๊บค่ะ ✨")]);
         if (userId) await upsertPhotoPending(userId, freshPhoto); // ต่ออายุ session แก้ไข
         await triggerMakeCard(userId!, freshPhoto, bless);
       } else {
@@ -486,12 +498,20 @@ async function handleEvent(ev: any) {
   }
 
   // ── LLM ล่ม → ใช้ regex สำรอง ──
-  const cb = parseCustomBless(text);
-  if (cb && freshPhoto) { await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 กำลังแก้คำอวยพรบนภาพให้ใหม่ รอแป๊บนะคะ ✨")]); if (userId) await upsertPhotoPending(userId, freshPhoto); await triggerMakeCard(userId!, freshPhoto, cb); return; }
-  if (wantsPhotoGreeting(text)) {
-    if (freshPhoto) { await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ! 🎨 กำลังทำภาพสวัสดีจากรูปของคุณ รอแป๊บนะคะ ✨")]); if (userId) await upsertPhotoPending(userId, freshPhoto); await triggerMakeCard(userId!, freshPhoto); }
-    else await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]);
-    return;
+  const cb = parseCustomBless(text);                       // "แก้คำอวยพรเป็น ..." แบบสั่งตรง
+  const bMakeCard = async (bless: string) => {
+    await lineReply(ev.replyToken, [textMsg(bless
+      ? `ได้เลยค่ะ! 🎨 กำลังทำภาพสวัสดีพร้อมคำอวยพร “${bless}” ให้เลย รอแป๊บนะคะ ✨`
+      : "ได้เลยค่ะ! 🎨 น้องใส่ใจขอคิดคำอวยพรประจำวันให้นะคะ กำลังทำภาพให้เลย รอแป๊บค่ะ ✨")]);
+    if (userId) await upsertPhotoPending(userId, freshPhoto!);
+    await triggerMakeCard(userId!, freshPhoto!, bless);
+  };
+  if (freshPhoto) {
+    if (cb) { await bMakeCard(cb); return; }                                   // สั่งแก้คำอวยพรเป็น ...
+    if (wantsPhotoGreeting(text) || AUTO_BLESS.test(text)) { await bMakeCard(""); return; } // ให้น้องคิดให้เอง
+    if (looksLikeBlessing(text)) { await bMakeCard(text.trim().slice(0, 120)); return; }    // พิมพ์คำอวยพรมาเอง
+  } else if (cb || wantsPhotoGreeting(text)) {
+    await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]); return;             // ยังไม่ได้ส่งรูป
   }
   const catId = detectCategory(text);
   if (wantsImage(text, catId)) { await replyGreetingImages(ev.replyToken, catId); return; }
