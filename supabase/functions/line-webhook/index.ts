@@ -409,6 +409,55 @@ async function triggerMakeCard(userId: string, messageId: string, bless = "") {
     body: JSON.stringify({ token: MKCARD_TOKEN, userId, messageId, bless }),
   }).catch(() => {});
 }
+
+// ════════ เก็บสถิติ + เรียนรู้จากคำขอจริงของผู้ใช้ (คำอวยพร + ลักษณะภาพ) ════════
+// log ทุกคำขอ → line_intents (action, cat, bless, user_id) : line_stats.behaviors ใช้ตัวนี้ทำสถิติ
+async function logIntent(action: string, cat: string | null, bless = "", userId?: string) {
+  await fetch(`${SUPABASE_URL}/rest/v1/line_intents`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" },
+    body: JSON.stringify({ action, cat: cat || null, bless: bless ? bless.slice(0, 200) : null, user_id: userId || null }),
+  }).catch(() => {});
+}
+// คัดกรองคำอวยพรเบื้องต้น — แค่ "ตั้งธง" (ก่อนแอดมินตัดสินใจ) กันคำหยาบ/โฆษณา/ลิงก์
+const BAD_WORD_RE = /(เหี้ย|สัส|สัด|ควย|หี|เย็ด|มึง|กู|ไอ้สั|อีดอก|ระยำ|fuck|shit|bitch|porn|เซ็ก|พนัน|หวย|โอนเงิน|line\s*id|ไอดีไลน์|http|www\.|\.com|\.net)/i;
+function screenBless(t: string): "ok" | "bad" { return BAD_WORD_RE.test(t) ? "bad" : "ok"; }
+// เก็บคำอวยพรของ user เข้าคลังเรียนรู้ — สถานะ pending เสมอ (ต้องให้แอดมินอนุมัติก่อนใช้บนการ์ดสาธารณะ)
+async function learnBlessing(text: string, theme: string, category: string | null, userId?: string) {
+  const t = text.trim();
+  if (t.length < 4 || t.length > 120) return;
+  await fetch(`${SUPABASE_URL}/rest/v1/line_learned_bless`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "resolution=ignore-duplicates,return=minimal" },
+    body: JSON.stringify({ text: t, theme: theme || null, category: category || null, source_user: userId || null, status: "pending", ai_flag: screenBless(t) }),
+  }).catch(() => {});
+}
+// บันทึก "ลักษณะภาพ/ธีม" ที่ผู้ใช้นิยม (แท็ก) → เพิ่มน้ำหนัก ใช้ bias การ gen รายวัน (ความเสี่ยงต่ำ ไม่ต้องอนุมัติ)
+async function learnTags(tags: string[]) {
+  const seen = new Set<string>();
+  for (const raw of tags) {
+    const tag = String(raw || "").toLowerCase().trim().slice(0, 40);
+    if (tag.length < 2 || seen.has(tag)) continue;
+    seen.add(tag);
+    await fetch(`${SUPABASE_URL}/rest/v1/rpc/line_bump_tag`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` },
+      body: JSON.stringify({ p_token: "ltag_6d2a9f", p_tag: tag }),
+    }).catch(() => {});
+  }
+}
+// รวมขั้นตอนเรียนรู้จาก "คำขอทำการ์ด" 1 ครั้ง: log + เก็บคำอวยพร (ถ้ามี) + เก็บแท็กลักษณะภาพ
+async function recordCardRequest(act: string, bless: string, text: string, intent: any, userId?: string) {
+  const theme = String(intent?.theme || "").trim().slice(0, 40);
+  const cat = (intent && CATS_SET.has(intent.category)) ? intent.category : (detectCategory(bless || text) || null);
+  await logIntent(act, cat, bless, userId);
+  if (bless) await learnBlessing(bless, theme, cat, userId);
+  const tags: string[] = [];
+  if (theme) tags.push(theme);
+  if (cat) tags.push(cat);
+  if (intent?.tags) for (const tg of String(intent.tags).split(/[,\s]+/)) tags.push(tg);
+  if (tags.length) await learnTags(tags);
+}
 // แยกคำอวยพรที่ user อยากแก้: "แก้คำอวยพรเป็น ..." / "เปลี่ยนข้อความเป็น ..." (fallback ถ้า LLM ล่ม)
 function parseCustomBless(t: string): string | null {
   const m = t.match(/(?:แก้|เปลี่ยน|ขอแก้|ขอเปลี่ยน)\s*(?:ไข|คำ)?\s*(?:คำอวยพร|ข้อความ|คำ)\s*(?:ใหม่)?\s*(?:เป็น|ว่า|:)\s*(.+)/);
@@ -421,7 +470,8 @@ const CATS_SET = new Set(["flowers", "dharma", "inspire", "miss", "birthday", "e
 const INTENT_SYS = [
   "คุณคือ “น้องใส่ใจ” ผู้ช่วยสาวอายุ 20 ของ LINE “สวัสดีทุกวัน” พูดจาอบอุ่นน่ารัก ลงท้าย ค่ะ/นะคะ",
   "หน้าที่: วิเคราะห์ “เจตนา” ของผู้ใช้จากข้อความ (ผู้ใช้พิมพ์ไม่เป๊ะ มีคำผิดได้ ให้ตีความตามความหมาย) แล้วตอบกลับเป็น JSON ล้วน ๆ เท่านั้น ห้ามมีข้อความอื่นนอก JSON",
-  'รูปแบบ: {"action":"make_card|edit_blessing|get_image|chat","blessing":"","category":"","reply":""}',
+  'รูปแบบ: {"action":"make_card|edit_blessing|get_image|chat","blessing":"","category":"","theme":"","tags":"","reply":""}',
+  'สำหรับ make_card/edit_blessing ให้ใส่ด้วย: "theme" = โอกาส/ธีมการ์ดสั้น ๆ (เช่น วันเกิด, ให้กำลังใจ, สุขภาพ, คิดถึง, ทั่วไป) และ "tags" = คำบอกลักษณะภาพที่เข้ากับคำอวยพร คั่นช่องว่าง (เช่น "ดอกไม้ อบอุ่น พระอาทิตย์")',
   "- make_card: อยากทำภาพสวัสดีจากรูปที่ส่งมา โดย “ให้น้องใส่ใจคิดคำอวยพรให้เอง” (ไม่ใส่คำเอง) เช่น ทำภาพสวัสดี, ใส่ให้เลย, ช่วยคิดให้, แล้วแต่เลย, อะไรก็ได้, จัดให้, เอาเลย → blessing เว้นว่าง",
   '- edit_blessing: ผู้ใช้ “ให้คำอวยพรของตัวเอง” ที่จะใส่บนภาพ → ดึงถ้อยคำนั้นทั้งหมดใส่ใน "blessing" ครอบคลุมทั้ง (ก) สั่งแก้/เปลี่ยน เช่น แก้ไขคำอวยพรเป็น..., เปลี่ยนข้อความเป็น..., ขอข้อความว่า... และ (ข) พิมพ์ “ถ้อยคำอวยพร/คำพูดที่อยากให้อยู่บนภาพ” มาตรง ๆ เช่น “สุขสันต์วันเกิดนะลูก”, “Happy holiday!!”, “คิดถึงเสมอนะ”, “ขอให้สุขภาพแข็งแรง” (โดยเฉพาะเมื่อเพิ่งส่งรูปและน้องใส่ใจเพิ่งถามว่าจะใส่คำอวยพรเองไหม)',
   '- get_image: ขอ “รูปสวัสดีจากคลัง” (ไม่เกี่ยวกับรูปที่ส่งมา) เช่น ขอรูปสวัสดี, ขอรูปดอกไม้ → ถ้าระบุหมวดใส่รหัสใน "category" จาก flowers,dharma,inspire,miss,birthday,elderly,health,festival,family,pets,coffee,nature ไม่ระบุใส่ ""',
@@ -494,6 +544,7 @@ async function handleEvent(ev: any) {
       return;
     }
     if (userId && msg.id) await upsertPhotoPending(userId, msg.id);   // จำรูปไว้เผื่อสั่งทำภาพสวัสดี
+    await logIntent("photo", null, "", userId);                        // สถิติ: ผู้ใช้ส่งรูปมาทำการ์ด
     await handleUserPhoto(ev.replyToken);
     return;
   }
@@ -561,16 +612,20 @@ async function handleEvent(ev: any) {
           : "ได้เลยค่ะ! 🎨 น้องใส่ใจขอคิดคำอวยพรประจำวันให้นะคะ กำลังทำภาพให้เลย รอแป๊บค่ะ ✨")]);
         if (userId) await upsertPhotoPending(userId, freshPhoto); // ต่ออายุ session แก้ไข
         await triggerMakeCard(userId!, freshPhoto, bless);
+        await recordCardRequest(act, bless, text, intent, userId); // เก็บสถิติ + เรียนรู้คำอวยพร/ลักษณะภาพ
       } else {
         await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]);
       }
       return;
     }
     if (act === "get_image") {
-      await replyGreetingImages(ev.replyToken, CATS_SET.has(intent.category) ? intent.category : null);
+      const gcat = CATS_SET.has(intent.category) ? intent.category : null;
+      await logIntent("get_image", gcat, "", userId);
+      await replyGreetingImages(ev.replyToken, gcat);
       return;
     }
-    // action=chat → ตอบด้วย persona เต็มของน้องใส่ใจ + ความรู้ที่เคยสอน (ใช้ reply จาก classifier เป็นสำรอง)
+    // action=chat → ตอบด้วย persona เต็มของน้องใส่ใจ (ใช้ reply จาก classifier เป็นสำรอง)
+    await logIntent("chat", null, "", userId);
     const a = await answerChat(userId, text);
     await lineReply(ev.replyToken, [textMsg(a || String(intent.reply || "").trim() ||
       "ตอนนี้น้องใส่ใจคิดไม่ทันนิดนึงค่ะ 🥺 ลองพิมพ์ใหม่อีกครั้งนะคะ")]);
@@ -585,6 +640,7 @@ async function handleEvent(ev: any) {
       : "ได้เลยค่ะ! 🎨 น้องใส่ใจขอคิดคำอวยพรประจำวันให้นะคะ กำลังทำภาพให้เลย รอแป๊บค่ะ ✨")]);
     if (userId) await upsertPhotoPending(userId, freshPhoto!);
     await triggerMakeCard(userId!, freshPhoto!, bless);
+    await recordCardRequest(bless ? "edit_blessing" : "make_card", bless, text, null, userId);
   };
   if (freshPhoto) {
     if (cb) { await bMakeCard(cb); return; }                                   // สั่งแก้คำอวยพรเป็น ...
