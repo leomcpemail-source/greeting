@@ -42,7 +42,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Charm:wght@400;700&family=Mitr:wght@400;500;600&family=Kanit:wght@400;500;600;700&family=Itim&family=Mali:wght@400;600&family=Sriracha&family=Pattaya&family=Bai+Jamjuree:wght@600&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script defer src="assets/html2canvas.min.js"></script>
 <script data-goatcounter="https://leomcpemail.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -486,8 +485,6 @@ function showCard(idx,dir){
   if(dir){requestAnimationFrame(()=>{cw.style.transition='opacity .28s,transform .28s';cw.style.opacity='1';cw.style.transform='translateX(0)';});}
   updateThumbActive();
   preloadNeighbors(curIdx);
-  // warm cache data URL ของรูปการ์ดนี้ไว้ล่วงหน้า → กดบันทึก/แชร์ครั้งแรกเร็ว ไม่ค้าง
-  const _bg=curCardEl&&curCardEl.querySelector('img.bg');if(_bg&&_bg.src)bgDataUrl(_bg.src).catch(()=>{});
 }
 
 function nextCard(){showCard(curIdx+1,1);track2('next');}
@@ -979,124 +976,63 @@ function applyFrameToCard(card,fr){
 }
 /* ════════════ SNAPSHOT (single card) ════════════ */
 const IS_LINE_WV=/\bLine\b/i.test(navigator.userAgent);
-// แปลงรูปพื้นหลังเป็น data URL (same-origin) — กัน canvas โดน taint จาก CORS ทำให้ save/share พลาดครั้งแรก
-const _bgCache=new Map();
-async function bgDataUrl(url){
-  if(_bgCache.has(url))return _bgCache.get(url);
-  const r=await fetch(url,{mode:'cors'});
-  if(!r.ok)throw new Error('img '+r.status);
-  const b=await r.blob();
-  const d=await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(b);});
-  _bgCache.set(url,d);return d;
-}
-// รอ html2canvas (โหลดแบบ defer) ให้พร้อมก่อน — กัน iOS/LINE กดบันทึก/แชร์ครั้งแรกแล้วพลาดเพราะสคริปต์ยังโหลดไม่เสร็จ
-function ensureH2C(){
-  if(typeof html2canvas!=='undefined')return Promise.resolve();
-  return new Promise((res,rej)=>{let n=0;const t=setInterval(()=>{
-    if(typeof html2canvas!=='undefined'){clearInterval(t);res();}
-    else if(++n>120){clearInterval(t);rej(new Error('html2canvas-load-timeout'));}
-  },100);});
-}
-async function snapshot(){
-  await ensureH2C();   // รอสคริปต์ให้พร้อม (Android ที่โหลดเสร็จแล้วผ่านทันที ไม่กระทบ)
-  const liveCard=curCardEl||stage.querySelector('.card');
-  if(!liveCard)throw new Error('no card');
-  const liveImg=liveCard.querySelector('img.bg');
-  const S=2;
-  const clone=liveCard.cloneNode(true);
-  const sb=clone.querySelector('.src-btn');if(sb)sb.remove();
-  clone.style.transform='none';clone.style.boxShadow='none';clone.style.position='absolute';clone.style.left='0';clone.style.top='0';
-  clone.style.width=CW+'px';clone.style.height=CW+'px';
-  const wrap=document.createElement('div');
-  wrap.style.cssText=`position:fixed;left:-${CW+300}px;top:0;width:${CW}px;height:${CW}px;overflow:hidden;z-index:-9999;opacity:0;pointer-events:none;background:#1a1208`;
-  wrap.appendChild(clone);document.body.appendChild(wrap);
-  const cloneImg=clone.querySelector('img.bg');
-  if(liveImg&&cloneImg){
-    cloneImg.style.opacity='1';
-    // ใช้ data URL ของรูปพื้นหลัง (same-origin) → html2canvas ไม่โดน taint, save/share สำเร็จตั้งแต่ครั้งแรก
-    let durl=null;try{durl=await bgDataUrl(liveImg.src);}catch(e){}
-    if(durl){cloneImg.removeAttribute('crossorigin');cloneImg.src=durl;}
-    else{cloneImg.crossOrigin='anonymous';if(cloneImg.src!==liveImg.src)cloneImg.src=liveImg.src;}
-    if(!cloneImg.complete||cloneImg.naturalWidth===0){await new Promise(res=>{cloneImg.onload=res;cloneImg.onerror=res;setTimeout(res,8000);});}}
-  if(document.fonts&&document.fonts.ready){try{await Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,3000))]);}catch(e){}}
-  let canvas;
-  try{
-    // กัน html2canvas ค้างไม่จบใน in-app browser (เช่น LINE) ด้วย timeout
-    canvas=await Promise.race([
-      html2canvas(clone,{useCORS:true,allowTaint:false,scale:S,backgroundColor:'#1a1208',logging:false,width:CW,height:CW,x:0,y:0,scrollX:0,scrollY:0}),
-      new Promise((_,rej)=>setTimeout(()=>rej(new Error('snapshot-timeout')),15000))
-    ]);
-  }
-  finally{if(wrap.parentNode)document.body.removeChild(wrap);}
-  // ตรวจ taint ทันที — ถ้าโดน (รูปข้ามโดเมนยังไม่ CORS-clean) โยน error เพื่อให้ snapshotReliable ลองใหม่
-  try{canvas.getContext('2d').getImageData(0,0,1,1);}catch(te){throw new Error('tainted-canvas');}
-  return canvas;
-}
-// กด "ครั้งเดียว" ให้สำเร็จ — ถ้าครั้งแรก canvas เสีย/taint (พบบ่อยใน iOS ครั้งแรก) ลองซ้ำเองอัตโนมัติ
-async function snapshotReliable(){
-  let lastErr;
-  for(let i=0;i<3;i++){
-    try{return await snapshot();}
-    catch(e){lastErr=e; if(i<2)await new Promise(r=>setTimeout(r,300+i*300));}
-  }
-  throw lastErr;
-}
-
-function showImageViewer(canvas,fname){
+function showImageViewer(src,fname){
   document.getElementById('imgViewer')?.remove();
-  const dataUrl=canvas.toDataURL('image/png');
   const ov=document.createElement('div');ov.id='imgViewer';
   ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:16px;overflow:auto;';
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});  // แตะพื้นมืดก็ปิดได้ (กันค้างบนจอเล็ก/จอพับ)
   const tip=document.createElement('div');
   tip.style.cssText="font-family:'Sarabun';font-size:17px;font-weight:700;color:#fff;text-align:center;line-height:1.6;background:rgba(255,255,255,.12);padding:12px 20px;border-radius:14px;";
   tip.innerHTML='📥 <b>กดค้างที่รูปด้านล่าง</b><br>แล้วเลือก "บันทึกรูปภาพ"';
-  const img=document.createElement('img');img.src=dataUrl;
+  const img=document.createElement('img');img.src=src;
   img.style.cssText='max-width:100%;max-height:60vh;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.6);';img.setAttribute('alt',fname);
   const cl=document.createElement('button');cl.textContent='✕ ปิด';
   cl.style.cssText="font-family:'Kanit';font-size:16px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.35);padding:11px 32px;border-radius:12px;cursor:pointer;";
   cl.onclick=()=>ov.remove();ov.append(tip,img,cl);document.body.appendChild(ov);
 }
 
+// การ์ดเป็นรูป "สำเร็จ" จาก server แล้ว (กรอบ+ข้อความ+ลายน้ำในไฟล์) → บันทึก/แชร์ใช้ไฟล์ตรง ๆ = เร็ว ไม่ค้าง ไม่ taint
+function curCardUrl(){const c=CARDS[curIdx];return `${(c&&c.base)||imgBase}/${c.file}?v=${M&&M.version?M.version:''}`;}
+function curFname(){return `${(M&&M.headline)||'สวัสดี'}.jpg`;}
+async function curCardFile(){
+  const url=curCardUrl();
+  const r=await fetch(url,{mode:'cors'});if(!r.ok)throw new Error('img '+r.status);
+  const blob=await r.blob();
+  return {url,blob,file:new File([blob],curFname(),{type:blob.type||'image/jpeg'})};
+}
 document.getElementById('btnSave').onclick=async()=>{
   const btn=document.getElementById('btnSave');const m=btn.querySelector('.bt-main');const orig=m.innerHTML;
   if(btn.disabled)return;
   m.textContent='กำลังบันทึก…';btn.disabled=true;
-  try{const c=await snapshotReliable();const fname=`${M.headline||'สวัสดีวันนี้'}.png`;
-    if(IS_LINE||IS_LINE_WV){showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อบันทึก 👆');}
-    else{const a=document.createElement('a');a.download=fname;a.href=c.toDataURL('image/png');a.click();toast('บันทึกแล้ว ✓');}
-    trackGC('download');track2('download',CARDS[curIdx]);}
+  try{
+    if(IS_LINE||IS_LINE_WV){showImageViewer(curCardUrl(),curFname());toast('กดค้างที่รูปเพื่อบันทึก 👆');}
+    else{const {blob}=await curCardFile();const a=document.createElement('a');a.download=curFname();a.href=URL.createObjectURL(blob);a.click();setTimeout(()=>URL.revokeObjectURL(a.href),8000);toast('บันทึกแล้ว ✓');}
+    trackGC('download');track2('download',CARDS[curIdx]);
+  }
   catch(e){toast('บันทึกไม่สำเร็จ ลองแคปหน้าจอแทน');}
   finally{m.innerHTML=orig;btn.disabled=false;}
 };
 document.getElementById('btnLine').onclick=async()=>{
   const btn=document.getElementById('btnLine');const m=btn.querySelector('.bt-main');const orig=m.innerHTML;
   if(btn.disabled)return;
+  // iOS ในแอป LINE: Web Share รูปไม่รองรับ → โชว์รูปให้กดค้างบันทึก/ส่งต่อ (ทันที ไม่ต้องเตรียมไฟล์ = ไม่ค้าง)
+  if((IS_LINE||IS_LINE_WV)&&IS_IOS){showImageViewer(curCardUrl(),curFname());toast('กดค้างที่รูปเพื่อบันทึก/ส่งต่อเข้า LINE 👆');trackGC('line');track2('line',CARDS[curIdx]);return;}
   m.textContent='กำลังเตรียม…';btn.disabled=true;
   try{
-    const c=await snapshotReliable();
-    const fname=`${M.headline||'สวัสดี'}.png`;
-    const blob=await new Promise(res=>c.toBlob(res,'image/png'));
-    const file=blob?new File([blob],fname,{type:'image/png'}):null;
-
-    // 1) iOS ในแอป LINE: Web Share รูปมักไม่รองรับ/ค้าง → โชว์รูปให้กดค้างบันทึก/ส่งต่อ (ได้ "รูป" จริง)
-    if((IS_LINE||IS_LINE_WV)&&IS_IOS){showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อบันทึก/ส่งต่อเข้า LINE 👆');trackGC('line');track2('line',CARDS[curIdx]);return;}
-
-    // 2) Web Share API — แอนดรอยด์ (รวม LINE แอนดรอยด์) + เบราว์เซอร์มือถือ → ส่ง "รูป" ให้เพื่อนได้จริง
-    if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+    const {url,blob,file}=await curCardFile();
+    // Web Share API — Android (รวม LINE Android) + เบราว์เซอร์มือถือ → ส่ง "รูป" ให้เพื่อนได้จริง
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
       try{await navigator.share({files:[file]});trackGC('line');track2('line',CARDS[curIdx]);return;}
-      catch(err){if(err&&err.name==='AbortError')return;/* ไม่รองรับ/หมดสิทธิ์ → fallback ข้างล่าง */}
+      catch(err){if(err&&err.name==='AbortError')return;/* ไม่รองรับ → fallback */}
     }
-
-    // 3) เดสก์ท็อป: คัดลอกรูปลงคลิปบอร์ด แล้วไปวางใน LINE ได้เลย
-    if(!IS_LINE&&blob&&window.ClipboardItem&&navigator.clipboard?.write){
-      try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+    // เดสก์ท็อป: คัดลอกรูปลงคลิปบอร์ด
+    if(!IS_LINE&&window.ClipboardItem&&navigator.clipboard?.write){
+      try{await navigator.clipboard.write([new ClipboardItem({[blob.type||'image/jpeg']:blob})]);
         toast('คัดลอกแล้ว เปิด LINE แล้ววางได้เลย ✓');trackGC('line');track2('line',CARDS[curIdx]);return;}
       catch{/* ตกไป viewer */}
     }
-
-    // 4) Fallback (LINE in-app / เบราว์เซอร์เก่า): แสดงรูปให้กดค้างเพื่อแชร์/บันทึก
-    showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อแชร์เข้า LINE 👆');
+    // fallback: โชว์รูปให้กดค้าง
+    showImageViewer(url,curFname());toast('กดค้างที่รูปเพื่อแชร์เข้า LINE 👆');
     trackGC('line');track2('line',CARDS[curIdx]);
   }
   catch(e){toast('ไม่สำเร็จ ลองกดบันทึกแทน');}
