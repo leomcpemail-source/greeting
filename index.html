@@ -33,7 +33,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Charm:wght@400;700&family=Mitr:wght@400;500;600&family=Kanit:wght@400;500;600;700&family=Itim&family=Mali:wght@400;600&family=Sriracha&family=Pattaya&family=Bai+Jamjuree:wght@600&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script data-goatcounter="https://leomcpemail.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -220,8 +220,8 @@ html,body{
 
 /* lightbox ดูรูปใหญ่ก่อนเลือก — ผู้สูงอายุดูรายละเอียดชัดๆ ก่อนกดใช้/บันทึก */
 #cardPreview{position:fixed;inset:0;z-index:9998;background:rgba(22,10,18,.93);display:flex;flex-direction:column;
-  align-items:center;justify-content:center;padding:16px;gap:14px;}
-#cardPreview img{max-width:min(94vw,560px);max-height:64vh;border-radius:18px;box-shadow:0 10px 36px rgba(0,0,0,.55);}
+  align-items:center;justify-content:center;padding:16px;gap:14px;overflow:auto;}
+#cardPreview img{max-width:min(94vw,560px);max-height:60vh;border-radius:18px;box-shadow:0 10px 36px rgba(0,0,0,.55);}
 .cp-btns{display:flex;gap:12px;width:100%;max-width:420px;}
 .cp-use{flex:1.4;border:none;border-radius:16px;padding:16px 10px;background:var(--pink);color:#fff;
   font-family:'Kanit';font-size:19px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(46,143,209,.4);transition:transform .12s;}
@@ -968,6 +968,7 @@ function applyFrameToCard(card,fr){
 /* ════════════ SNAPSHOT (single card) ════════════ */
 const IS_LINE_WV=/\bLine\b/i.test(navigator.userAgent);
 async function snapshot(){
+  if(typeof html2canvas==='undefined')throw new Error('html2canvas-not-ready');  // โหลดแบบ defer — กันกดก่อนสคริปต์พร้อม
   const liveCard=curCardEl||stage.querySelector('.card');
   if(!liveCard)throw new Error('no card');
   const liveImg=liveCard.querySelector('img.bg');
@@ -999,7 +1000,8 @@ function showImageViewer(canvas,fname){
   document.getElementById('imgViewer')?.remove();
   const dataUrl=canvas.toDataURL('image/png');
   const ov=document.createElement('div');ov.id='imgViewer';
-  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:16px;';
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:16px;overflow:auto;';
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});  // แตะพื้นมืดก็ปิดได้ (กันค้างบนจอเล็ก/จอพับ)
   const tip=document.createElement('div');
   tip.style.cssText="font-family:'Sarabun';font-size:17px;font-weight:700;color:#fff;text-align:center;line-height:1.6;background:rgba(255,255,255,.12);padding:12px 20px;border-radius:14px;";
   tip.innerHTML='📥 <b>กดค้างที่รูปด้านล่าง</b><br>แล้วเลือก "บันทึกรูปภาพ"';
@@ -1030,6 +1032,9 @@ document.getElementById('btnLine').onclick=async()=>{
     const fname=`${M.headline||'สวัสดี'}.png`;
     const blob=await new Promise(res=>c.toBlob(res,'image/png'));
     const file=blob?new File([blob],fname,{type:'image/png'}):null;
+
+    // 0) ใน LINE in-app browser: navigator.share มักค้าง (ปุ่มค้าง "กำลังเตรียม…") → ไป viewer เลย
+    if(IS_LINE||IS_LINE_WV){showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อแชร์เข้า LINE 👆');trackGC('line');track2('line',CARDS[curIdx]);return;}
 
     // 1) Web Share API — เปิดแผงแชร์ของระบบ เลือก LINE แล้วส่งให้เพื่อนได้จริง (Chrome/Safari มือถือ)
     if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
