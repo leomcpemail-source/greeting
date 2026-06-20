@@ -42,7 +42,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Charm:wght@400;700&family=Mitr:wght@400;500;600&family=Kanit:wght@400;500;600;700&family=Itim&family=Mali:wght@400;600&family=Sriracha&family=Pattaya&family=Bai+Jamjuree:wght@600&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script defer src="assets/html2canvas.min.js"></script>
 <script data-goatcounter="https://leomcpemail.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -989,8 +989,16 @@ async function bgDataUrl(url){
   const d=await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(b);});
   _bgCache.set(url,d);return d;
 }
+// รอ html2canvas (โหลดแบบ defer) ให้พร้อมก่อน — กัน iOS/LINE กดบันทึก/แชร์ครั้งแรกแล้วพลาดเพราะสคริปต์ยังโหลดไม่เสร็จ
+function ensureH2C(){
+  if(typeof html2canvas!=='undefined')return Promise.resolve();
+  return new Promise((res,rej)=>{let n=0;const t=setInterval(()=>{
+    if(typeof html2canvas!=='undefined'){clearInterval(t);res();}
+    else if(++n>120){clearInterval(t);rej(new Error('html2canvas-load-timeout'));}
+  },100);});
+}
 async function snapshot(){
-  if(typeof html2canvas==='undefined')throw new Error('html2canvas-not-ready');  // โหลดแบบ defer — กันกดก่อนสคริปต์พร้อม
+  await ensureH2C();   // รอสคริปต์ให้พร้อม (Android ที่โหลดเสร็จแล้วผ่านทันที ไม่กระทบ)
   const liveCard=curCardEl||stage.querySelector('.card');
   if(!liveCard)throw new Error('no card');
   const liveImg=liveCard.querySelector('img.bg');
