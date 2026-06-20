@@ -352,6 +352,7 @@ html,body{
 <script>
 /* ── LINE DETECTION ── */
 const IS_LINE = /\bLine\b/i.test(navigator.userAgent) || /FBAN|FBAV|Instagram/i.test(navigator.userAgent);
+const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 if(IS_LINE)document.getElementById('appEl').classList.add('line-browser');
 
 /* ── CONFIG ── */
@@ -485,6 +486,8 @@ function showCard(idx,dir){
   if(dir){requestAnimationFrame(()=>{cw.style.transition='opacity .28s,transform .28s';cw.style.opacity='1';cw.style.transform='translateX(0)';});}
   updateThumbActive();
   preloadNeighbors(curIdx);
+  // warm cache data URL ของรูปการ์ดนี้ไว้ล่วงหน้า → กดบันทึก/แชร์ครั้งแรกเร็ว ไม่ค้าง
+  const _bg=curCardEl&&curCardEl.querySelector('img.bg');if(_bg&&_bg.src)bgDataUrl(_bg.src).catch(()=>{});
 }
 
 function nextCard(){showCard(curIdx+1,1);track2('next');}
@@ -976,6 +979,16 @@ function applyFrameToCard(card,fr){
 }
 /* ════════════ SNAPSHOT (single card) ════════════ */
 const IS_LINE_WV=/\bLine\b/i.test(navigator.userAgent);
+// แปลงรูปพื้นหลังเป็น data URL (same-origin) — กัน canvas โดน taint จาก CORS ทำให้ save/share พลาดครั้งแรก
+const _bgCache=new Map();
+async function bgDataUrl(url){
+  if(_bgCache.has(url))return _bgCache.get(url);
+  const r=await fetch(url,{mode:'cors',cache:'force-cache'});
+  if(!r.ok)throw new Error('img '+r.status);
+  const b=await r.blob();
+  const d=await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(b);});
+  _bgCache.set(url,d);return d;
+}
 async function snapshot(){
   if(typeof html2canvas==='undefined')throw new Error('html2canvas-not-ready');  // โหลดแบบ defer — กันกดก่อนสคริปต์พร้อม
   const liveCard=curCardEl||stage.querySelector('.card');
@@ -990,7 +1003,12 @@ async function snapshot(){
   wrap.style.cssText=`position:fixed;left:-${CW+300}px;top:0;width:${CW}px;height:${CW}px;overflow:hidden;z-index:-9999;opacity:0;pointer-events:none;background:#1a1208`;
   wrap.appendChild(clone);document.body.appendChild(wrap);
   const cloneImg=clone.querySelector('img.bg');
-  if(liveImg&&cloneImg){cloneImg.crossOrigin='anonymous';cloneImg.style.opacity='1';if(cloneImg.src!==liveImg.src)cloneImg.src=liveImg.src;
+  if(liveImg&&cloneImg){
+    cloneImg.style.opacity='1';
+    // ใช้ data URL ของรูปพื้นหลัง (same-origin) → html2canvas ไม่โดน taint, save/share สำเร็จตั้งแต่ครั้งแรก
+    let durl=null;try{durl=await bgDataUrl(liveImg.src);}catch(e){}
+    if(durl){cloneImg.removeAttribute('crossorigin');cloneImg.src=durl;}
+    else{cloneImg.crossOrigin='anonymous';if(cloneImg.src!==liveImg.src)cloneImg.src=liveImg.src;}
     if(!cloneImg.complete||cloneImg.naturalWidth===0){await new Promise(res=>{cloneImg.onload=res;cloneImg.onerror=res;setTimeout(res,8000);});}}
   if(document.fonts&&document.fonts.ready){try{await Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,3000))]);}catch(e){}}
   let canvas;
@@ -1035,15 +1053,6 @@ document.getElementById('btnSave').onclick=async()=>{
 document.getElementById('btnLine').onclick=async()=>{
   const btn=document.getElementById('btnLine');const m=btn.querySelector('.bt-main');const orig=m.innerHTML;
   if(btn.disabled)return;
-  // ใน LINE in-app browser: Web Share รูปไม่รองรับ (โดยเฉพาะ iOS) ปุ่มเลยเงียบ → ใช้ "ตัวแชร์ของ LINE"
-  // ส่งลิงก์ให้เพื่อนแบบแตะเดียว เชื่อถือได้ (เพื่อนเปิดลิงก์ก็เห็นการ์ดสวัสดีวันนี้ + บันทึกเองได้)
-  if(IS_LINE||IS_LINE_WV){
-    const url=location.origin+location.pathname;
-    const msg=((M&&M.headline)?M.headline+'\n':'')+'ส่งความสุขให้กันทุกวันนะคะ 🌸\n'+url;
-    trackGC('line');track2('line',CARDS[curIdx]);
-    location.href='https://line.me/R/share?text='+encodeURIComponent(msg);
-    return;
-  }
   m.textContent='กำลังเตรียม…';btn.disabled=true;
   try{
     const c=await snapshot();
@@ -1051,20 +1060,23 @@ document.getElementById('btnLine').onclick=async()=>{
     const blob=await new Promise(res=>c.toBlob(res,'image/png'));
     const file=blob?new File([blob],fname,{type:'image/png'}):null;
 
-    // 1) Web Share API — เปิดแผงแชร์ของระบบ เลือก LINE แล้วส่งให้เพื่อนได้จริง (Chrome/Safari มือถือ)
+    // 1) iOS ในแอป LINE: Web Share รูปมักไม่รองรับ/ค้าง → โชว์รูปให้กดค้างบันทึก/ส่งต่อ (ได้ "รูป" จริง)
+    if((IS_LINE||IS_LINE_WV)&&IS_IOS){showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อบันทึก/ส่งต่อเข้า LINE 👆');trackGC('line');track2('line',CARDS[curIdx]);return;}
+
+    // 2) Web Share API — แอนดรอยด์ (รวม LINE แอนดรอยด์) + เบราว์เซอร์มือถือ → ส่ง "รูป" ให้เพื่อนได้จริง
     if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
       try{await navigator.share({files:[file]});trackGC('line');track2('line',CARDS[curIdx]);return;}
       catch(err){if(err&&err.name==='AbortError')return;/* ไม่รองรับ/หมดสิทธิ์ → fallback ข้างล่าง */}
     }
 
-    // 2) เดสก์ท็อป: คัดลอกรูปลงคลิปบอร์ด แล้วไปวางใน LINE ได้เลย
+    // 3) เดสก์ท็อป: คัดลอกรูปลงคลิปบอร์ด แล้วไปวางใน LINE ได้เลย
     if(!IS_LINE&&blob&&window.ClipboardItem&&navigator.clipboard?.write){
       try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
         toast('คัดลอกแล้ว เปิด LINE แล้ววางได้เลย ✓');trackGC('line');track2('line',CARDS[curIdx]);return;}
       catch{/* ตกไป viewer */}
     }
 
-    // 3) Fallback (LINE in-app / เบราว์เซอร์เก่า): แสดงรูปให้กดค้างเพื่อแชร์/บันทึก
+    // 4) Fallback (LINE in-app / เบราว์เซอร์เก่า): แสดงรูปให้กดค้างเพื่อแชร์/บันทึก
     showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อแชร์เข้า LINE 👆');
     trackGC('line');track2('line',CARDS[curIdx]);
   }
