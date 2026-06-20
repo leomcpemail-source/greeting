@@ -11,7 +11,6 @@
 const G = (globalThis as any).__SEC ?? {};
 const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") || G.AT || "";
 const CRON_KEY = Deno.env.get("CRON_KEY") || G.CRON || "";
-const ADMIN_TOKEN = Deno.env.get("DASH_ADMIN_TOKEN") || G.DASH || "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || G.URL || "https://iuyiwpoupnuxnohpatyw.supabase.co";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || G.SK || "";
 const APP_URL = Deno.env.get("APP_URL") ?? "https://leomcpemail-source.github.io/greeting/";
@@ -177,7 +176,14 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   const token = url.searchParams.get("token");
   const isCron = CRON_KEY !== "" && req.headers.get("x-cron-key") === CRON_KEY;
-  const isAdmin = !!(token && ADMIN_TOKEN !== "" && token === ADMIN_TOKEN);
+  // admin = session token จาก db.html (ออกหลังยืนยัน TOTP) → ตรวจกับตาราง line_admin_sessions
+  let isAdmin = false;
+  if (!isCron && token) {
+    try {
+      const sr = await fetch(`${SUPABASE_URL}/rest/v1/line_admin_sessions?token=eq.${encodeURIComponent(token)}&select=expires_at`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
+      if (sr.ok) { const rows = await sr.json(); isAdmin = !!(rows[0] && new Date(rows[0].expires_at).getTime() > Date.now()); }
+    } catch { /* ignore */ }
+  }
   if (!isCron && !isAdmin) return json({ error: "unauthorized" }, 401);
 
   const force = url.searchParams.get("style");
