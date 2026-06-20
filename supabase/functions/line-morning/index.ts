@@ -7,11 +7,13 @@
 // ENV: LINE_CHANNEL_ACCESS_TOKEN, CRON_KEY, DASH_ADMIN_TOKEN, SUPABASE_URL,
 //      SUPABASE_SERVICE_ROLE_KEY, (ออปชัน) APP_URL, CARDS_PER_DAY
 
-const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") ?? "";
-const CRON_KEY = Deno.env.get("CRON_KEY") ?? "";
-const ADMIN_TOKEN = Deno.env.get("DASH_ADMIN_TOKEN") ?? "";
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+// secrets: รับจาก env ถ้าตั้งไว้ ไม่งั้นจาก globalThis.__SEC ที่ตัว loader ใส่ให้ (ไม่ฝัง secret ในรีโป)
+const G = (globalThis as any).__SEC ?? {};
+const ACCESS_TOKEN = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN") || G.AT || "";
+const CRON_KEY = Deno.env.get("CRON_KEY") || G.CRON || "";
+const ADMIN_TOKEN = Deno.env.get("DASH_ADMIN_TOKEN") || G.DASH || "";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || G.URL || "https://iuyiwpoupnuxnohpatyw.supabase.co";
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || G.SK || "";
 const APP_URL = Deno.env.get("APP_URL") ?? "https://leomcpemail-source.github.io/greeting/";
 const CARDS_PER_DAY = Number(Deno.env.get("CARDS_PER_DAY") ?? "5");
 const GO = `${SUPABASE_URL}/functions/v1/line-go`;
@@ -174,12 +176,15 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url);
   const token = url.searchParams.get("token");
-  const authed = req.headers.get("x-cron-key") === CRON_KEY || (token && token === ADMIN_TOKEN);
-  if (!authed) return json({ error: "unauthorized" }, 401);
+  const isCron = CRON_KEY !== "" && req.headers.get("x-cron-key") === CRON_KEY;
+  const isAdmin = !!(token && ADMIN_TOKEN !== "" && token === ADMIN_TOKEN);
+  if (!isCron && !isAdmin) return json({ error: "unauthorized" }, 401);
 
   const force = url.searchParams.get("style");
   const dry = url.searchParams.get("dry") === "1";
   const to = url.searchParams.get("to");   // ยิงรายคน (โหมดทดสอบ)
+  // broadcast (ไม่มี to = ส่งทุกคน) อนุญาตเฉพาะ cron เท่านั้น — admin token ส่งได้แค่รายคน (กันสแปมหากโทเค็นหลุด)
+  if (!to && !isCron) return json({ error: "broadcast_requires_cron" }, 403);
 
   const style: "images" | "cards" = force === "cards" || force === "images"
     ? force
