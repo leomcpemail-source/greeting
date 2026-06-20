@@ -34,11 +34,17 @@ const CATS = [
   "family", "pets", "coffee", "nature",
 ];
 
-// เมนูหน้าแรก 3 ปุ่ม (รูป main.jpg แบ่ง 3 คอลัมน์): หน้าแรก | ตามหมวด | ส่งรูปทำภาพสวัสดี
+// เมนูหน้าแรก 4 ปุ่ม:
+//   คอลัมน์ซ้าย (เต็มสูง) = หน้าแรก
+//   คอลัมน์กลาง แบ่ง 2 แถว: บน = ภาพตามหมวด , ล่าง = สร้างภาพสวัสดีของคุณ
+//   คอลัมน์ขวา (เต็มสูง) = AI โสเหล่ (เว็บแอปคุยกับ AI ตัวละคร)
+const HALF = Math.round(H / 2); // 843
+const AISOLE_URL = Deno.env.get("AISOLE_URL") ?? "https://leomcpemail-source.github.io/aisole/";
 const mainAreas = [
   { bounds: { x: 0, y: 0, width: 833, height: H }, action: { type: "uri", uri: `${GO}?s=rm_home` } },
-  { bounds: { x: 833, y: 0, width: 834, height: H }, action: { type: "richmenuswitch", richMenuAliasId: ALIAS_CATS, data: "to=categories" } },
-  { bounds: { x: 1667, y: 0, width: 833, height: H }, action: { type: "message", text: "อยากทำภาพสวัสดีจากรูปของฉัน 📷" } },
+  { bounds: { x: 833, y: 0, width: 834, height: HALF }, action: { type: "richmenuswitch", richMenuAliasId: ALIAS_CATS, data: "to=categories" } },
+  { bounds: { x: 833, y: HALF, width: 834, height: H - HALF }, action: { type: "message", text: "อยากทำภาพสวัสดีจากรูปของฉัน 📷" } },
+  { bounds: { x: 1667, y: 0, width: 833, height: H }, action: { type: "uri", uri: `${GO}?s=rm_aisole&to=${encodeURIComponent(AISOLE_URL)}` } },
 ];
 
 function catAreas() {
