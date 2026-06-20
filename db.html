@@ -262,12 +262,20 @@ const SB_LINE_URL  = "https://iuyiwpoupnuxnohpatyw.supabase.co";
 const SB_LINE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1eWl3cG91cG51eG5vaHBhdHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzEwOTcsImV4cCI6MjA5MDA0NzA5N30.FEi3t39fuuQChq0OMGtTYZe5dnHP5OVi82eXP75uUic";
 const LINE_STATS_TOKEN = "lstat_9f3c1ab27e5d4";   // อ่านสถิติ LINE (read-only)
 const LINE_FN = SB_LINE_URL + "/functions/v1";
-// admin token: ไม่ฝังในหน้าเว็บสาธารณะแล้ว (กันคนเอาไปยิง/ดึงรายชื่อ) — ให้แอดมินพิมพ์เองครั้งแรก เก็บใน sessionStorage
-function adminToken(){
-  let t=sessionStorage.getItem('ladmin')||'';
-  if(!t){ t=(prompt('ใส่รหัสแอดมิน (admin token) เพื่อใช้คำสั่งผู้ดูแล:')||'').trim(); if(t) sessionStorage.setItem('ladmin',t); }
-  return t;
+// ล็อกอินแอดมินด้วย Authenticator (TOTP): กรอกเลข 6 หลัก → server ออก session token (อายุ 12 ชม.) เก็บใน sessionStorage
+// ไม่มีรหัสคงที่ฝังในหน้าเว็บอีกแล้ว
+async function adminToken(){
+  let t=sessionStorage.getItem('asess')||'';
+  if(t) return t;
+  const code=(prompt('🔐 ใส่รหัส 6 หลักจากแอป Authenticator:')||'').trim();
+  if(!code) return '';
+  try{
+    const d=await lineRpc('admin_login',{p_code:code});
+    if(d&&d.token){ sessionStorage.setItem('asess',d.token); return d.token; }
+  }catch(e){}
+  alert('รหัสไม่ถูกต้องหรือหมดอายุ ลองใหม่นะคะ'); return '';
 }
+function adminLogout(){ sessionStorage.removeItem('asess'); }
 
 const todayISO = new Date().toLocaleDateString('sv-SE');
 let PASS='', DAYS=36500, DATE_FILTER=null, charts={}, _timer=null;
@@ -719,7 +727,7 @@ function renderLine(d, host){
 async function loadLearn(){
   const host=$('learnWrap'); if(!host) return;
   try{
-    const d=await lineRpc('line_learn_read',{p_token:adminToken(),p_days:DAYS||30});
+    const d=await lineRpc('line_learn_read',{p_token:await adminToken(),p_days:DAYS||30});
     if(d?.error){ host.innerHTML=`<div style="color:var(--mut);font-size:12px">เข้าถึงไม่ได้ (${esc(d.error)})</div>`; return; }
     renderLearn(d,host);
   }catch(e){ host.innerHTML=`<div style="color:var(--mut);font-size:12px">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`; }
@@ -751,7 +759,7 @@ function renderLearn(d,host){
 }
 async function learnSet(id,status){
   try{
-    const d=await lineRpc('line_learn_set',{p_token:adminToken(),p_id:id,p_status:status});
+    const d=await lineRpc('line_learn_set',{p_token:await adminToken(),p_id:id,p_status:status});
     if(d?.error){ alert('ทำรายการไม่สำเร็จ: '+esc(d.error)); return; }
     loadLearn();
   }catch(e){ alert('ทำรายการไม่สำเร็จ: '+e.message); }
@@ -763,7 +771,7 @@ async function loadFriendsForTest(){
   $('lineTestPanel').style.display='';
   const tbl=$('testTable'); if(tbl) tbl.innerHTML='<tr><td style="color:var(--mut);padding:10px">กำลังโหลดรายชื่อ…</td></tr>';
   try{
-    const list=await lineRpc('line_friends_list',{ p_token:adminToken() });
+    const list=await lineRpc('line_friends_list',{ p_token:await adminToken() });
     if(list?.error){ _testFriends=[]; if(tbl) tbl.innerHTML=`<tr><td style="color:var(--red);padding:10px">เข้าถึงรายชื่อไม่ได้ (${esc(list.error)})</td></tr>`; return; }
     _testFriends=Array.isArray(list)?list:[]; _testPage=1;
     renderTestTable();
@@ -827,7 +835,7 @@ async function sendTest(uid, label, style, btn){
   btn.disabled=true; btn.textContent='⏳';
   res.style.color='var(--mut)'; res.textContent='กำลังยิง '+label+'…';
   try{
-    const u=`${LINE_FN}/line-morning?token=${encodeURIComponent(adminToken())}&to=${encodeURIComponent(uid)}&style=${style}`;
+    const u=`${LINE_FN}/line-morning?token=${encodeURIComponent(await adminToken())}&to=${encodeURIComponent(uid)}&style=${style}`;
     const r=await fetch(u,{method:'POST'});
     const d=await r.json().catch(()=>({}));
     if(r.ok && !d.error){ res.innerHTML=`<span style="color:#7fd1a0">✓ ส่ง ${esc(label)} แล้ว — ${N(d.ok)} ฉบับ (${N(d.cards)} รูป)</span>`; }
