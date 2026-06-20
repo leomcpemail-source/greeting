@@ -983,7 +983,7 @@ const IS_LINE_WV=/\bLine\b/i.test(navigator.userAgent);
 const _bgCache=new Map();
 async function bgDataUrl(url){
   if(_bgCache.has(url))return _bgCache.get(url);
-  const r=await fetch(url,{mode:'cors',cache:'force-cache'});
+  const r=await fetch(url,{mode:'cors'});
   if(!r.ok)throw new Error('img '+r.status);
   const b=await r.blob();
   const d=await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(b);});
@@ -1028,7 +1028,18 @@ async function snapshot(){
     ]);
   }
   finally{if(wrap.parentNode)document.body.removeChild(wrap);}
+  // ตรวจ taint ทันที — ถ้าโดน (รูปข้ามโดเมนยังไม่ CORS-clean) โยน error เพื่อให้ snapshotReliable ลองใหม่
+  try{canvas.getContext('2d').getImageData(0,0,1,1);}catch(te){throw new Error('tainted-canvas');}
   return canvas;
+}
+// กด "ครั้งเดียว" ให้สำเร็จ — ถ้าครั้งแรก canvas เสีย/taint (พบบ่อยใน iOS ครั้งแรก) ลองซ้ำเองอัตโนมัติ
+async function snapshotReliable(){
+  let lastErr;
+  for(let i=0;i<3;i++){
+    try{return await snapshot();}
+    catch(e){lastErr=e; if(i<2)await new Promise(r=>setTimeout(r,300+i*300));}
+  }
+  throw lastErr;
 }
 
 function showImageViewer(canvas,fname){
@@ -1051,7 +1062,7 @@ document.getElementById('btnSave').onclick=async()=>{
   const btn=document.getElementById('btnSave');const m=btn.querySelector('.bt-main');const orig=m.innerHTML;
   if(btn.disabled)return;
   m.textContent='กำลังบันทึก…';btn.disabled=true;
-  try{const c=await snapshot();const fname=`${M.headline||'สวัสดีวันนี้'}.png`;
+  try{const c=await snapshotReliable();const fname=`${M.headline||'สวัสดีวันนี้'}.png`;
     if(IS_LINE||IS_LINE_WV){showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อบันทึก 👆');}
     else{const a=document.createElement('a');a.download=fname;a.href=c.toDataURL('image/png');a.click();toast('บันทึกแล้ว ✓');}
     trackGC('download');track2('download',CARDS[curIdx]);}
@@ -1063,7 +1074,7 @@ document.getElementById('btnLine').onclick=async()=>{
   if(btn.disabled)return;
   m.textContent='กำลังเตรียม…';btn.disabled=true;
   try{
-    const c=await snapshot();
+    const c=await snapshotReliable();
     const fname=`${M.headline||'สวัสดี'}.png`;
     const blob=await new Promise(res=>c.toBlob(res,'image/png'));
     const file=blob?new File([blob],fname,{type:'image/png'}):null;
