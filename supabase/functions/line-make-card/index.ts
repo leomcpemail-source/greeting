@@ -90,14 +90,29 @@ async function loadDay() {
   return { headline: headlineToday(), bless: pick(FALLBACK_BLESS), dateThai: dateThaiToday(), color: dc[0], color2: dc[1] };
 }
 
-function wrap2(t: string, maxLen: number): string[] {
-  if (t.length <= maxLen) return [t];
-  const parts = t.split(" ");
-  if (parts.length < 2) return [t.slice(0, maxLen), t.slice(maxLen)];
-  let l1 = "", i = 0;
-  for (; i < parts.length; i++) { if ((l1 + " " + parts[i]).trim().length > maxLen && l1) break; l1 = (l1 + " " + parts[i]).trim(); }
-  const l2 = parts.slice(i).join(" ");
-  return l2 ? [l1, l2] : [l1];
+// ตัดคำอวยพรเป็นหลายบรรทัด (greedy ตามคำ) — คำเดี่ยวยาวเกินก็ตัดแข็ง กันล้นกรอบ
+function wrapLines(t: string, maxChars: number): string[] {
+  const words = String(t).trim().split(/\s+/);
+  const lines: string[] = [];
+  let cur = "";
+  for (const w of words) {
+    if (!cur) cur = w;
+    else if ((cur + " " + w).length <= maxChars) cur += " " + w;
+    else { lines.push(cur); cur = w; }
+    while (cur.length > maxChars) { lines.push(cur.slice(0, maxChars)); cur = cur.slice(maxChars); }
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [String(t)];
+}
+// จัดวางคำอวยพรให้ "พอดีกรอบเสมอ" — เลือกขนาดฟอนต์อัตโนมัติให้ไม่ล้นทั้งแนวกว้างและแนวสูง
+function layoutBless(text: string): { lines: string[]; F: number; lineGap: number; bandTop: number; bandH: number } {
+  const MAXW = 860, bandTop = 782, bandBot = 916, bandH = bandBot - bandTop;
+  for (let F = 42; ; F -= 2) {
+    const maxChars = Math.max(8, Math.floor(MAXW / (F * 0.55)));
+    const lines = wrapLines(text, maxChars);
+    const lineGap = Math.round(F * 1.25);
+    if (lines.length * lineGap <= bandH || F <= 22) return { lines, F, lineGap, bandTop, bandH };
+  }
 }
 
 function buildSvg(photoDataUri: string, day: { headline: string; bless: string; dateThai: string; color: string; color2: string }) {
@@ -111,11 +126,13 @@ function buildSvg(photoDataUri: string, day: { headline: string; bless: string; 
   const headline =
     `<text x="500" y="${hY}" ${tA} fill="none" stroke="${col2}" stroke-opacity="0.92" stroke-width="17" paint-order="stroke">${tx(hl)}</text>` +
     `<text x="500" y="${hY}" ${tA} fill="#ffffff" stroke="${col}" stroke-width="6" paint-order="stroke">${tx(hl)}</text>`;
-  const blLines = wrap2(day.bless, 30);
-  let by = 855 - (blLines.length - 1) * 26;
-  const blessText = blLines.map((ln) => {
-    const t = `<text x="500" y="${by}" font-family="Sarabun" font-weight="700" font-size="40" fill="#ffffff" text-anchor="middle" stroke="${col2}" stroke-opacity="0.85" stroke-width="6" paint-order="stroke">${tx(ln)}</text>`;
-    by += 52; return t;
+  const bl = layoutBless(day.bless);
+  const blTotal = bl.lines.length * bl.lineGap;
+  let by = bl.bandTop + (bl.bandH - blTotal) / 2 + bl.F;   // baseline บรรทัดแรก (จัดกึ่งกลางแนวสูงในแถบ)
+  const blStroke = Math.max(3, Math.round(bl.F * 0.15));
+  const blessText = bl.lines.map((ln) => {
+    const t = `<text x="500" y="${by.toFixed(0)}" font-family="Sarabun" font-weight="700" font-size="${bl.F}" fill="#ffffff" text-anchor="middle" stroke="${col2}" stroke-opacity="0.85" stroke-width="${blStroke}" paint-order="stroke">${tx(ln)}</text>`;
+    by += bl.lineGap; return t;
   }).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
     <defs>
