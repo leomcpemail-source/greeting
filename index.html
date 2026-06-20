@@ -180,10 +180,6 @@ html,body{
 .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
 
 /* LINE notice */
-.line-notice{display:none;padding:0 16px 8px;flex-shrink:0;}
-.line-browser .line-notice{display:block;}
-.line-notice-in{background:var(--line);border-radius:12px;padding:9px 13px;display:flex;gap:8px;align-items:flex-start;}
-.line-notice-tx{font-family:'Sarabun';font-size:13px;font-weight:600;color:#fff;line-height:1.5;}
 
 /* ═══════════════ PAGE: CATEGORY ═══════════════ */
 #pageCategory{background:#fff;overflow-y:auto;}
@@ -297,13 +293,6 @@ html,body{
       </button>
     </div>
 
-    <div class="line-notice">
-      <div class="line-notice-in">
-        <div style="font-size:16px;flex-shrink:0">💬</div>
-        <div class="line-notice-tx" id="lineNoticeTx">กดปุ่ม <b>บันทึกรูป</b> เพื่อเก็บรูป · กด <b>ส่งเข้า LINE</b> เพื่อส่งให้เพื่อน</div>
-      </div>
-    </div>
-
     <div class="thumbs" id="thumbs" style="display:none">
       <div class="thumbs-label">🌸 รูปเพิ่มเติมของวันนี้</div>
       <div class="thumb-row" id="thumbRow"></div>
@@ -354,9 +343,6 @@ const IS_LINE = /\bLine\b/i.test(navigator.userAgent) || /FBAN|FBAV|Instagram/i.
 const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 if(IS_LINE)document.getElementById('appEl').classList.add('line-browser');
 // ข้อความแนะนำในแอป LINE ต่างกันตามระบบ: iOS ต้องแตะรูปค้าง / Android เซฟลงเครื่องได้เลย
-if(IS_LINE){const _n=document.getElementById('lineNoticeTx');if(_n)_n.innerHTML=IS_IOS
-  ? 'กดปุ่มแล้ว <b>แตะรูปค้างไว้</b> → เลือก “บันทึกลงรูปภาพ” หรือ “แชร์” เข้า LINE'
-  : 'กดปุ่มแล้ว <b>เลือก “บันทึก” หรือ “ส่งต่อ”</b> ในแผงที่เด้งขึ้นได้เลย';}
 
 /* ── CONFIG ── */
 const REPO   = "leomcpemail-source/greeting";
