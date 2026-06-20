@@ -356,7 +356,7 @@ if(IS_LINE)document.getElementById('appEl').classList.add('line-browser');
 // ข้อความแนะนำในแอป LINE ต่างกันตามระบบ: iOS ต้องแตะรูปค้าง / Android เซฟลงเครื่องได้เลย
 if(IS_LINE){const _n=document.getElementById('lineNoticeTx');if(_n)_n.innerHTML=IS_IOS
   ? 'กดปุ่มแล้ว <b>แตะรูปค้างไว้</b> → เลือก “บันทึกลงรูปภาพ” หรือ “แชร์” เข้า LINE'
-  : 'กด <b>บันทึกรูป</b> รูปจะเซฟลงเครื่องเลย · กด <b>ส่งเข้า LINE</b> เพื่อส่งให้เพื่อน';}
+  : 'กดปุ่มแล้ว <b>เลือก “บันทึก” หรือ “ส่งต่อ”</b> ในแผงที่เด้งขึ้นได้เลย';}
 
 /* ── CONFIG ── */
 const REPO   = "leomcpemail-source/greeting";
@@ -1012,10 +1012,17 @@ document.getElementById('btnSave').onclick=async()=>{
   m.textContent='กำลังบันทึก…';btn.disabled=true;
   try{
     if(IS_IOS){
-      // iOS: ดาวน์โหลดตรงไม่ได้ → ต้องแตะรูปค้างเพื่อบันทึก
+      // iOS: ดาวน์โหลดตรงไม่ได้ → แตะรูปค้างเพื่อบันทึก
       showImageViewer(curCardUrl(),curFname(),'save');
+    } else if(IS_LINE||IS_LINE_WV){
+      // Android ในแอป LINE: ดาวน์โหลดตรงไม่ได้ (LINE บล็อก เด้ง popup) → ใช้แผงแชร์ของเครื่อง (มีตัวเลือกบันทึก/ส่ง)
+      const {url,file}=await curCardFile();
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file]});}
+        catch(err){if(!(err&&err.name==='AbortError'))showImageViewer(url,curFname(),'save');}
+      } else { showImageViewer(url,curFname(),'save'); }
     } else {
-      // Android + คอม: เซฟลงเครื่องอัตโนมัติ (ดูในอัลบั้ม/แกลเลอรี)
+      // เบราว์เซอร์ปกติ (Chrome/Safari นอกแอป LINE): เซฟลงเครื่องอัตโนมัติ
       const {blob}=await curCardFile();
       const a=document.createElement('a');a.download=curFname();a.href=URL.createObjectURL(blob);a.click();
       setTimeout(()=>URL.revokeObjectURL(a.href),8000);
