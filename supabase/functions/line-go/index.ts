@@ -21,8 +21,15 @@ Deno.serve(async (req) => {
   const cat = CATS.has(catRaw) ? catRaw : "";
   const src = (u.searchParams.get("s") || "").replace(/[^a-z0-9_]/gi, "").slice(0, 24);
 
+  // ปลายทางภายนอกที่อนุญาต (กัน open-redirect) — เว็บในเครือเดียวกันเท่านั้น เช่น AI โสเหล่
+  const ALLOW_HOSTS = new Set(["leomcpemail-source.github.io"]);
   let dest = APP_URL;
-  if (cat) dest += (APP_URL.includes("?") ? "&" : "?") + "cat=" + encodeURIComponent(cat);
+  const toRaw = u.searchParams.get("to") || "";
+  if (toRaw) {
+    try { const t = new URL(toRaw); if (ALLOW_HOSTS.has(t.hostname)) dest = t.toString(); } catch { /* ignore bad url */ }
+  } else if (cat) {
+    dest += (APP_URL.includes("?") ? "&" : "?") + "cat=" + encodeURIComponent(cat);
+  }
 
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/line_events`, {
