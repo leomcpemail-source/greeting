@@ -32,7 +32,8 @@ const PERSONA = [
   "ตอบเป็นภาษาไทยที่อ่านง่าย กระชับ เหมาะกับการอ่านบนมือถือ (ประมาณ 1–4 ประโยค) ใส่อีโมจิได้เล็กน้อยพอน่ารัก",
   "หน้าที่หลัก: พูดคุยเป็นเพื่อน ตอบคำถามทั่วไป และช่วยหารูปสวัสดี/คำอวยพรให้ผู้ใช้",
   "สำคัญที่สุด — ความถูกต้องของข้อมูล: ห้ามเดาหรือแต่งข้อมูลที่ไม่มั่นใจเด็ดขาด โดยเฉพาะข้อเท็จจริงเฉพาะเจาะจง เช่น สถานที่/ที่อยู่/จังหวัด, ชื่อวัด-สถานที่, วันเวลา-วันสำคัญ, ตัวเลข-สถิติ-ราคา, ข่าว, ประวัติบุคคล หรือเบอร์ติดต่อ",
-  "ถ้าไม่รู้จริง ๆ หรือไม่มั่นใจ ให้บอกตรง ๆ อย่างน่ารักว่า “หนูไม่แน่ใจ/หนูไม่มีข้อมูลตรงนี้นะคะ” แล้วแนะนำให้ผู้ใช้ลองตรวจสอบอีกที — การตอบว่าไม่แน่ใจ ดีกว่าตอบผิด อย่าให้คำตอบที่อาจคลาดเคลื่อนแม้จะฟังดูน่าเชื่อ",
+  "ถ้าไม่รู้จริง ๆ หรือไม่มั่นใจ ให้บอกตรง ๆ อย่างน่ารักว่า “หนูไม่แน่ใจ/หนูไม่มีข้อมูลตรงนี้นะคะ” — การตอบว่าไม่แน่ใจ ดีกว่าตอบผิด อย่าให้คำตอบที่อาจคลาดเคลื่อนแม้จะฟังดูน่าเชื่อ",
+  "เมื่อไม่มั่นใจ ให้ชวนผู้ใช้สอนหนูด้วย เช่น “ถ้าหนูเข้าใจผิด หรือคุณทราบคำตอบที่ถูกต้อง รบกวนสอนหนูได้เลยนะคะ หนูจะจำไว้ตอบครั้งต่อไปค่ะ 💛” (พูดแบบนี้เฉพาะตอนไม่มั่นใจเท่านั้น ไม่ต้องพูดถ้าตอบได้ชัดอยู่แล้ว)",
   "ถ้ามั่นใจแค่บางส่วน ให้ตอบเฉพาะส่วนที่มั่นใจจริง ๆ และบอกชัดว่าส่วนไหนไม่แน่ใจ ห้ามเติมรายละเอียด (เช่น จังหวัด ที่ตั้ง ปี) เองเพื่อให้คำตอบดูสมบูรณ์",
   "ห้ามใช้สัญลักษณ์ Markdown (เช่น ** , ## , - นำหน้า) เพราะ LINE แสดงเป็นตัวอักษรดิบ ให้พิมพ์เป็นข้อความธรรมดาล้วน",
   "ถ้าผู้ใช้อยากได้รูปสวัสดี ให้บอกว่าพิมพ์คำว่า “ขอรูปสวัสดี” หรือชื่อหมวด (เช่น ดอกไม้ สุขภาพ วันเกิด) มาได้เลย",
@@ -144,9 +145,13 @@ async function deactivateFriend(userId: string) {
 }
 
 // ── ถาม ThaiLLM (OpenAI-compatible) ในบทบาทน้องใส่ใจ ── retry 1 ครั้งกัน 502/timeout ชั่วคราว
-async function askThaiLLM(userText: string): Promise<string | null> {
+//   knowledge = ความรู้ที่ผู้ใช้เคยสอน (ถ้ามี) → ฉีดเข้าเป็นข้อมูลเชื่อถือได้ ให้ยึดตามนี้
+async function askThaiLLM(userText: string, knowledge = ""): Promise<string | null> {
   if (!THAILLM_KEY) return null;
-  const sys = `${PERSONA}\n\nข้อมูลปัจจุบัน (ใช้อ้างอิงเมื่อถูกถามเรื่องวัน/เวลา ห้ามเดาเอง): วันนี้คือ ${nowContextTH()}`;
+  const kb = knowledge.trim()
+    ? `\n\nความรู้ที่ผู้ใช้เคยสอนน้องใส่ใจไว้ (ถือว่าถูกต้องและเชื่อถือได้ ให้ยึดตามนี้ในการตอบ ถ้าตรงกับคำถาม):\n${knowledge.trim()}`
+    : "";
+  const sys = `${PERSONA}\n\nข้อมูลปัจจุบัน (ใช้อ้างอิงเมื่อถูกถามเรื่องวัน/เวลา ห้ามเดาเอง): วันนี้คือ ${nowContextTH()}${kb}`;
   const body = JSON.stringify({
     model: THAILLM_MODEL,
     messages: [{ role: "system", content: sys }, { role: "user", content: userText.slice(0, 1000) }],
@@ -170,6 +175,74 @@ async function askThaiLLM(userText: string): Promise<string | null> {
     if (attempt === 0) await new Promise((res) => setTimeout(res, 700));
   }
   return null;
+}
+
+// ════════ ระบบ "เรียนรู้คำตอบ" — ผู้ใช้สอน → น้องใส่ใจจำไว้ตอบคนอื่นต่อ ════════
+const norm = (s: string) => String(s || "").toLowerCase().trim();
+const wordsOf = (s: string) => norm(s).split(/[\s,/.;:!?()«»"'’“”\-]+/).filter((w) => w.length >= 2);
+
+// ดึงคลังความรู้ล่าสุด (ใหม่สุดก่อน = คำตอบที่แก้ล่าสุดมาก่อน)
+async function fetchKnowledge(): Promise<any[]> {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/line_knowledge?select=id,topic,question,answer,keywords&order=created_at.desc&limit=300`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
+    if (!r.ok) return [];
+    return await r.json();
+  } catch { return []; }
+}
+// จับคู่ความรู้กับคำถาม (topic เป็น substring / คำค้นปรากฏในคำถาม) → คืนข้อความฉีดเข้า prompt
+async function knowledgeForQuestion(question: string): Promise<string> {
+  const rows = await fetchKnowledge();
+  if (!rows.length) return "";
+  const qn = norm(question);
+  const scored: { score: number; r: any }[] = [];
+  for (const r of rows) {
+    let score = 0;
+    const topic = norm(r.topic);
+    if (topic && topic.length >= 2 && qn.includes(topic)) score += 3;
+    for (const k of String(r.keywords || "").split(/\s+/)) { const kn = norm(k); if (kn.length >= 2 && qn.includes(kn)) score += 1; }
+    for (const t of wordsOf(r.topic)) if (t.length >= 3 && qn.includes(t)) score += 1;
+    if (score > 0) scored.push({ score, r });
+  }
+  if (!scored.length) return "";
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, 6).map(({ r }) => `- ${r.topic ? r.topic + ": " : ""}${r.answer}`).join("\n");
+}
+// บันทึกความรู้ใหม่ (ลบ topic เดิมที่ซ้ำก่อน = คำตอบล่าสุดถือเป็นตัวจริง)
+async function storeKnowledge(d: { topic: string; question?: string; answer: string; keywords?: string; userId?: string | null }) {
+  const topic = d.topic.trim().slice(0, 120);
+  const answer = d.answer.trim().slice(0, 600);
+  if (!topic || !answer) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/line_knowledge?topic=ilike.${encodeURIComponent(topic)}`, { method: "DELETE", headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" } });
+  } catch { /* ignore */ }
+  await fetch(`${SUPABASE_URL}/rest/v1/line_knowledge`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" },
+    body: JSON.stringify({ topic, question: (d.question || "").slice(0, 300), answer, keywords: (d.keywords || "").toLowerCase().slice(0, 300), taught_by: d.userId || null, updated_at: new Date().toISOString() }),
+  }).catch(() => {});
+}
+// บริบทคำถาม/คำตอบล่าสุดต่อผู้ใช้ (ใช้ผูกการสอนกับคำถามก่อนหน้า)
+async function saveQAContext(userId: string, q: string, a: string) {
+  await fetch(`${SUPABASE_URL}/rest/v1/line_qa_context`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({ user_id: userId, last_question: q.slice(0, 400), last_answer: a.slice(0, 600), updated_at: new Date().toISOString() }),
+  }).catch(() => {});
+}
+async function getQAContext(userId: string): Promise<{ q: string; a: string } | null> {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/line_qa_context?user_id=eq.${encodeURIComponent(userId)}&select=last_question,last_answer`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
+    if (!r.ok) return null;
+    const row = (await r.json())?.[0];
+    return row ? { q: row.last_question || "", a: row.last_answer || "" } : null;
+  } catch { return null; }
+}
+// ตอบแชต: ดึงความรู้ที่เคยสอนมาช่วยตอบ + จำคำถาม/คำตอบล่าสุดไว้ (เผื่อ user สอนแก้ทีหลัง)
+async function answerChat(userId: string | undefined, text: string): Promise<string | null> {
+  const kb = await knowledgeForQuestion(text);
+  const a = await askThaiLLM(text, kb);
+  if (userId && a) await saveQAContext(userId, text, a);
+  return a;
 }
 
 // ── หารูปสวัสดีจากคลัง ตามหมวด (ไม่มีหมวด = สุ่มทั่วไป) ──
@@ -342,15 +415,19 @@ function parseCustomBless(t: string): string | null {
 }
 
 const CATS_SET = new Set(["flowers", "dharma", "inspire", "miss", "birthday", "elderly", "health", "festival", "family", "pets", "coffee", "nature"]);
+// สัญญาณว่าผู้ใช้กำลัง "สอน/แก้คำตอบ" (ใช้เป็น fallback ตอน LLM ล่ม)
+const TEACH_RE = /(ที่ถูก|ที่ถูกต้อง|ที่จริง|จริง ?ๆ ?แล้ว|ผิดแล้ว|ตอบผิด|ไม่ถูก|ไม่ใช่.*(?:เป็น|คือ|แต่)|จำไว้|แก้ให้|ที่ถูกคือ|อันที่จริง|correct)/i;
 
 // ── ตัวจำแนกเจตนา (intent) ด้วย ThaiLLM — ตีความแม้พิมพ์ไม่เป๊ะ + รู้บริบทว่าเพิ่งส่งรูปไหม ──
 const INTENT_SYS = [
   "คุณคือ “น้องใส่ใจ” ผู้ช่วยสาวอายุ 20 ของ LINE “สวัสดีทุกวัน” พูดจาอบอุ่นน่ารัก ลงท้าย ค่ะ/นะคะ",
   "หน้าที่: วิเคราะห์ “เจตนา” ของผู้ใช้จากข้อความ (ผู้ใช้พิมพ์ไม่เป๊ะ มีคำผิดได้ ให้ตีความตามความหมาย) แล้วตอบกลับเป็น JSON ล้วน ๆ เท่านั้น ห้ามมีข้อความอื่นนอก JSON",
-  'รูปแบบ: {"action":"make_card|edit_blessing|get_image|chat","blessing":"","category":"","reply":""}',
+  'รูปแบบ: {"action":"make_card|edit_blessing|get_image|teach|chat","blessing":"","category":"","topic":"","answer":"","keywords":"","reply":""}',
   "- make_card: อยากทำภาพสวัสดีจากรูปที่ส่งมา โดย “ให้น้องใส่ใจคิดคำอวยพรให้เอง” (ไม่ใส่คำเอง) เช่น ทำภาพสวัสดี, ใส่ให้เลย, ช่วยคิดให้, แล้วแต่เลย, อะไรก็ได้, จัดให้, เอาเลย → blessing เว้นว่าง",
   '- edit_blessing: ผู้ใช้ “ให้คำอวยพรของตัวเอง” ที่จะใส่บนภาพ → ดึงถ้อยคำนั้นทั้งหมดใส่ใน "blessing" ครอบคลุมทั้ง (ก) สั่งแก้/เปลี่ยน เช่น แก้ไขคำอวยพรเป็น..., เปลี่ยนข้อความเป็น..., ขอข้อความว่า... และ (ข) พิมพ์ “ถ้อยคำอวยพร/คำพูดที่อยากให้อยู่บนภาพ” มาตรง ๆ เช่น “สุขสันต์วันเกิดนะลูก”, “Happy holiday!!”, “คิดถึงเสมอนะ”, “ขอให้สุขภาพแข็งแรง” (โดยเฉพาะเมื่อเพิ่งส่งรูปและน้องใส่ใจเพิ่งถามว่าจะใส่คำอวยพรเองไหม)',
   '- get_image: ขอ “รูปสวัสดีจากคลัง” (ไม่เกี่ยวกับรูปที่ส่งมา) เช่น ขอรูปสวัสดี, ขอรูปดอกไม้ → ถ้าระบุหมวดใส่รหัสใน "category" จาก flowers,dharma,inspire,miss,birthday,elderly,health,festival,family,pets,coffee,nature ไม่ระบุใส่ ""',
+  '- teach: ผู้ใช้กำลัง “สอน/แก้ไขข้อมูลให้น้องใส่ใจจำ” เช่น “ที่ถูกคือ...”, “ผิดแล้ว ... คือ ...”, “ไม่ใช่ X เป็น Y”, “จำไว้นะว่า...”, หรือยืนยันข้อเท็จจริงเพื่อให้จำ (มักตามหลังคำตอบที่น้องใส่ใจเพิ่งตอบ) → ใส่: "topic"=หัวข้อ/ประธานสั้น ๆ (เช่น "วัดบางจะเกร็ง"), "answer"=ประโยคคำตอบที่ถูกต้องแบบสมบูรณ์ (รวมข้อมูลจากคำถามก่อนหน้าให้ครบ เช่น "วัดบางจะเกร็งตั้งอยู่ที่จังหวัดสมุทรสงคราม"), "keywords"=คำค้นสำคัญคั่นช่องว่าง (เช่น "วัดบางจะเกร็ง บางจะเกร็ง สมุทรสงคราม"), "reply"=คำขอบคุณสั้น ๆ ว่าจะจำไว้',
+  "teach เลือกเฉพาะเมื่อผู้ใช้ตั้งใจให้น้องใส่ใจ “จำข้อมูล/แก้คำตอบ” เท่านั้น ไม่ใช่การถามหรือคุยทั่วไป ; ถ้าเป็นคำถาม = chat",
   '- chat: พูดคุย/ถามทั่วไป รวมถึง “คำชม/ขอบคุณ/ตอบรับ” (เช่น เยี่ยมมาก, ดีมาก, สวยจัง, ขอบคุณ, โอเค) → เขียนคำตอบแบบน้องใส่ใจสั้น ๆ อบอุ่นใน "reply" — ห้ามเดา/แต่งข้อเท็จจริง (สถานที่/จังหวัด/วันเวลา/ตัวเลข/ชื่อ) ถ้าไม่มั่นใจให้ตอบว่า “หนูไม่แน่ใจนะคะ” แทนการเดา',
   "สำคัญมาก: คำชม/ขอบคุณ/ตอบรับ (เยี่ยม, ดีมาก, สวยจัง, ขอบคุณ, โอเค ฯลฯ) = chat เสมอ ห้ามตีความเป็น make_card/edit_blessing แม้จะเพิ่งส่งรูปมา",
   "เมื่อ “เพิ่งส่งรูปมา” และน้องใส่ใจเพิ่งถามว่าจะใส่คำอวยพรเองไหม: ถ้าผู้ใช้พิมพ์ถ้อยคำที่ใช้เป็นคำอวยพรได้ = edit_blessing (ใส่ข้อความนั้นใน blessing) ; ถ้าบอกให้น้องคิดให้เอง = make_card ; ถ้าเป็นคำถาม/คุยเล่น = chat",
@@ -363,9 +440,12 @@ function extractJson(s: string): any | null {
   if (!m) return null;
   try { return JSON.parse(m[0]); } catch { return null; }
 }
-async function classifyIntent(text: string, hasPhoto: boolean): Promise<any | null> {
+async function classifyIntent(text: string, hasPhoto: boolean, ctx?: { q: string; a: string } | null): Promise<any | null> {
   if (!THAILLM_KEY) return null;
-  const sys = `${INTENT_SYS}\nบริบท: ผู้ใช้ตอนนี้${hasPhoto ? "เพิ่งส่งรูปมา และน้องใส่ใจเพิ่งถามว่าจะ “ใส่คำอวยพรเอง” ไหม — ข้อความถัดมาที่เป็นถ้อยคำอวยพรให้ถือเป็น edit_blessing" : "ยังไม่ได้ส่งรูปเข้ามา"} · วันนี้คือ ${nowContextTH()}`;
+  const recent = ctx && (ctx.q || ctx.a)
+    ? `\nบริบทล่าสุด (ใช้ช่วยตีความ teach): ก่อนหน้านี้ผู้ใช้ถามว่า “${(ctx.q || "-").slice(0, 200)}” และน้องใส่ใจตอบไปว่า “${(ctx.a || "-").slice(0, 200)}”`
+    : "";
+  const sys = `${INTENT_SYS}\nบริบท: ผู้ใช้ตอนนี้${hasPhoto ? "เพิ่งส่งรูปมา และน้องใส่ใจเพิ่งถามว่าจะ “ใส่คำอวยพรเอง” ไหม — ข้อความถัดมาที่เป็นถ้อยคำอวยพรให้ถือเป็น edit_blessing" : "ยังไม่ได้ส่งรูปเข้ามา"} · วันนี้คือ ${nowContextTH()}${recent}`;
   const body = JSON.stringify({ model: THAILLM_MODEL, messages: [{ role: "system", content: sys }, { role: "user", content: String(text).slice(0, 800) }], max_tokens: 400, temperature: 0.2 });
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
@@ -429,6 +509,7 @@ async function handleEvent(ev: any) {
   // ใช้เฉพาะ "รูปที่เพิ่งส่งมา" เท่านั้น (รูปเก่าค้าง = ไม่นับ) เพื่อกันการทำซ้ำ/เตือนผิดกับรูปเดิม
   const pendingRow = userId ? await getPhotoPending(userId) : null;
   const freshPhoto = pendingRow && pendingRow.fresh ? pendingRow.id : null;
+  const qaCtx = userId ? await getQAContext(userId) : null;   // คำถาม/คำตอบล่าสุด (ใช้ตอน user สอนแก้คำตอบ)
   const noPhotoMsg = "ส่งรูปถ่ายที่อยากทำเป็นภาพสวัสดีมาก่อนนะคะ 📷 (เป็นรูปที่ยังไม่มีตัวหนังสือ) แล้วบอกหนูได้เลยค่ะ 🌸";
 
   // ── กำลังรอ user ตัดสินใจเรื่อง "ภาพเดิมค้างอยู่" (staged) → จัดการคำตอบก่อนอย่างอื่น ──
@@ -473,9 +554,23 @@ async function handleEvent(ev: any) {
   }
 
   // ── ให้ ThaiLLM ตีความเจตนาก่อน (พิมพ์ไม่เป๊ะก็เข้าใจ) ──
-  const intent = await classifyIntent(text, !!freshPhoto);
+  const intent = await classifyIntent(text, !!freshPhoto, qaCtx);
   if (intent && intent.action) {
     const act = intent.action;
+    if (act === "teach") {   // ผู้ใช้สอน/แก้คำตอบ → จำไว้ตอบคนอื่นต่อ
+      const topic = String(intent.topic || "").trim().slice(0, 120);
+      const answer = String(intent.answer || "").trim().slice(0, 600);
+      if (topic && answer) {
+        await storeKnowledge({ topic, question: qaCtx?.q || "", answer, keywords: String(intent.keywords || ""), userId });
+        await lineReply(ev.replyToken, [textMsg(String(intent.reply || "").trim() ||
+          "ขอบคุณที่สอนหนูนะคะ 🙏 หนูจำไว้แล้ว ครั้งหน้าจะตอบให้ถูกเลยค่ะ 💛")]);
+      } else {
+        await lineReply(ev.replyToken, [textMsg(
+          "ขอบคุณที่จะสอนหนูนะคะ 🙏 รบกวนบอกชัด ๆ อีกนิดได้ไหมคะว่าให้หนูจำว่าอะไร\n" +
+          "เช่น “วัดบางจะเกร็งอยู่จังหวัดสมุทรสงคราม” เดี๋ยวหนูจำไว้ตอบครั้งต่อไปเลยค่ะ ✨")]);
+      }
+      return;
+    }
     if (act === "edit_blessing" || act === "make_card") {
       if (freshPhoto) {
         const bless = act === "edit_blessing" ? String(intent.blessing || "").trim().slice(0, 120) : "";
@@ -493,8 +588,8 @@ async function handleEvent(ev: any) {
       await replyGreetingImages(ev.replyToken, CATS_SET.has(intent.category) ? intent.category : null);
       return;
     }
-    // action=chat → ตอบด้วย persona เต็มของน้องใส่ใจ (ใช้ reply จาก classifier เป็นสำรอง)
-    const a = await askThaiLLM(text);
+    // action=chat → ตอบด้วย persona เต็มของน้องใส่ใจ + ความรู้ที่เคยสอน (ใช้ reply จาก classifier เป็นสำรอง)
+    const a = await answerChat(userId, text);
     await lineReply(ev.replyToken, [textMsg(a || String(intent.reply || "").trim() ||
       "ตอนนี้น้องใส่ใจคิดไม่ทันนิดนึงค่ะ 🥺 ลองพิมพ์ใหม่อีกครั้งนะคะ")]);
     return;
@@ -518,7 +613,13 @@ async function handleEvent(ev: any) {
   }
   const catId = detectCategory(text);
   if (wantsImage(text, catId)) { await replyGreetingImages(ev.replyToken, catId); return; }
-  const answer = await askThaiLLM(text);
+  // LLM ล่ม + ดูเหมือนผู้ใช้กำลังสอน/แก้คำตอบ (มีคำถามก่อนหน้า) → จำไว้แบบหยาบ ๆ
+  if (userId && qaCtx?.q && TEACH_RE.test(text)) {
+    await storeKnowledge({ topic: qaCtx.q.replace(/อยู่ที่ไหน|อยู่ไหน|คืออะไร|\?/g, "").trim().slice(0, 120) || text.slice(0, 60), question: qaCtx.q, answer: text, userId });
+    await lineReply(ev.replyToken, [textMsg("ขอบคุณที่สอนหนูนะคะ 🙏 หนูจำไว้แล้ว ครั้งหน้าจะตอบให้ถูกเลยค่ะ 💛")]);
+    return;
+  }
+  const answer = await answerChat(userId, text);
   await lineReply(ev.replyToken, [textMsg(answer ||
     "ตอนนี้น้องใส่ใจคิดไม่ทันนิดนึงค่ะ 🥺 ลองพิมพ์ถามใหม่อีกครั้ง หรือพิมพ์ “ขอรูปสวัสดี” มาได้เลยนะคะ 🌸")]);
 }
