@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>สวัสดีทุกวัน ☀️</title>
+<meta name="description" content="ภาพสวัสดีสวย ๆ พร้อมคำอวยพรดี ๆ ส่งต่อความสุขให้คนที่คุณรัก ทุกเช้ามีรูปใหม่ทุกวัน 🌸">
+<meta property="og:type" content="website">
+<meta property="og:title" content="สวัสดีทุกวัน ☀️">
+<meta property="og:description" content="ภาพสวัสดีสวย ๆ พร้อมคำอวยพรดี ๆ ส่งต่อความสุขให้คนที่คุณรัก ทุกเช้ามีรูปใหม่ทุกวัน 🌸">
+<meta property="og:url" content="https://leomcpemail-source.github.io/greeting/">
+<meta property="og:image" content="https://leomcpemail-source.github.io/greeting/assets/og-cover.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <script>
 /* ตัวดัก error เงียบ ๆ — ถ้าแอป "ไม่ขึ้นรูปเลย" (หน้าว่าง) ค่อยโชว์สาเหตุบนจอ
    เพื่อช่วย debug iPad/Safari โดยไม่รบกวนเครื่องที่ใช้งานได้ปกติ */
@@ -1026,15 +1035,21 @@ document.getElementById('btnSave').onclick=async()=>{
 document.getElementById('btnLine').onclick=async()=>{
   const btn=document.getElementById('btnLine');const m=btn.querySelector('.bt-main');const orig=m.innerHTML;
   if(btn.disabled)return;
+  // ใน LINE in-app browser: Web Share รูปไม่รองรับ (โดยเฉพาะ iOS) ปุ่มเลยเงียบ → ใช้ "ตัวแชร์ของ LINE"
+  // ส่งลิงก์ให้เพื่อนแบบแตะเดียว เชื่อถือได้ (เพื่อนเปิดลิงก์ก็เห็นการ์ดสวัสดีวันนี้ + บันทึกเองได้)
+  if(IS_LINE||IS_LINE_WV){
+    const url=location.origin+location.pathname;
+    const msg=((M&&M.headline)?M.headline+'\n':'')+'ส่งความสุขให้กันทุกวันนะคะ 🌸\n'+url;
+    trackGC('line');track2('line',CARDS[curIdx]);
+    location.href='https://line.me/R/share?text='+encodeURIComponent(msg);
+    return;
+  }
   m.textContent='กำลังเตรียม…';btn.disabled=true;
   try{
     const c=await snapshot();
     const fname=`${M.headline||'สวัสดี'}.png`;
     const blob=await new Promise(res=>c.toBlob(res,'image/png'));
     const file=blob?new File([blob],fname,{type:'image/png'}):null;
-
-    // 0) ใน LINE in-app browser: navigator.share มักค้าง (ปุ่มค้าง "กำลังเตรียม…") → ไป viewer เลย
-    if(IS_LINE||IS_LINE_WV){showImageViewer(c,fname);toast('กดค้างที่รูปเพื่อแชร์เข้า LINE 👆');trackGC('line');track2('line',CARDS[curIdx]);return;}
 
     // 1) Web Share API — เปิดแผงแชร์ของระบบ เลือก LINE แล้วส่งให้เพื่อนได้จริง (Chrome/Safari มือถือ)
     if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
