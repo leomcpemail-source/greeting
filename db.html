@@ -193,6 +193,18 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
         <div id="pxWrap"><div style="color:var(--mut);font-size:12px">เปิดแท็บ Dashboard ค้างไว้สักครู่เพื่อให้ระบบดึงข้อมูล…</div></div>
       </div>
 
+      <!-- ═══ เรียนรู้จากผู้ใช้ LINE จริง: คำขอ + คำอวยพร(รออนุมัติ) + แท็กลักษณะภาพ ═══ -->
+      <div class="panel" id="learnPanel" style="margin-bottom:14px;border-color:#7a5cc0">
+        <h3>🧠 เรียนรู้จากผู้ใช้ LINE — คำอวยพร + ลักษณะภาพ
+          <button class="chip" style="margin-left:8px;padding:3px 12px;font-size:12px" onclick="loadLearn()">↻ รีเฟรช</button>
+        </h3>
+        <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:10px">
+          คำอวยพรที่ user พิมพ์เองตอนทำการ์ด จะมารอที่นี่ — กด ✓ อนุมัติ เพื่อให้เข้าคลังคำอวยพรของการ์ดที่ระบบสร้างทุกวัน<br>
+          ⚠️ ต้องอนุมัติก่อนเสมอ คำอวยพรของ user จะไม่ขึ้นการ์ดสาธารณะเองอัตโนมัติ (กันคำไม่เหมาะ/คนไม่ดีป้อนข้อมูล)
+        </div>
+        <div id="learnWrap"><div style="color:var(--mut);font-size:12px">กำลังโหลด…</div></div>
+      </div>
+
       <!-- refs: ภาพต้นแบบสอนระบบเรียนรู้ -->
       <div class="panel" id="refsPanel">
         <h3>🖼️ ภาพต้นแบบสอนระบบ (refs) <span id="refsCount" style="color:var(--gold)"></span></h3>
@@ -307,6 +319,7 @@ function switchDbTab(t){
   // filter bar ใช้กับ Dashboard + LINE เท่านั้น (tab AI ระบบ ไม่เกี่ยวกับช่วงเวลา)
   $('filterBar').style.display = (t==='teach') ? 'none' : '';
   if(t==='line') loadLine();   // เข้าแท็บ LINE แล้วโหลดสถิติทันที
+  if(t==='teach') loadLearn(); // เข้าแท็บ AI ระบบ → โหลดสิ่งที่เรียนรู้จากผู้ใช้
 }
 
 /* ── บทเรียนที่ระบบเรียนรู้แล้ว — อัปเดตรายการนี้ทุกครั้งที่ได้บทเรียนใหม่ ──
@@ -695,6 +708,48 @@ function renderLine(d, host){
   const PALL=['#7fd1a0','#6ea8e7','#b98fe7','#e7b96e','#e78f6e','#5bc4d4','#a0d96e','#e76e9c'];
   let pi=0;
   drawTreemap('tmLineSrc',(c.by_source||[]).map(x=>({label:LINE_SRC_TH[x.source]||x.source||'?',value:N(x.n),color:PALL[pi++%PALL.length]})));
+}
+
+/* ── เรียนรู้จากผู้ใช้: คำขอ/คำอวยพร(รออนุมัติ)/แท็ก (RPC line_learn_read + line_learn_set) ── */
+async function loadLearn(){
+  const host=$('learnWrap'); if(!host) return;
+  try{
+    const d=await lineRpc('line_learn_read',{p_token:LINE_ADMIN_TOKEN,p_days:DAYS||30});
+    if(d?.error){ host.innerHTML=`<div style="color:var(--mut);font-size:12px">เข้าถึงไม่ได้ (${esc(d.error)})</div>`; return; }
+    renderLearn(d,host);
+  }catch(e){ host.innerHTML=`<div style="color:var(--mut);font-size:12px">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`; }
+}
+function renderLearn(d,host){
+  const c=d.counts||{}, pend=d.pending||[], appr=d.approved||[], tags=d.tags||[];
+  const kpis=`<div class="kpis">
+    ${kpi(N(c.photo).toLocaleString(),'ส่งรูปมาทำการ์ด',true)}
+    ${kpi(N(c.make_card).toLocaleString(),'ขอสร้างภาพ',true)}
+    ${kpi(N(c.edit_blessing).toLocaleString(),'ใส่คำอวยพรเอง',true)}
+    ${kpi(N(c.get_image).toLocaleString(),'ขอรูปจากคลัง')}
+    ${kpi(N(c.chat).toLocaleString(),'พูดคุย')}
+  </div>`;
+  const pHtml = pend.length ? pend.map(p=>`
+    <div style="display:flex;gap:8px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;${p.ai_flag==='bad'?'border-color:#e76e6e':''}">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;word-break:break-word">${esc(p.text)}</div>
+        <div style="font-size:11px;color:var(--mut)">${p.category?esc(p.category)+' · ':''}${p.theme?esc(p.theme)+' · ':''}${p.ai_flag==='bad'?'<span style="color:#e76e6e">⚠ อาจไม่เหมาะ</span> · ':''}${esc((p.created_at||'').slice(0,10))}</div>
+      </div>
+      <button class="chip" style="border-color:#2f7d52;color:#7fd1a0" onclick="learnSet(${p.id},'approved')">✓ อนุมัติ</button>
+      <button class="chip" style="border-color:#7a2f2f;color:#e76e6e" onclick="learnSet(${p.id},'rejected')">✕ ทิ้ง</button>
+    </div>`).join('') : '<div style="color:var(--mut);font-size:12px">ยังไม่มีคำอวยพรรออนุมัติ</div>';
+  const aHtml = appr.length ? appr.map(a=>`<span class="chip" style="margin:3px;display:inline-block">${esc(a.text)}${a.category?' · '+esc(a.category):''}</span>`).join('') : '<div style="color:var(--mut);font-size:12px">ยังไม่มีคำอวยพรที่อนุมัติ</div>';
+  const tHtml = tags.length ? tags.map(t=>`<span class="chip" style="margin:3px;display:inline-block">${esc(t.tag)} <b style="color:var(--gold)">${N(t.weight)}</b></span>`).join('') : '<div style="color:var(--mut);font-size:12px">ยังไม่มีแท็ก</div>';
+  host.innerHTML = kpis +
+    `<h3 style="margin-top:12px">✍️ คำอวยพรรออนุมัติ (${pend.length})</h3>${pHtml}` +
+    `<h3 style="margin-top:14px">✅ อนุมัติแล้ว — ใช้บนการ์ดรายวัน (${appr.length})</h3><div>${aHtml}</div>` +
+    `<h3 style="margin-top:14px">🏷️ ลักษณะภาพที่ผู้ใช้นิยม (แท็ก)</h3><div>${tHtml}</div>`;
+}
+async function learnSet(id,status){
+  try{
+    const d=await lineRpc('line_learn_set',{p_token:LINE_ADMIN_TOKEN,p_id:id,p_status:status});
+    if(d?.error){ alert('ทำรายการไม่สำเร็จ: '+esc(d.error)); return; }
+    loadLearn();
+  }catch(e){ alert('ทำรายการไม่สำเร็จ: '+e.message); }
 }
 
 /* ── ทดสอบยิงข้อความรายคน (ตาราง: ค้นหา/เรียง/แบ่งหน้า) ผ่าน line-morning โหมด admin ── */

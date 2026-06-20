@@ -1630,6 +1630,29 @@ function saveRecentHashes(rh, refISO) {
 }
 function recentHashList(rh) { return Object.values(rh).flat(); }
 
+// ── เรียนรู้จากผู้ใช้ LINE: คำอวยพรที่ "แอดมินอนุมัติแล้ว" + แท็กลักษณะภาพ (อ่านอย่างเดียว) ──
+//   • คำอวยพร: เฉพาะที่อนุมัติใน db.html เท่านั้น (กันคำไม่เหมาะขึ้นการ์ดสาธารณะ)
+//   • แท็ก: ใช้เป็น style hint เบา ๆ ตอน gen ภาพ
+const LINE_SB_URL      = process.env.LINE_SB_URL      || 'https://iuyiwpoupnuxnohpatyw.supabase.co';
+const LINE_SB_ANON     = process.env.LINE_SB_ANON     || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1eWl3cG91cG51eG5vaHBhdHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzEwOTcsImV4cCI6MjA5MDA0NzA5N30.FEi3t39fuuQChq0OMGtTYZe5dnHP5OVi82eXP75uUic';
+const LINE_LEARN_TOKEN = process.env.LINE_LEARN_TOKEN || 'lstat_9f3c1ab27e5d4';
+const USE_LINE_LEARN   = (process.env.USE_LINE_LEARN || '1') !== '0';
+async function fetchLearnedFromLine() {
+  if (!USE_LINE_LEARN) return { blessings: [], tags: [] };
+  try {
+    const r = await fetch(`${LINE_SB_URL}/rest/v1/rpc/line_learned_for_gen`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: LINE_SB_ANON, Authorization: 'Bearer ' + LINE_SB_ANON },
+      body: JSON.stringify({ p_token: LINE_LEARN_TOKEN }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!r.ok) return { blessings: [], tags: [] };
+    const d = await r.json();
+    if (!d || d.error) return { blessings: [], tags: [] };
+    return { blessings: Array.isArray(d.blessings) ? d.blessings : [], tags: Array.isArray(d.tags) ? d.tags : [] };
+  } catch { return { blessings: [], tags: [] }; }
+}
+
 // ── main ใหม่ (rolling) ────────────────────────────────────────────────────
 async function main() {
   const start = Date.now();
@@ -1709,6 +1732,24 @@ async function main() {
     'ขอให้วันนี้มีแต่ความสุขความเจริญ การงานราบรื่น เงินทองคล่องมือ จิตใจเบิกบานแจ่มใส',
   ];
   for (const b of LONG_BLESSINGS) if (!st.blessings.includes(b)) st.blessings.push(b);
+
+  // เติมคำอวยพรที่ "แอดมินอนุมัติแล้ว" จากผู้ใช้ LINE → เข้าคลังการ์ดรายวัน (idempotent)
+  // + เตรียมแท็กลักษณะภาพ (เฉพาะ ASCII เช่น flowers/birthday) ไว้เป็น style hint ตอน gen
+  const learned = await fetchLearnedFromLine();
+  let learnedCount = 0;
+  for (const b of (learned.blessings || [])) {
+    const t = String(b?.text || '').trim();
+    if (t.length < 4 || t.length > 120) continue;
+    const c = b?.category;
+    if (c && CAT_BLESSINGS[c]) { if (!CAT_BLESSINGS[c].includes(t)) { CAT_BLESSINGS[c].push(t); learnedCount++; } }
+    else if (!st.blessings.includes(t)) { st.blessings.push(t); learnedCount++; }
+  }
+  if (learnedCount) console.log(`✓ คำอวยพรจากผู้ใช้ LINE (อนุมัติแล้ว) +${learnedCount} คำ`);
+  const learnedTags = (learned.tags || [])
+    .map(x => String(x?.tag || '').trim())
+    .filter(t => /^[\x20-\x7E]{2,30}$/.test(t))   // ASCII เท่านั้น กันคำไทยทำ prompt ภาพเพี้ยน
+    .slice(0, 6);
+
   const pickBl = (i) => st.blessings[i % st.blessings.length];
 
   // คำอวยพรของ "การ์ดภาพตรงธีมวันพิเศษ" — เทศกาลใช้คำของเทศกาล, วันพระใช้คำทำบุญ+พุทธสุภาษิต
@@ -1900,7 +1941,10 @@ async function main() {
         if (!subject && cat === 'flowers' && Math.random() < 0.5) subject = `${theme.flower}, beautiful blooming flowers closeup`;
         if (!subject) subject = pickCatSubject(cat);
         do { seed = Math.floor(Math.random() * 1e9); } while (st.usedSeeds.includes(seed));
-        const prompt = `${subject}, ${theme.tone} color palette, soft golden morning light, dreamy, elegant, highly detailed, beautiful, no text, no letters, no numbers, no watermark, no signature`;
+        // style hint จากแท็กยอดนิยมของผู้ใช้ LINE (เบา ๆ ครึ่งหนึ่งของรูป) — ใช้ลักษณะภาพที่คนชอบ
+        const styleHint = (learnedTags.length && Math.random() < 0.5)
+          ? ', ' + learnedTags[Math.floor(Math.random() * learnedTags.length)] : '';
+        const prompt = `${subject}, ${theme.tone} color palette, soft golden morning light, dreamy, elegant, highly detailed, beautiful${styleHint}, no text, no letters, no numbers, no watermark, no signature`;
         console.log(`[${gens}] gen seed=${seed} [${cat}]${themed ? ' [ธีมวันพิเศษ]' : ''} (${st.images.length}/${TARGET})`);
         try { raw = await genImage(prompt, seed); brain?.srcEvent('gen', true); }
         catch (e) { brain?.srcEvent('gen', false); throw e; }   // โควตาหมด/ล่ม → brain จำไว้ปรับสัดส่วน
