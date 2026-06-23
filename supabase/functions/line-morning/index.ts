@@ -15,7 +15,6 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || G.URL || "https://iuyiwpoup
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || G.SK || "";
 const APP_URL = Deno.env.get("APP_URL") ?? "https://leomcpemail-source.github.io/greeting/";
 const CARDS_PER_DAY = Number(Deno.env.get("CARDS_PER_DAY") ?? "5");
-const GO = `${SUPABASE_URL}/functions/v1/line-go`;
 
 const REPO = "leomcpemail-source/greeting";
 const BRANCH = "daily-images";
@@ -28,16 +27,6 @@ const CORS = {
 };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { "Content-Type": "application/json", ...CORS } });
 
-const WD = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
-const FALLBACK_BLESS = [
-  "ขอให้วันนี้เป็นวันที่ดี สุขกายสบายใจนะคะ",
-  "อรุณสวัสดิ์ ขอให้รอยยิ้มอยู่กับคุณทั้งวันค่ะ",
-  "ขอให้สุขภาพแข็งแรง คิดสิ่งใดสมหวังนะคะ",
-  "ส่งความสุขและกำลังใจดี ๆ ให้ในยามเช้าค่ะ",
-  "ขอให้โชคดีเข้าหาตลอดทั้งวันนะคะ",
-  "สุขภาพแข็งแรง ร่างกายสดชื่น ใจเบิกบานทุกวันค่ะ",
-];
-
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 function shuffle<T>(a: T[]): T[] { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
@@ -46,7 +35,6 @@ function thaiDateISO(): string {
   const d = ictNow();
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 }
-function headlineToday(): string { return `สวัสดีวัน${WD[ictNow().getUTCDay()]}`; }
 function dayIndex(): number { const d = ictNow(); return Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / 86400000); }
 
 function cleanName(dn: string | null): string {
@@ -89,7 +77,6 @@ async function pickCards(n: number): Promise<{ folder: string; file: string }[]>
 
 const urlOf = (c: { folder: string; file: string }) => `${BASE}/img/${c.folder}/${c.file}`;
 const imageMsg = (c: { folder: string; file: string }) => ({ type: "image", originalContentUrl: urlOf(c), previewImageUrl: urlOf(c) });
-const shareUrl = (text: string) => `https://line.me/R/share?text=${encodeURIComponent(text)}`;
 
 function introMsg(name: string) {
   const hi = name ? `☀️ อรุณสวัสดิ์ค่ะ คุณ ${name} 🌸` : "☀️ อรุณสวัสดิ์ค่ะ 🌸";
