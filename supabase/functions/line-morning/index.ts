@@ -91,48 +91,16 @@ const urlOf = (c: { folder: string; file: string }) => `${BASE}/img/${c.folder}/
 const imageMsg = (c: { folder: string; file: string }) => ({ type: "image", originalContentUrl: urlOf(c), previewImageUrl: urlOf(c) });
 const shareUrl = (text: string) => `https://line.me/R/share?text=${encodeURIComponent(text)}`;
 
-function introMsg(name: string, style: "images" | "cards") {
+function introMsg(name: string) {
   const hi = name ? `☀️ อรุณสวัสดิ์ค่ะ คุณ ${name} 🌸` : "☀️ อรุณสวัสดิ์ค่ะ 🌸";
-  const tail = style === "cards"
-    ? "วันนี้มีการ์ดอวยพรมาฝาก ปัดดูได้เลย ชอบใบไหนกด “ส่งต่อให้เพื่อน” ได้เลยนะคะ 💌"
-    : "วันนี้มีรูปสวย ๆ มาฝาก กดค้างไว้แล้วส่งต่อให้คนที่คุณรักได้เลยนะคะ 💛";
+  // ส่งเป็น "รูปจริง" → อยากส่งต่อให้เพื่อนเป็นรูป ให้กดค้างที่รูปแล้วเลือก "ส่งต่อ" (ไม่ใช่ปุ่มแชร์ที่ได้เป็นลิงก์)
+  const tail = "วันนี้มีการ์ดอวยพรมาฝากค่ะ 🌸\nอยากส่งให้เพื่อน — กดค้างที่รูป 👉 เลือก “ส่งต่อ” ได้เลย จะส่งเป็นรูปสวย ๆ ให้เพื่อนทันทีค่ะ 💛";
   return { type: "text", text: `${hi}\n${tail}` };
 }
 
-function buildCarousel(cards: { folder: string; file: string }[], name: string) {
-  const headline = headlineToday();
-  const blesses = shuffle([...FALLBACK_BLESS]);
-  const bubbles = cards.map((c, i) => {
-    const imageUrl = urlOf(c);
-    const bless = blesses[i % blesses.length];
-    const sUrl = shareUrl(`☀️ ${headline}\n${bless}\n${imageUrl}`);
-    return {
-      type: "bubble",
-      hero: { type: "image", url: imageUrl, size: "full", aspectRatio: "1:1", aspectMode: "cover", action: { type: "uri", uri: imageUrl } },
-      body: { type: "box", layout: "vertical", spacing: "sm", contents: [
-        { type: "text", text: `☀️ ${headline}`, weight: "bold", size: "md", color: "#2e8fd1", wrap: true },
-        { type: "text", text: bless, size: "sm", color: "#243a4d", wrap: true },
-      ] },
-      footer: { type: "box", layout: "vertical", spacing: "sm", contents: [
-        { type: "button", style: "primary", color: "#06c755", height: "sm", action: { type: "uri", label: "ส่งต่อให้เพื่อน 💌", uri: sUrl } },
-        { type: "button", style: "link", height: "sm", action: { type: "uri", label: "ดูรูปอื่น ๆ", uri: `${GO}?s=morning_more` } },
-      ] },
-    };
-  });
-  return {
-    type: "flex",
-    altText: (name ? `การ์ดอวยพรเช้านี้สำหรับคุณ ${name} 🌸` : `การ์ดอวยพรเช้านี้ 🌸`).slice(0, 390),
-    contents: { type: "carousel", contents: bubbles },
-  };
-}
-
-function buildMessages(cards: { folder: string; file: string }[], name: string, style: "images" | "cards") {
-  if (style === "cards") {
-    const lead = cards[0];
-    const rest = cards.slice(1);
-    return [introMsg(name, "cards"), imageMsg(lead), buildCarousel(rest.length ? rest : cards, name)];
-  }
-  return [introMsg(name, "images"), ...cards.slice(0, 4).map(imageMsg)];
+// ส่งการ์ดเป็น image message ล้วน — แต่ละใบ forward เป็น "รูปจริง" ได้ (เลี่ยง line.me/R/share ที่ส่งได้แค่ลิงก์)
+function buildMessages(cards: { folder: string; file: string }[], name: string) {
+  return [introMsg(name), ...cards.slice(0, 4).map(imageMsg)];
 }
 
 async function getActiveFriends(): Promise<{ user_id: string; display_name: string | null }[]> {
@@ -199,7 +167,7 @@ Deno.serve(async (req) => {
   const cards = await pickCards(CARDS_PER_DAY);
   if (!cards.length) return json({ error: "no images" });
 
-  if (dry) return json({ style, cards: cards.length, messages: buildMessages(cards, "ตัวอย่าง", style) });
+  if (dry) return json({ style, cards: cards.length, messages: buildMessages(cards, "ตัวอย่าง") });
 
   let friends: { user_id: string; display_name: string | null }[];
   if (to) {
@@ -214,7 +182,7 @@ Deno.serve(async (req) => {
   const failed: { userId: string; status?: number; body?: string }[] = [];
   for (const f of friends) {
     const name = cleanName(f.display_name);
-    const res = await pushToFriend(f.user_id, buildMessages(cards, name, style));
+    const res = await pushToFriend(f.user_id, buildMessages(cards, name));
     if (res.ok) { ok++; sent.push(f.user_id); } else { failed.push({ userId: f.user_id, status: res.status, body: res.body }); }
     await sleep(150);
   }
