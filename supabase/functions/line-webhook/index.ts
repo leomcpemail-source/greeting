@@ -581,6 +581,7 @@ function parseCustomBless(t: string): string | null {
 // แยก "สีกรอบ" ที่ user อยากได้ — ต้องพูดถึง "กรอบ/เฟรม" + ชื่อสี เช่น "ทำกรอบสีเทา", "เปลี่ยนกรอบเป็นสีฟ้า"
 // คืน key สีมาตรฐาน (ตรงกับ FRAME_COLORS ใน line-make-card) ; ไม่เข้าเงื่อนไข = null
 const FRAME_WORDS: [RegExp, string][] = [
+  [/รุ้ง|rainbow|เรนโบว์|หลากสี|หลายสี|7\s*สี|เจ็ดสี/i, "รุ้ง"],
   [/เทาเข้ม|เทาแก่/, "เทาเข้ม"], [/เทา|grey|gray/i, "เทา"],
   [/ชมพูอ่อน|พีช|peach/i, "ชมพูอ่อน"], [/ชมพู|pink/i, "ชมพู"],
   [/แดง|red/i, "แดง"], [/ฟ้า|sky/i, "ฟ้า"], [/น้ำเงิน|กรมท่า|navy|blue/i, "น้ำเงิน"],
@@ -589,11 +590,17 @@ const FRAME_WORDS: [RegExp, string][] = [
   [/น้ำตาล|brown/i, "น้ำตาล"], [/ครีม|เบจ|cream|beige/i, "ครีม"],
   [/ดำ|black/i, "ดำ"], [/ขาว|white/i, "ขาว"],
 ];
+// รายชื่อสีที่ "ทำได้" — ใช้บอก user ตรง ๆ เวลาขอสีที่ยังไม่รองรับ (อย่าแอบทำมั่ว)
+const FRAME_LIST = "เทา ชมพู แดง ฟ้า น้ำเงิน เขียว เหลือง ส้ม ม่วง ทอง เงิน น้ำตาล ครีม ดำ ขาว และ “สีรุ้ง” 🌈";
 function parseFrameColor(t: string): string | null {
   const s = String(t);
   if (!/กรอบ|เฟรม|frame/i.test(s)) return null;   // ต้องพูดถึงกรอบจริง ๆ กันชนคำอวยพร/แชต
   for (const [re, key] of FRAME_WORDS) if (re.test(s)) return key;
   return null;
+}
+// พูดถึง "สีกรอบ" ชัด ๆ (กรอบ + สี/เปลี่ยน/ทำ) — ใช้ดักกรณีขอเปลี่ยนกรอบแต่สีที่ขอยังไม่รองรับ
+function mentionsFrameColor(t: string): boolean {
+  return /กรอบ|เฟรม|frame/i.test(t) && /สี|เปลี่ยน|ทำ|เป็น/i.test(t);
 }
 
 const CATS_SET = new Set(["flowers", "dharma", "inspire", "miss", "birthday", "elderly", "health", "festival", "family", "pets", "coffee", "nature"]);
@@ -748,6 +755,15 @@ async function handleEvent(ev: any) {
       if (userId) await upsertPhotoPending(userId, freshPhoto, st.frame || null, st.bless || null);
       await triggerMakeCard(userId!, freshPhoto, st.bless, st.frame);
       await recordCardRequest(cbf ? "edit_blessing" : "make_card", cbf || "", text, null, userId);
+    } else {
+      await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]);
+    }
+    return;
+  }
+  // พูดถึง "สีกรอบ" แต่สีที่ขอยังไม่รองรับ → บอกตรง ๆ ว่าทำสีนั้นไม่ได้ + บอกสีที่ทำได้ (อย่าเอาไปทำเป็นคำอวยพร)
+  if (mentionsFrameColor(text)) {
+    if (freshPhoto) {
+      await lineReply(ev.replyToken, [textMsg(`ขอโทษนะคะ 🙏 สีกรอบที่ขอมา น้องใส่ใจยังทำให้ไม่ได้ค่ะ\nตอนนี้มีสีให้เลือกแบบนี้: ${FRAME_LIST}\nพิมพ์ว่า “เปลี่ยนกรอบเป็นสี…” ได้เลยนะคะ ✨`)]);
     } else {
       await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]);
     }
