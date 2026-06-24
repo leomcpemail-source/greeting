@@ -43,8 +43,12 @@ const FRAME_COLORS: Record<string, [string, string]> = {
   "ครีม": ["#d9c089", "#8a774a"], "ดำ": ["#2b2b2b", "#000000"], "ขาว": ["#ffffff", "#7a7f85"],
 };
 function applyFrame(day: any, frame: string) {
+  if (frame === "รุ้ง") {            // กรอบไล่สีรุ้ง — ตัวอักษรใช้สีอ่านง่าย (ขาว + ขอบเข้ม)
+    day.color = "#e23b6d"; day.color2 = "#2f2350"; day.frameGrad = "rainbow";
+    return;
+  }
   const f = FRAME_COLORS[frame];
-  if (f) { day.color = f[0]; day.color2 = f[1]; }
+  if (f) { day.color = f[0]; day.color2 = f[1]; day.frameGrad = ""; }
 }
 
 let _wasm: Promise<void> | null = null;
@@ -131,6 +135,16 @@ function layoutBless(text: string): { lines: string[]; F: number; lineGap: numbe
 function buildSvg(photoDataUri: string, day: { headline: string; bless: string; dateThai: string; color: string; color2: string }) {
   const W = 1000, H = 1000;
   const col = day.color, col2 = day.color2;
+  // กรอบไล่สีรุ้ง (ถ้าเลือก "สีรุ้ง") — กรอบใช้ gradient ส่วนตัวอักษรยังใช้สีทึบเพื่ออ่านง่าย
+  const grad = (day as any).frameGrad === "rainbow";
+  const frameStroke = grad ? "url(#framegrad)" : col;
+  const gradDef = grad
+    ? `<linearGradient id="framegrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ff3b30"/><stop offset="0.18" stop-color="#ff9500"/>
+        <stop offset="0.36" stop-color="#ffd60a"/><stop offset="0.54" stop-color="#34c759"/>
+        <stop offset="0.72" stop-color="#0a84ff"/><stop offset="0.88" stop-color="#5e5ce6"/>
+        <stop offset="1" stop-color="#bf5af2"/></linearGradient>`
+    : "";
   const hl = day.headline;
   const hSize = hl.length <= 10 ? 104 : hl.length <= 14 ? 86 : 70;
   const hY = 760;
@@ -155,11 +169,12 @@ function buildSvg(photoDataUri: string, day: { headline: string; bless: string; 
         <stop offset="0.62" stop-color="#000" stop-opacity="0.12"/>
         <stop offset="1" stop-color="#000" stop-opacity="0.72"/>
       </linearGradient>
+      ${gradDef}
     </defs>
     <rect width="${W}" height="${H}" fill="#222"/>
     <image href="${photoDataUri}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>
     <rect width="${W}" height="${H}" fill="url(#scrim)"/>
-    <rect x="22" y="22" width="${W - 44}" height="${H - 44}" fill="none" stroke="${col}" stroke-width="10" rx="28"/>
+    <rect x="22" y="22" width="${W - 44}" height="${H - 44}" fill="none" stroke="${frameStroke}" stroke-width="10" rx="28"/>
     <rect x="40" y="40" width="${W - 80}" height="${H - 80}" fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="2.5" rx="20"/>
     ${headline}
     ${blessText}
