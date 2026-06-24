@@ -39,7 +39,7 @@ const CATS = [
 //   คอลัมน์กลาง แบ่ง 2 แถว: บน = ภาพตามหมวด , ล่าง = สร้างภาพสวัสดีของคุณ
 //   คอลัมน์ขวา (เต็มสูง) = AI โสเหล่ (เว็บแอปคุยกับ AI ตัวละคร)
 const HALF = Math.round(H / 2); // 843
-const AISOLE_URL = Deno.env.get("AISOLE_URL") ?? "https://leomcpemail-source.github.io/aisole/";
+const AISOLE_URL = Deno.env.get("AISOLE_URL") ?? "https://leomcpemail-source.github.io/aiofficesole/";
 const mainAreas = [
   { bounds: { x: 0, y: 0, width: 833, height: H }, action: { type: "uri", uri: `${GO}?s=rm_home` } },
   { bounds: { x: 833, y: 0, width: 834, height: HALF }, action: { type: "richmenuswitch", richMenuAliasId: ALIAS_CATS, data: "to=categories" } },
