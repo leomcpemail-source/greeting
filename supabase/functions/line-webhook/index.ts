@@ -403,11 +403,11 @@ async function getPhotoPending(userId: string): Promise<{ id: string; fresh: boo
 async function deletePhotoPending(userId: string) {
   await fetch(`${SUPABASE_URL}/rest/v1/line_photo_pending?user_id=eq.${encodeURIComponent(userId)}`, { method: "DELETE", headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" } }).catch(() => {});
 }
-async function triggerMakeCard(userId: string, messageId: string, bless = "") {
+async function triggerMakeCard(userId: string, messageId: string, bless = "", frame = "") {
   await fetch(`${SUPABASE_URL}/functions/v1/line-make-card`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: MKCARD_TOKEN, userId, messageId, bless }),
+    body: JSON.stringify({ token: MKCARD_TOKEN, userId, messageId, bless, frame }),
   }).catch(() => {});
 }
 
@@ -463,6 +463,23 @@ async function recordCardRequest(act: string, bless: string, text: string, inten
 function parseCustomBless(t: string): string | null {
   const m = t.match(/(?:แก้|เปลี่ยน|ขอแก้|ขอเปลี่ยน)\s*(?:ไข|คำ)?\s*(?:คำอวยพร|ข้อความ|คำ)\s*(?:ใหม่)?\s*(?:เป็น|ว่า|:)\s*(.+)/);
   return m && m[1] && m[1].trim() ? m[1].trim().slice(0, 120) : null;
+}
+// แยก "สีกรอบ" ที่ user อยากได้ — ต้องพูดถึง "กรอบ/เฟรม" + ชื่อสี เช่น "ทำกรอบสีเทา", "เปลี่ยนกรอบเป็นสีฟ้า"
+// คืน key สีมาตรฐาน (ตรงกับ FRAME_COLORS ใน line-make-card) ; ไม่เข้าเงื่อนไข = null
+const FRAME_WORDS: [RegExp, string][] = [
+  [/เทาเข้ม|เทาแก่/, "เทาเข้ม"], [/เทา|grey|gray/i, "เทา"],
+  [/ชมพูอ่อน|พีช|peach/i, "ชมพูอ่อน"], [/ชมพู|pink/i, "ชมพู"],
+  [/แดง|red/i, "แดง"], [/ฟ้า|sky/i, "ฟ้า"], [/น้ำเงิน|กรมท่า|navy|blue/i, "น้ำเงิน"],
+  [/เขียว|green/i, "เขียว"], [/เหลือง|yellow/i, "เหลือง"], [/ส้ม|orange/i, "ส้ม"],
+  [/ม่วง|purple|violet/i, "ม่วง"], [/ทอง|gold/i, "ทอง"], [/เงิน|silver/i, "เงิน"],
+  [/น้ำตาล|brown/i, "น้ำตาล"], [/ครีม|เบจ|cream|beige/i, "ครีม"],
+  [/ดำ|black/i, "ดำ"], [/ขาว|white/i, "ขาว"],
+];
+function parseFrameColor(t: string): string | null {
+  const s = String(t);
+  if (!/กรอบ|เฟรม|frame/i.test(s)) return null;   // ต้องพูดถึงกรอบจริง ๆ กันชนคำอวยพร/แชต
+  for (const [re, key] of FRAME_WORDS) if (re.test(s)) return key;
+  return null;
 }
 
 const CATS_SET = new Set(["flowers", "dharma", "inspire", "miss", "birthday", "elderly", "health", "festival", "family", "pets", "coffee", "nature"]);
@@ -598,6 +615,21 @@ async function handleEvent(ev: any) {
   if (isAck(text)) {
     const a = await askThaiLLM(text);
     await lineReply(ev.replyToken, [textMsg(a || "ขอบคุณนะคะ 🥰 ถ้าอยากให้น้องใส่ใจช่วยอะไรอีก บอกได้เลยค่ะ 💛")]);
+    return;
+  }
+
+  // ── เปลี่ยน "สีกรอบ" เอง: "ทำกรอบสีเทา" / "เปลี่ยนกรอบเป็นสีฟ้า" (ดักก่อน LLM กันตีความเป็นทำภาพปกติ) ──
+  const frameColor = parseFrameColor(text);
+  if (frameColor) {
+    if (freshPhoto) {
+      const cbf = parseCustomBless(text);   // เผื่อสั่งเปลี่ยนคำอวยพรมาพร้อมกัน
+      await lineReply(ev.replyToken, [textMsg(`ได้เลยค่ะ! 🎨 เปลี่ยนกรอบเป็นสี${frameColor}ให้เลย กำลังทำภาพนะคะ รอแป๊บค่ะ ✨`)]);
+      if (userId) await upsertPhotoPending(userId, freshPhoto);
+      await triggerMakeCard(userId!, freshPhoto, cbf || "", frameColor);
+      await recordCardRequest(cbf ? "edit_blessing" : "make_card", cbf || "", text, null, userId);
+    } else {
+      await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]);
+    }
     return;
   }
 
