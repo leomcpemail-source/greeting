@@ -158,7 +158,8 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
           <button class="chip" style="margin-left:8px;padding:3px 12px;font-size:12px" onclick="loadFriendsForTest()">↻ รีเฟรช</button>
         </h3>
         <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:10px">
-          ค้นหาแล้วเลือกยิงการ์ด/รูปไปหา user ทีละคนเพื่อทดสอบ — ไม่กระทบสถิติ “ส่งถึงแล้ววันนี้”
+          ค้นหาแล้วเลือกยิงการ์ด/รูปไปหา user ทีละคนเพื่อทดสอบ — ไม่กระทบสถิติ “ส่งถึงแล้ววันนี้”<br>
+          👑 <b style="color:#7fd1a0">แอดมิน</b>: กดตั้งใครเป็นแอดมินก็ได้ (ยกเลิกได้) — เวลาน้องใส่ใจ <b>ไม่มั่นใจ</b> จะตอบ user รับหน้าไว้ก่อน แล้วส่งแจ้งเตือนเข้าแชต LINE ของแอดมินทุกคน พร้อมรหัสเคส ; แอดมินพิมพ์ <b>ตอบ &lt;รหัส&gt; &lt;ข้อความ&gt;</b> ในแชตของตัวเอง น้องใส่ใจจะเอาไปบอก user ให้ (พิมพ์ “เคส” เพื่อดูเคสค้าง)
         </div>
         <input id="testSearch" type="text" autocomplete="off" placeholder="🔍 พิมพ์ชื่อ หรือรหัส user เพื่อค้นหา…"
           oninput="_testPage=1;renderTestTable()"
@@ -812,6 +813,7 @@ function renderTestTable(){
     <th style="${thS}" onclick="testSetSort('name')">ชื่อ${arr('name')}</th>
     <th style="${thS}" onclick="testSetSort('followed_at')">เข้าเมื่อ${arr('followed_at')}</th>
     <th style="${thS}" onclick="testSetSort('active')">สถานะ${arr('active')}</th>
+    <th style="${thP}">แอดมิน</th>
     <th style="${thP}">ทดสอบยิง</th>
   </tr></thead><tbody>`;
   rows.forEach((u,i)=>{
@@ -824,11 +826,24 @@ function renderTestTable(){
       <td style="padding:7px 8px;white-space:nowrap;color:var(--mut)">${dt}</td>
       <td style="padding:7px 8px;white-space:nowrap">${u.active?'🟢 active':'⚪ เลิก'}</td>
       <td style="padding:7px 8px;white-space:nowrap">
+        <button class="chip" title="${u.is_admin?'กดเพื่อยกเลิกแอดมิน':'ตั้งให้เป็นแอดมิน (รับแจ้งเตือนเคส)'}" style="padding:3px 10px;font-size:13px;${u.is_admin?'background:#7fd1a0;color:#06281a;font-weight:600':''}" onclick="toggleAdmin('${uid}',${u.is_admin?'false':'true'},this)">${u.is_admin?'✅ แอดมิน':'＋ ตั้งแอดมิน'}</button>
+      </td>
+      <td style="padding:7px 8px;white-space:nowrap">
         <button class="chip" title="ยิงการ์ด" style="padding:3px 10px;font-size:13px" onclick="sendTest('${uid}','การ์ด','cards',this)">🎴</button>
         <button class="chip" title="ยิงรูปล้วน" style="padding:3px 10px;font-size:13px" onclick="sendTest('${uid}','รูปล้วน','images',this)">🖼️</button>
       </td></tr>`;
   });
   tbl.innerHTML=html+'</tbody>';
+}
+async function toggleAdmin(uid, on, btn){
+  const old=btn.innerHTML; btn.disabled=true; btn.textContent='⏳';
+  try{
+    const d=await lineRpc('line_set_admin',{ p_token:await adminToken(), p_user_id:uid, p_on:on });
+    if(d && d.ok){
+      const f=_testFriends.find(x=>x.user_id===uid); if(f) f.is_admin=on;
+      renderTestTable();   // วาดใหม่ทั้งตาราง = ปุ่มอัปเดตสถานะ
+    } else { btn.innerHTML=old; btn.disabled=false; alert('ตั้งแอดมินไม่สำเร็จ: '+esc((d&&d.error)||'ไม่ทราบสาเหตุ')); }
+  }catch(e){ btn.innerHTML=old; btn.disabled=false; alert('ผิดพลาด: '+e.message); }
 }
 async function sendTest(uid, label, style, btn){
   const res=$('testResult'); const old=btn.textContent;
