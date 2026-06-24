@@ -474,17 +474,31 @@ async function handleAdminCommand(adminId: string, text: string, replyToken: str
   const m = text.match(ADMIN_REPLY_RE);
   if (m) {
     const code = m[1].toLowerCase(), reply = m[2].trim().slice(0, 1500);
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/line_escalations?code=eq.${encodeURIComponent(code)}&status=eq.open&select=id,user_id,user_name`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
-    const rows = r.ok ? await r.json() : [];
-    if (!rows.length) { await lineReply(replyToken, [textMsg(`ไม่พบเคสรหัส “${code}” ที่ยังเปิดอยู่ค่ะ (อาจตอบไปแล้ว) — พิมพ์ “เคส” เพื่อดูรายการค้างนะคะ`)]); return true; }
-    const c0 = rows[0];
-    await linePush(c0.user_id, [textMsg(`เรื่องที่ถามไว้นะคะ 🌸\n${reply}`)]);
-    await fetch(`${SUPABASE_URL}/rest/v1/line_escalations?id=eq.${c0.id}`, {
+    // claim เคสแบบ atomic: PATCH เฉพาะที่ยัง open → ถ้าได้ row กลับมาแปลว่าเรา "จอง" ได้ (กันแอดมิน 2 คนตอบพร้อมกัน)
+    const upd = await fetch(`${SUPABASE_URL}/rest/v1/line_escalations?code=eq.${encodeURIComponent(code)}&status=eq.open`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" },
+      headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=representation" },
       body: JSON.stringify({ status: "answered", admin_reply: reply, admin_user: adminId, answered_at: new Date().toISOString() }),
-    }).catch(() => {});
-    await lineReply(replyToken, [textMsg(`ส่งให้ ${c0.user_name || "ผู้ใช้"} เรียบร้อยแล้วค่ะ ✅`)]);
+    }).catch(() => null);
+    const claimed = upd && upd.ok ? await upd.json() : [];
+    if (!claimed.length) {
+      // ไม่ได้ = ไม่มีเคสรหัสนี้ หรือ ถูกตอบไปแล้ว (เช็คให้ชัดเพื่อข้อความที่ถูกต้อง)
+      const chk = await fetch(`${SUPABASE_URL}/rest/v1/line_escalations?code=eq.${encodeURIComponent(code)}&select=status,admin_reply`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
+      const ex = chk.ok ? await chk.json() : [];
+      if (ex.length) await lineReply(replyToken, [textMsg(`เคส “${code}” ถูกตอบไปแล้วค่ะ (อาจมีแอดมินท่านอื่นตอบก่อน) หนูเลยไม่ส่งซ้ำให้นะคะ\nคำตอบก่อนหน้า: “${String(ex[0].admin_reply || "").slice(0, 200)}”`)]);
+      else await lineReply(replyToken, [textMsg(`ไม่พบเคสรหัส “${code}” ค่ะ — พิมพ์ “เคส” เพื่อดูรายการที่ยังรอตอบนะคะ`)]);
+      return true;
+    }
+    const c0 = claimed[0];
+    const q = String(c0.question || "").slice(0, 300);
+    // ส่งให้ user พร้อม "ทวนคำถามเดิม" — เผื่อระหว่างรอ user ถามไปหลายเรื่องแล้ว จะได้รู้ว่าตอบเรื่องไหน
+    const toUser = q ? `เรื่องที่คุณถามไว้ว่า “${q}” นะคะ 🌸\n${reply}` : `เรื่องที่ถามไว้นะคะ 🌸\n${reply}`;
+    await linePush(c0.user_id, [textMsg(toUser)]);
+    await lineReply(replyToken, [textMsg(`ส่งคำตอบเรื่อง “${q || "ที่ถามไว้"}” ให้ ${c0.user_name || "ผู้ใช้"} แล้วค่ะ ✅`)]);
+    // แจ้งแอดมินคนอื่น ๆ ว่าเคสนี้ตอบแล้ว (กันตอบซ้ำ/ขัดกัน)
+    const admins = await getAdmins();
+    const others = `✅ เคส ${code} มีคนตอบแล้วค่ะ — ไม่ต้องตอบซ้ำนะคะ\nคำถาม: “${q}”\nคำตอบที่ส่งให้ ${c0.user_name || "ผู้ใช้"}: “${reply.slice(0, 300)}”`;
+    for (const a of admins) if (a !== adminId) await linePush(a, [textMsg(others)]);
     return true;
   }
   if (ADMIN_CASES_RE.test(text)) {
