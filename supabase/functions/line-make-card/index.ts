@@ -33,6 +33,19 @@ const WD = ["อาทิตย์", "จันทร์", "อังคาร",
 const MO = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 // สีประจำวัน (เข้ม, เข้มกว่า) ใช้เป็น fallback ถ้า manifest ไม่มี color
 const DAY_COL = [["#e0322f", "#7d1715"], ["#f2b705", "#8a6800"], ["#e84f9c", "#7d2256"], ["#2faa5d", "#155c31"], ["#ef8a21", "#8a4a08"], ["#1f73c4", "#0f4677"], ["#7a4fc0", "#3d2569"]];
+// สีกรอบที่ user เลือกเองได้ (key ตรงกับ parseFrameColor ใน line-webhook) — [สีกรอบ/ตัวอักษร, สีเข้มฮาโล/ขอบ]
+const FRAME_COLORS: Record<string, [string, string]> = {
+  "เทา": ["#9aa0a6", "#4a4f54"], "เทาเข้ม": ["#6b7178", "#2f3438"],
+  "แดง": ["#e0322f", "#7d1715"], "ชมพู": ["#e84f9c", "#7d2256"], "ชมพูอ่อน": ["#f48fb1", "#9c3b62"],
+  "ฟ้า": ["#29a3df", "#0f4677"], "น้ำเงิน": ["#2746b8", "#152663"], "เขียว": ["#2faa5d", "#155c31"],
+  "เหลือง": ["#f2b705", "#8a6800"], "ส้ม": ["#ef8a21", "#8a4a08"], "ม่วง": ["#7a4fc0", "#3d2569"],
+  "ทอง": ["#d4a017", "#7a5c00"], "เงิน": ["#b8bcc2", "#5c6066"], "น้ำตาล": ["#8d5524", "#4a2c12"],
+  "ครีม": ["#d9c089", "#8a774a"], "ดำ": ["#2b2b2b", "#000000"], "ขาว": ["#ffffff", "#7a7f85"],
+};
+function applyFrame(day: any, frame: string) {
+  const f = FRAME_COLORS[frame];
+  if (f) { day.color = f[0]; day.color2 = f[1]; }
+}
 
 let _wasm: Promise<void> | null = null;
 function ensureWasm() { if (!_wasm) _wasm = initWasm(fetch("https://unpkg.com/@resvg/resvg-wasm@2.6.2/index_bg.wasm")); return _wasm; }
@@ -214,7 +227,7 @@ async function push(userId: string, messages: unknown[]) {
   }).catch(() => {});
 }
 
-async function job(userId: string, messageId: string, test: boolean, customBless: string) {
+async function job(userId: string, messageId: string, test: boolean, customBless: string, frame = "") {
   try {
     let photo: Uint8Array, mime: string;
     if (test) {
@@ -226,11 +239,12 @@ async function job(userId: string, messageId: string, test: boolean, customBless
     }
     const day = await loadDay();
     if (customBless) day.bless = customBless;
+    if (frame) applyFrame(day, frame);
     const png = await renderCard(photo, mime, day);
     const url = await uploadCard(png);
     const hint = customBless
-      ? "แก้ให้เรียบร้อยแล้วค่ะ! 💛 ถ้าอยากเปลี่ยนคำอวยพรอีก พิมพ์ “แก้คำอวยพรเป็น …” ตามด้วยข้อความใหม่ได้เลยนะคะ ✨"
-      : "เสร็จแล้วค่ะ! ✨ ภาพสวัสดีจากรูปของคุณ 🌸\nอยากได้คำอวยพรแบบไหนเป็นพิเศษ บอกหนูได้เลยค่ะ — พิมพ์ว่า “แก้คำอวยพรเป็น …” ตามด้วยข้อความที่อยากได้ แล้วหนูจะทำให้ใหม่ทันทีเลยนะคะ 💛";
+      ? "แก้ให้เรียบร้อยแล้วค่ะ! 💛 ถ้าอยากเปลี่ยนคำอวยพรอีก พิมพ์ “แก้คำอวยพรเป็น …” หรืออยากเปลี่ยนสีกรอบ พิมพ์ “เปลี่ยนกรอบเป็นสี…” (เช่น สีฟ้า สีทอง) ได้เลยนะคะ ✨"
+      : "เสร็จแล้วค่ะ! ✨ ภาพสวัสดีจากรูปของคุณ 🌸\nอยากได้คำอวยพรแบบไหนเป็นพิเศษ พิมพ์ “แก้คำอวยพรเป็น …” หรืออยากเปลี่ยนสีกรอบ พิมพ์ “เปลี่ยนกรอบเป็นสี…” (เช่น สีเทา สีฟ้า สีทอง) แล้วหนูจะทำให้ใหม่ทันทีเลยนะคะ 💛";
     await push(userId, [
       { type: "image", originalContentUrl: url, previewImageUrl: url },
       { type: "text", text: hint },
@@ -249,13 +263,14 @@ Deno.serve(async (req) => {
     const day = await loadDay();
     if (body.bless) day.bless = String(body.bless);
     if (body.headline) day.headline = String(body.headline);
+    if (body.frame) applyFrame(day, String(body.frame));
     const rr = await fetch("https://picsum.photos/900");
     const png = await renderCard(new Uint8Array(await rr.arrayBuffer()), "image/jpeg", day);
     return new Response(JSON.stringify({ url: await uploadCard(png) }), { headers: { "Content-Type": "application/json" } });
   }
   const userId = String(body.userId || "");
   if (!userId) return new Response(JSON.stringify({ error: "no userId" }), { status: 400, headers: { "Content-Type": "application/json" } });
-  const p = job(userId, String(body.messageId || ""), !!body.test, String(body.bless || "").slice(0, 120));
+  const p = job(userId, String(body.messageId || ""), !!body.test, String(body.bless || "").slice(0, 120), String(body.frame || ""));
   // @ts-ignore EdgeRuntime มีบน Supabase
   if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) EdgeRuntime.waitUntil(p); else await p;
   return new Response(JSON.stringify({ accepted: true }), { headers: { "Content-Type": "application/json" } });
