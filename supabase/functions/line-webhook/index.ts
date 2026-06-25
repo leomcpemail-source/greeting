@@ -799,6 +799,7 @@ async function handleEvent(ev: any) {
       if (userId) await upsertPhotoPending(userId, freshPhoto, st.frame || null, st.bless || null);
       await triggerMakeCard(userId!, freshPhoto, st.bless, st.frame);
       await recordCardRequest(cbf ? "edit_blessing" : "make_card", cbf || "", text, null, userId);
+      await logIntent("frame", null, frameColor, userId);   // เก็บสีกรอบที่เลือก (โทนหม่นซ้ำ ๆ = สัญญาณเสริมในแผง "ใส่ใจเป็นพิเศษ")
     } else {
       await lineReply(ev.replyToken, [textMsg(noPhotoMsg)]);
     }
