@@ -103,9 +103,10 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
   <!-- gate -->
   <div id="gate" class="gate">
     <h2>🔒 Dashboard — สวัสดีวันนี้</h2>
-    <input id="pass" type="password" placeholder="รหัสผ่าน" autocomplete="off">
+    <input id="pass" type="text" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="รหัส 6 หลักจาก Authenticator" onkeydown="if(event.key==='Enter')enter()">
     <button class="btn-gold" onclick="enter()">เข้าดู</button>
     <div class="err-text" id="gateErr"></div>
+    <div style="color:var(--mut);font-size:12px;margin-top:8px;line-height:1.6">ใช้รหัสจากแอป Authenticator เท่านั้น<br>(ไม่มีรหัสผ่านแยกอีกแล้ว)</div>
   </div>
 
   <!-- board -->
@@ -120,6 +121,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
       <button class="dtab on" id="dtabDash" onclick="switchDbTab('dash')">📊 Dashboard</button>
       <button class="dtab" id="dtabLine" onclick="switchDbTab('line')">💬 LINE</button>
       <button class="dtab" id="dtabTeach" onclick="switchDbTab('teach')">🧠 AI ระบบ</button>
+      <button class="dtab" onclick="setDashPass()" title="ตั้ง/แก้รหัสสถิติเว็บแอป (จำในเครื่องนี้ครั้งเดียว)" style="font-size:12px">🔑</button>
     </div>
 
     <!-- filter bar (ใช้ร่วม Dashboard + LINE) -->
@@ -292,6 +294,14 @@ async function adminToken(){
   alert('รหัสไม่ถูกต้องหรือหมดอายุ ลองใหม่นะคะ'); return '';
 }
 function adminLogout(){ sessionStorage.removeItem('asess'); }
+// ตั้ง/แก้รหัสสถิติเว็บแอป (เก็บใน localStorage ของเครื่องนี้เท่านั้น ไม่ฝังในไฟล์ public)
+function setDashPass(){
+  const cur=localStorage.getItem('dpass')||'';
+  const dp=prompt('รหัสสถิติ “เว็บแอป” (จำในเครื่องนี้ — เว้นว่างถ้าไม่ใช้แท็บเว็บแอป)', cur);
+  if(dp===null) return;
+  localStorage.setItem('dpass',dp); PASS=dp;
+  try{ load(); loadRefs(); }catch(e){}
+}
 
 const todayISO = new Date().toLocaleDateString('sv-SE');
 let PASS='', DAYS=36500, DATE_FILTER=null, charts={}, _timer=null;
@@ -300,10 +310,22 @@ const $=id=>document.getElementById(id);
 // init date picker
 $('datePicker').max = todayISO;
 
-/* ── auth ── */
-function enter(){
-  PASS = $('pass').value.trim();
-  if(!PASS){ $('gateErr').textContent='ใส่รหัสก่อน'; return; }
+/* ── auth: เข้าด้วย Authenticator (TOTP) อย่างเดียว ── */
+async function enter(){
+  const code=($('pass').value||'').trim();
+  if(!/^\d{6}$/.test(code)){ $('gateErr').textContent='ใส่รหัส 6 หลักจากแอป Authenticator'; return; }
+  $('gateErr').textContent='กำลังตรวจสอบ…';
+  let tok='';
+  try{ const d=await lineRpc('admin_login',{p_code:code}); if(d&&d.token) tok=d.token; }catch(e){}
+  if(!tok){ $('gateErr').textContent='รหัสไม่ถูกต้องหรือหมดอายุ ลองใหม่นะคะ'; $('pass').value=''; return; }
+  sessionStorage.setItem('asess',tok);   // session แอดมิน → งาน LINE ใช้ต่อได้เลย ไม่ต้องใส่ซ้ำ
+  // รหัสสถิติเว็บแอป (แท็บ "เว็บแอป") — จำในเครื่องนี้ครั้งเดียว ไม่ฝังในไฟล์ public ; ไม่ใช้ก็เว้นว่างได้
+  let dp=localStorage.getItem('dpass');
+  if(dp===null){
+    dp=prompt('ครั้งแรกในเครื่องนี้เท่านั้น 🔑\nใส่รหัสสถิติ “เว็บแอป” (ถ้าไม่ได้ดูแท็บเว็บแอป เว้นว่างแล้วกด OK ได้เลย)\nเครื่องนี้จะจำไว้ ไม่ต้องใส่อีก')||'';
+    localStorage.setItem('dpass',dp);
+  }
+  PASS=dp||'';
   $('gate').style.display='none';
   $('board').style.display='block';
   startAutoRefresh();
