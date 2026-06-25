@@ -149,12 +149,13 @@ async function deactivateFriend(userId: string) {
 
 // ── ถาม ThaiLLM (OpenAI-compatible) ในบทบาทน้องใส่ใจ ── retry 1 ครั้งกัน 502/timeout ชั่วคราว
 //   knowledge = ความรู้ที่ผู้ใช้เคยสอน (ถ้ามี) → ฉีดเข้าเป็นข้อมูลเชื่อถือได้ ให้ยึดตามนี้
-async function askThaiLLM(userText: string, knowledge = ""): Promise<string | null> {
+async function askThaiLLM(userText: string, knowledge = "", extraSys = ""): Promise<string | null> {
   if (!THAILLM_KEY) return null;
   const kb = knowledge.trim()
     ? `\n\nความรู้ที่ผู้ใช้เคยสอนน้องใส่ใจไว้ (ถือว่าถูกต้องและเชื่อถือได้ ให้ยึดตามนี้ในการตอบ ถ้าตรงกับคำถาม):\n${knowledge.trim()}`
     : "";
-  const sys = `${PERSONA}\n\nข้อมูลปัจจุบัน (ใช้อ้างอิงเมื่อถูกถามเรื่องวัน/เวลา ห้ามเดาเอง): วันนี้คือ ${nowContextTH()}${kb}`;
+  const ex = extraSys.trim() ? `\n\n${extraSys.trim()}` : "";
+  const sys = `${PERSONA}\n\nข้อมูลปัจจุบัน (ใช้อ้างอิงเมื่อถูกถามเรื่องวัน/เวลา ห้ามเดาเอง): วันนี้คือ ${nowContextTH()}${kb}${ex}`;
   const body = JSON.stringify({
     model: THAILLM_MODEL,
     messages: [{ role: "system", content: sys }, { role: "user", content: userText.slice(0, 1000) }],
@@ -452,18 +453,20 @@ function genCode(): string {
   return s;
 }
 // สร้างเคส + แจ้งแอดมินทุกคน ; คืน true ถ้าฟ้องสำเร็จ (มีแอดมินรับเรื่อง)
-async function escalate(userId: string, question: string): Promise<boolean> {
+async function escalate(userId: string, question: string, kind: "unsure" | "crisis" = "unsure"): Promise<boolean> {
   const admins = await getAdmins();
-  if (!admins.length) return false;            // ยังไม่ได้ตั้งแอดมิน → ไม่ฟ้อง (ตอบปกติ)
+  if (!admins.length) return false;            // ยังไม่ได้ตั้งแอดมิน → ไม่ฟ้อง (กรณีวิกฤตยังให้สายด่วนไปแล้วในข้อความ)
   const name = await friendName(userId);
   const code = genCode();
   const ins = await fetch(`${SUPABASE_URL}/rest/v1/line_escalations`, {
     method: "POST",
     headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" },
-    body: JSON.stringify({ code, user_id: userId, user_name: name, question: question.slice(0, 500), status: "open" }),
+    body: JSON.stringify({ code, user_id: userId, user_name: name, question: question.slice(0, 500), status: "open", kind }),
   }).catch(() => null);
   if (!ins || !ins.ok) return false;
-  const note = `🔔 มีคำถามที่น้องใส่ใจไม่มั่นใจค่ะ\nจาก: ${name}\nคำถาม: “${question.slice(0, 300)}”\n\nถ้าจะให้ตอบกลับผู้ใช้ พิมพ์:\nตอบ ${code} <ข้อความที่จะให้บอก>\n(ดูเคสค้างทั้งหมด พิมพ์ “เคส”)`;
+  const note = kind === "crisis"
+    ? `🚨 ด่วนมาก! ผู้ใช้อาจกำลังมีภาวะเสี่ยง (อารมณ์/ความปลอดภัย) ค่ะ\nจาก: ${name}\nข้อความ: “${question.slice(0, 300)}”\n\nหนูส่งสายด่วนสุขภาพจิต 1323 ให้แล้ว — รบกวนช่วยติดต่อ/ดูแลโดยด่วนนะคะ 🙏\nถ้าจะฝากข้อความถึงผู้ใช้ พิมพ์: ตอบ ${code} <ข้อความ>`
+    : `🔔 มีคำถามที่น้องใส่ใจไม่มั่นใจค่ะ\nจาก: ${name}\nคำถาม: “${question.slice(0, 300)}”\n\nถ้าจะให้ตอบกลับผู้ใช้ พิมพ์:\nตอบ ${code} <ข้อความที่จะให้บอก>\n(ดูเคสค้างทั้งหมด พิมพ์ “เคส”)`;
   for (const a of admins) await linePush(a, [textMsg(note)]);
   return true;
 }
@@ -502,10 +505,10 @@ async function handleAdminCommand(adminId: string, text: string, replyToken: str
     return true;
   }
   if (ADMIN_CASES_RE.test(text)) {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/line_escalations?status=eq.open&select=code,user_name,question&order=created_at.desc&limit=10`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/line_escalations?status=eq.open&select=code,user_name,question,kind&order=created_at.desc&limit=10`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
     const rows = r.ok ? await r.json() : [];
     if (!rows.length) { await lineReply(replyToken, [textMsg("ตอนนี้ไม่มีเคสค้างค่ะ ✨")]); return true; }
-    const lines = rows.map((x: any) => `• ${x.code} — ${x.user_name || "ผู้ใช้"}: “${String(x.question || "").slice(0, 60)}”`).join("\n");
+    const lines = rows.map((x: any) => `${x.kind === "crisis" ? "🚨" : "•"} ${x.code} — ${x.user_name || "ผู้ใช้"}: “${String(x.question || "").slice(0, 60)}”`).join("\n");
     await lineReply(replyToken, [textMsg(`เคสที่ยังรอตอบ (${rows.length}):\n${lines}\n\nตอบโดยพิมพ์: ตอบ <รหัส> <ข้อความ>`)]);
     return true;
   }
@@ -523,6 +526,32 @@ async function replyChatOrEscalate(userId: string | undefined, text: string, rep
   }
   await lineReply(replyToken, [textMsg(a ||
     "ตอนนี้น้องใส่ใจคิดไม่ทันนิดนึงค่ะ 🥺 ลองพิมพ์ถามใหม่อีกครั้ง หรือพิมพ์ “ขอรูปสวัสดี” มาได้เลยนะคะ 🌸")]);
+}
+
+// ════════ สุขภาพใจ: รับฟัง + ตาข่ายเซฟตี้ (น้องใส่ใจ = เพื่อนที่รับฟัง ไม่ใช่หมอ) ════════
+// สัญญาณ "วิกฤต" — เสี่ยงทำร้ายตัวเอง/ไม่ปลอดภัย → ต้องดูแลทันที + สายด่วน + ฟ้องแอดมินด่วน
+const CRISIS_RE = /(อยากตาย|ไม่อยากอยู่|ไม่อยากมีชีวิต|ไม่อยากตื่น|ฆ่าตัวตาย|ฆ่าตัวเอง|จบชีวิต|จบ ?ชีวิต|อยากจบ ?ๆ|ทำร้ายตัวเอง|กรีดข้อมือ|กรีดแขน|โดดตึก|กินยาเกิน|แขวนคอ|อยากหายไปจากโลก|ไม่มีค่าจะอยู่|อยู่ไปก็ไร้ค่า)/;
+// สัญญาณ "ทุกข์ใจ/ซึมเศร้า" (ไม่วิกฤต) → รับฟังอย่างเข้าใจ
+const DISTRESS_RE = /(ซึมเศร้า|เศร้ามาก|เศร้าจัง|ท้อแท้|ท้อมาก|หมดกำลังใจ|หมดหวัง|สิ้นหวัง|เหนื่อยใจ|เครียดมาก|อยากร้องไห้|ร้องไห้ทุก|โดดเดี่ยว|เหงามาก|ไม่มีใคร|ไม่ไหวแล้ว|เบื่อชีวิต|รู้สึกแย่มาก|จิตตก|แพนิค|panic|เป็นภาระ)/;
+const CRISIS_MSG =
+  "หนูอยู่ตรงนี้กับคุณนะคะ 💛 สิ่งที่คุณกำลังเจออยู่มันหนักมากจริง ๆ และคุณไม่ได้อยู่คนเดียวนะคะ\n" +
+  "ถ้าตอนนี้รู้สึกไม่ไหว อยากให้ลองโทร “สายด่วนสุขภาพจิต 1323” (ฟรี 24 ชม.) มีผู้เชี่ยวชาญพร้อมรับฟังและช่วยเหลือจริง ๆ ค่ะ\n" +
+  "ถ้ารู้สึกว่าตัวเองอาจไม่ปลอดภัยเฉพาะหน้า โทร 1669 (เหตุฉุกเฉิน) ได้ทันทีนะคะ\n" +
+  "หนูจะแจ้งทีมงานให้มาช่วยดูแลคุณด้วยค่ะ ขอให้ใจดีกับตัวเองอีกนิดนะคะ คุณมีค่าเสมอ 🤍";
+const DISTRESS_FALLBACK =
+  "ขอบคุณที่เล่าให้หนูฟังนะคะ 💛 หนูเข้าใจว่ามันไม่ง่ายเลย และคุณเก่งมากแล้วที่ผ่านแต่ละวันมาได้\n" +
+  "หนูอยู่ตรงนี้พร้อมรับฟังเสมอนะคะ อยากระบายอะไรเล่าให้หนูฟังได้เลยค่ะ\n" +
+  "ถ้าช่วงนี้หนักใจมาก ๆ การโทรปรึกษาสายด่วนสุขภาพจิต 1323 (ฟรี 24 ชม.) ก็ช่วยได้นะคะ ไม่ต้องเผชิญคนเดียวค่ะ";
+const SUPPORT_GUIDE =
+  "บริบทพิเศษ — ตอนนี้ผู้ใช้กำลังเศร้า/ทุกข์ใจ ให้ตอบในบทบาท “เพื่อนที่รับฟัง” ไม่ใช่หมอ:\n" +
+  "• รับฟังและยอมรับความรู้สึกเขาก่อน (validate) อย่างอบอุ่นจริงใจ\n" +
+  "• ห้าม toxic positivity เด็ดขาด (ห้ามพูด “สู้ ๆ”, “คิดบวกสิ”, “คนอื่นแย่กว่า”, “เดี๋ยวก็หาย”)\n" +
+  "• ห้ามวินิจฉัยโรค ห้ามแนะนำเรื่องยา ห้ามสัญญาว่าจะหาย\n" +
+  "• ชวนเขาเล่าต่อเบา ๆ ให้รู้สึกว่าไม่ได้อยู่คนเดียว\n" +
+  "• ถ้าฟังดูหนักมาก ค่อย ๆ แนะว่ามีสายด่วนสุขภาพจิต 1323 (ฟรี 24 ชม.) โทรปรึกษาได้\n" +
+  "• ตอบอบอุ่น กระชับ ประมาณ 2-4 ประโยค";
+async function answerSupportive(text: string): Promise<string | null> {
+  return await askThaiLLM(text, "", SUPPORT_GUIDE);
 }
 
 // ════════ เก็บสถิติ + เรียนรู้จากคำขอจริงของผู้ใช้ (คำอวยพร + ลักษณะภาพ) ════════
@@ -742,6 +771,21 @@ async function handleEvent(ev: any) {
   if (isAck(text)) {
     const a = await askThaiLLM(text);
     await lineReply(ev.replyToken, [textMsg(a || "ขอบคุณนะคะ 🥰 ถ้าอยากให้น้องใส่ใจช่วยอะไรอีก บอกได้เลยค่ะ 💛")]);
+    return;
+  }
+
+  // ── สุขภาพใจมาก่อนทุกอย่าง: วิกฤต (เสี่ยงทำร้ายตัวเอง) → ดูแลทันที + สายด่วน 1323 + ฟ้องแอดมินด่วน ──
+  if (CRISIS_RE.test(text)) {
+    await lineReply(ev.replyToken, [textMsg(CRISIS_MSG)]);
+    await logIntent("crisis", null, "", userId);
+    if (userId) await escalate(userId, text, "crisis");
+    return;
+  }
+  // ── ทุกข์ใจ/ซึมเศร้า (ไม่ใช่คำสั่งทำการ์ดชัด ๆ) → รับฟังอย่างเข้าใจ ไม่ toxic positivity ──
+  if (DISTRESS_RE.test(text) && !parseFrameColor(text) && !parseCustomBless(text) && !wantsPhotoGreeting(text)) {
+    await logIntent("support", null, "", userId);
+    const a = await answerSupportive(text);
+    await lineReply(ev.replyToken, [textMsg(a || DISTRESS_FALLBACK)]);
     return;
   }
 
