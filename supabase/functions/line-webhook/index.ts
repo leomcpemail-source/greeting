@@ -146,6 +146,14 @@ async function deactivateFriend(userId: string) {
     body: JSON.stringify({ active: false, unfollowed_at: new Date().toISOString() }),
   }).catch(() => {});
 }
+// ขอพัก/กลับมาทักได้ — คุมเฉพาะการ "ทักเชิงรุก" (line-checkin) ไม่กระทบการ์ดเช้า
+async function setCheckinOptout(userId: string, off: boolean) {
+  await fetch(`${SUPABASE_URL}/rest/v1/line_friends?user_id=eq.${encodeURIComponent(userId)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, Prefer: "return=minimal" },
+    body: JSON.stringify({ checkin_optout: off }),
+  }).catch(() => {});
+}
 
 // ── ถาม ThaiLLM (OpenAI-compatible) ในบทบาทน้องใส่ใจ ── retry 1 ครั้งกัน 502/timeout ชั่วคราว
 //   knowledge = ความรู้ที่ผู้ใช้เคยสอน (ถ้ามี) → ฉีดเข้าเป็นข้อมูลเชื่อถือได้ ให้ยึดตามนี้
@@ -242,10 +250,31 @@ async function getQAContext(userId: string): Promise<{ q: string; a: string } | 
   } catch { return null; }
 }
 // ตอบแชต: ดึงความรู้ที่เคยสอนมาช่วยตอบ + จำคำถาม/คำตอบล่าสุดไว้ (เผื่อ user สอนแก้ทีหลัง)
-async function answerChat(_userId: string | undefined, text: string): Promise<string | null> {
-  // ตอบแชตด้วยบุคลิกน้องใส่ใจล้วน ๆ — เลิกใช้ระบบ "จำคำตอบจากผู้ใช้" แล้ว
-  // (กันคนป้อนข้อมูลผิด/ไม่เหมาะให้จำ แล้วถูกเสิร์ฟต่อให้คนอื่น + กันการล้วงความจำ)
-  return await askThaiLLM(text);
+// ความจำรายคน (จากพฤติกรรมจริงของเขาเอง) → ใบ้ให้น้องใส่ใจคุยได้ตรงใจ/อบอุ่นขึ้น
+// ส่วนตัวรายคน: ฉีดเฉพาะในบทสนทนาของเจ้าตัวเท่านั้น ไม่ข้ามไปคนอื่น (กันล้วงความลับ)
+async function userMemoryHint(userId: string): Promise<string> {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/line_user_profile`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` },
+      body: JSON.stringify({ p_user_id: userId }),
+    });
+    if (!r.ok) return "";
+    const p = await r.json();
+    if (!p || !p.total) return "";
+    const parts: string[] = [];
+    if (p.fav_cat && CAT_LABEL[p.fav_cat]) parts.push(`ชอบรูปหมวด${CAT_LABEL[p.fav_cat]}`);
+    if (p.n_cards > 0) parts.push(`เคยทำการ์ดสวัสดีจากรูปตัวเอง ${p.n_cards} ครั้ง`);
+    if (p.fav_frame) parts.push(`ชอบกรอบสี${p.fav_frame}`);
+    if (p.n_support > 0) parts.push(`เคยมีช่วงที่รู้สึกไม่ค่อยดี ให้ใส่ใจความรู้สึกเป็นพิเศษอย่างอบอุ่น`);
+    if (!parts.length) return "";
+    return `ความชอบของผู้ใช้คนนี้ (ส่วนตัว — ใช้เพื่อคุยให้อบอุ่นเป็นกันเองและตรงใจ อ้างถึงอย่างเป็นธรรมชาติได้ถ้าเหมาะ ห้ามเอาไปเล่าให้ผู้ใช้คนอื่นเด็ดขาด): ${parts.join(", ")}`;
+  } catch { return ""; }
+}
+async function answerChat(userId: string | undefined, text: string): Promise<string | null> {
+  // ตอบแชตด้วยบุคลิกน้องใส่ใจ + ความจำพฤติกรรมรายคน (ไม่ใช่ระบบ "จำข้อเท็จจริงที่ user สอน" ที่เสี่ยงและถอดออกไปแล้ว)
+  const hint = userId ? await userMemoryHint(userId) : "";
+  return await askThaiLLM(text, "", hint);
 }
 
 // ── หารูปสวัสดีจากคลัง ตามหมวด (ไม่มีหมวด = สุ่มทั่วไป) ──
@@ -786,6 +815,18 @@ async function handleEvent(ev: any) {
     await logIntent("support", null, "", userId);
     const a = await answerSupportive(text);
     await lineReply(ev.replyToken, [textMsg(a || DISTRESS_FALLBACK)]);
+    return;
+  }
+
+  // ── ขอพัก / กลับมาทักได้ (คุมเฉพาะการทักเชิงรุก ไม่กระทบการ์ดเช้า) ──
+  if (/(พักก่อน|หยุดทัก|ไม่ต้องทัก|อย่าทักมา|เลิกทักมา|อย่ารบกวน|ขอพักก่อน)/.test(text)) {
+    if (userId) await setCheckinOptout(userId, true);
+    await lineReply(ev.replyToken, [textMsg("ได้เลยค่ะ หนูจะไม่แวะไปทักรบกวนนะคะ 💛 ถ้าอยากให้หนูทักทายอีกเมื่อไหร่ พิมพ์ “ทักได้” มาได้เลยค่ะ\n(รูปสวัสดีตอนเช้ายังส่งให้เหมือนเดิมนะคะ)")]);
+    return;
+  }
+  if (/(ทักได้|กลับมาทัก|ทักมาได้|อยากให้ทัก|ทักหาได้)/.test(text)) {
+    if (userId) await setCheckinOptout(userId, false);
+    await lineReply(ev.replyToken, [textMsg("ดีใจจังค่ะ 🥰 หนูจะแวะมาทักทายเป็นระยะ ๆ นะคะ 🌸")]);
     return;
   }
 
