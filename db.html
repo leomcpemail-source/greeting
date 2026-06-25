@@ -183,6 +183,21 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
         </div>
         <div id="testResult" style="color:var(--mut);font-size:12px;margin-top:10px;min-height:18px"></div>
       </div>
+
+      <!-- สมาชิกที่อาจต้องใส่ใจเป็นพิเศษ (สัญญาณสุขภาพใจ — คนตัดสินใจดูแลเอง) -->
+      <div id="lineCarePanel" class="panel full" style="margin-top:14px;display:none;border-color:#b06a8f">
+        <h3 style="color:#e3a3c7">💗 สมาชิกที่อาจต้องใส่ใจเป็นพิเศษ
+          <button class="chip" style="margin-left:8px;padding:3px 12px;font-size:12px" onclick="loadCareList()">↻ รีเฟรช</button>
+        </h3>
+        <div style="color:var(--mut);font-size:12px;line-height:1.7;margin-bottom:10px">
+          รวมจากสิ่งที่สมาชิก <b>พูด</b> จริง (🚨 ข้อความเสี่ยง / 💧 ระบายความเศร้า) + 🩶 เลือกกรอบโทนหม่นซ้ำ ๆ เป็นสัญญาณเสริม<br>
+          กด <b style="color:#e3a3c7">ใส่ใจเป็นพิเศษ</b> เพื่อทำเครื่องหมายไว้ (ยกเลิกได้) — <b>แอดมินเป็นคนตัดสินใจทักไปดูแลเอง</b> น้องใส่ใจไม่ตัดสิน/ไม่ทักเรื่องนี้เองนะคะ
+        </div>
+        <div style="overflow-x:auto">
+          <table id="careTable" style="width:100%;border-collapse:collapse;font-size:13px"></table>
+        </div>
+        <div id="careResult" style="color:var(--mut);font-size:12px;margin-top:10px;min-height:18px"></div>
+      </div>
     </div><!-- /tabLine -->
 
     <!-- ═══ tab: AI ระบบ — สอนระบบ + Pipeline สร้างรูป (refresh เฉพาะ #pxWrap จาก load()) ═══ -->
@@ -295,6 +310,7 @@ function enter(){
   load();
   loadRefs();   // โหลดครั้งเดียวตอนเข้า (ไม่ผูกกับ auto-refresh — รูปเยอะ ไม่ควรดึงซ้ำทุก 30 วิ)
   loadFriendsForTest();   // รายชื่อเพื่อนสำหรับยิงทดสอบ — โหลดครั้งเดียว (static ไม่โดน refresh ทับ)
+  loadCareList();         // แผงสมาชิกที่อาจต้องใส่ใจ (สัญญาณสุขภาพใจ) — โหลดครั้งเดียว
   renderLearned(); renderAiLog();   // เนื้อหานิ่งใน tab สอนระบบ — render ครั้งเดียว
   loadLiveLog();                    // log สดจาก pipeline — ดึงซ้ำเองทุก 5 นาที (เฉพาะข้อความ ไม่แตะส่วนอัปโหลด)
   if(_liveTimer) clearInterval(_liveTimer);
@@ -834,6 +850,51 @@ function renderTestTable(){
       </td></tr>`;
   });
   tbl.innerHTML=html+'</tbody>';
+}
+/* ── สมาชิกที่อาจต้องใส่ใจเป็นพิเศษ (สัญญาณสุขภาพใจ) ── */
+let _careRows=[];
+async function loadCareList(){
+  const panel=$('lineCarePanel'); if(panel) panel.style.display='';
+  const tbl=$('careTable'); if(tbl) tbl.innerHTML='<tr><td style="color:var(--mut);padding:10px">กำลังโหลด…</td></tr>';
+  try{
+    const list=await lineRpc('line_care_list',{ p_token:await adminToken() });
+    if(list?.error){ if(tbl) tbl.innerHTML=`<tr><td style="color:var(--red);padding:10px">เข้าถึงไม่ได้ (${esc(list.error)})</td></tr>`; return; }
+    _careRows=Array.isArray(list)?list:[]; renderCareTable();
+  }catch(e){ if(tbl) tbl.innerHTML=`<tr><td style="color:var(--red);padding:10px">โหลดไม่สำเร็จ: ${esc(e.message)}</td></tr>`; }
+}
+function renderCareTable(){
+  const tbl=$('careTable'); if(!tbl) return;
+  if(!_careRows.length){ tbl.innerHTML='<tr><td style="color:var(--mut);padding:10px">ยังไม่มีสมาชิกที่มีสัญญาณ หรือถูกตั้งให้ดูแลเป็นพิเศษค่ะ ✨</td></tr>'; return; }
+  const thP='text-align:left;padding:7px 8px;border-bottom:2px solid var(--line);color:var(--mut);white-space:nowrap';
+  let html=`<thead><tr>
+    <th style="${thP};width:36px">#</th><th style="${thP}">ชื่อ</th>
+    <th style="${thP}">สัญญาณ</th><th style="${thP}">ล่าสุด</th><th style="${thP}">ดูแล</th>
+  </tr></thead><tbody>`;
+  _careRows.forEach((u,i)=>{
+    const nm=esc(u.name||('ผู้ใช้ …'+String(u.user_id||'').slice(-4))), uid=esc(u.user_id);
+    const sig=[];
+    if(u.crisis_count>0) sig.push(`<span style="color:#ff6b6b" title="ข้อความเสี่ยง">🚨 ${N(u.crisis_count)}</span>`);
+    if(u.support_count>0) sig.push(`<span style="color:#7fb0e3" title="ระบายความเศร้า">💧 ${N(u.support_count)}</span>`);
+    if(u.somber_count>0) sig.push(`<span style="color:var(--mut)" title="เลือกกรอบโทนหม่น">🩶 ${N(u.somber_count)}</span>`);
+    const last=u.last_signal_at?esc(new Date(u.last_signal_at).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})):'—';
+    html+=`<tr style="border-bottom:1px solid var(--line)">
+      <td style="padding:7px 8px;color:var(--mut)">${i+1}</td>
+      <td style="padding:7px 8px">${nm}</td>
+      <td style="padding:7px 8px;white-space:nowrap">${sig.join(' &nbsp; ')||'—'}</td>
+      <td style="padding:7px 8px;white-space:nowrap;color:var(--mut)">${last}</td>
+      <td style="padding:7px 8px;white-space:nowrap">
+        <button class="chip" style="padding:3px 10px;font-size:13px;${u.care_flag?'background:#e3a3c7;color:#3a1228;font-weight:600':''}" onclick="toggleCare('${uid}',${u.care_flag?'false':'true'},this)">${u.care_flag?'✅ กำลังดูแล':'＋ ใส่ใจเป็นพิเศษ'}</button>
+      </td></tr>`;
+  });
+  tbl.innerHTML=html+'</tbody>';
+}
+async function toggleCare(uid,on,btn){
+  const old=btn.innerHTML; btn.disabled=true; btn.textContent='⏳';
+  try{
+    const d=await lineRpc('line_set_care',{ p_token:await adminToken(), p_user_id:uid, p_on:on });
+    if(d && d.ok){ const f=_careRows.find(x=>x.user_id===uid); if(f) f.care_flag=on; renderCareTable(); }
+    else { btn.innerHTML=old; btn.disabled=false; alert('ไม่สำเร็จ: '+esc((d&&d.error)||'ไม่ทราบสาเหตุ')); }
+  }catch(e){ btn.innerHTML=old; btn.disabled=false; alert('ผิดพลาด: '+e.message); }
 }
 async function toggleAdmin(uid, on, btn){
   const old=btn.innerHTML; btn.disabled=true; btn.textContent='⏳';
