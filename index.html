@@ -378,6 +378,8 @@ const SID    = 's_'+Math.random().toString(36).slice(2);
 /* โหลด manifest/index ผ่าน Edge Function (gate ตามโดเมน) แทนการยิง raw ตรง
    เว็บที่ลอกไป deploy บนโดเมนอื่นจะได้ข้อมูลเปล่า → หน้าว่าง */
 const MF_FN  = `${SB_URL}/functions/v1/manifest`;
+// บันทึกที่มาผู้เยี่ยมชม (IP→ประเทศ ผ่าน edge function บนโปรเจกต์ LINE — ไม่เก็บ IP ดิบ)
+const VISIT_FN = "https://iuyiwpoupnuxnohpatyw.supabase.co/functions/v1/line-visit";
 function _okHost(){try{const h=location.hostname;return h==='leomcpemail-source.github.io'||h==='localhost'||h==='127.0.0.1';}catch(e){return false;}}
 function mfFetch(path){
   // ชั้นที่สอง (client): ถ้าไม่ได้รันบนโดเมนจริง ก็ไม่ต้องยิงไป function เลย คืนค่าว่าง
@@ -1195,9 +1197,13 @@ function switchTab(tab){
   document.getElementById('tabCat').classList.toggle('active',tab==='category'||tab==='catdetail');
 }
 
+// บันทึกที่มาผู้เยี่ยมชม (เปิดเว็บครั้งเดียวต่อโหลด) — fire-and-forget, geo มาจาก IP ฝั่ง server
+function pingVisit(){ try{ if(!_okHost())return; const {v}=visitorId(); fetch(VISIT_FN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitor_id:v})}); }catch(e){} }
+
 /* ════════════ BOOT ════════════ */
 async function boot(){
   track2('open');
+  pingVisit();
   const ict=new Date(Date.now()+7*3600*1000);
   const todayISO=`${ict.getUTCFullYear()}-${String(ict.getUTCMonth()+1).padStart(2,'0')}-${String(ict.getUTCDate()).padStart(2,'0')}`;
   const tryLoad=async f=>{const r=await mfFetch(`img/${f}/manifest.json`);if(!r.ok)throw new Error('m'+r.status);return r.json();};

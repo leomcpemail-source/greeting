@@ -148,6 +148,14 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);min-
       <div id="content">
         <div class="loading"><div class="spin"></div>กำลังโหลด…</div>
       </div>
+      <!-- ผู้เยี่ยมชมเว็บมาจากไหน (ตาม IP → ประเทศ/เมือง ; ไม่เก็บ IP ดิบ) -->
+      <div id="visitGeoPanel" class="panel full" style="margin-top:14px;display:none">
+        <h3 style="color:#7fd1a0">🌍 ผู้เยี่ยมชมเว็บมาจากไหน
+          <button class="chip" style="margin-left:8px;padding:3px 12px;font-size:12px" onclick="loadVisitorGeo()">↻ รีเฟรช</button>
+        </h3>
+        <div style="color:var(--mut);font-size:12px;margin-bottom:10px">อ้างอิงตำแหน่งจาก IP ฝั่งเซิร์ฟเวอร์ — เก็บแค่ประเทศ/จังหวัด/เมือง ไม่เก็บเลข IP ดิบ</div>
+        <div id="visitGeoBody" style="font-size:13px"></div>
+      </div>
     </div>
 
     <!-- ═══ tab: LINE (สถิติเพื่อน + ทดสอบยิงข้อความ) ═══ -->
@@ -333,6 +341,7 @@ async function enter(){
   loadRefs();   // โหลดครั้งเดียวตอนเข้า (ไม่ผูกกับ auto-refresh — รูปเยอะ ไม่ควรดึงซ้ำทุก 30 วิ)
   loadFriendsForTest();   // รายชื่อเพื่อนสำหรับยิงทดสอบ — โหลดครั้งเดียว (static ไม่โดน refresh ทับ)
   loadCareList();         // แผงสมาชิกที่อาจต้องใส่ใจ (สัญญาณสุขภาพใจ) — โหลดครั้งเดียว
+  loadVisitorGeo();       // ที่มาผู้เยี่ยมชมเว็บ (ตาม IP) — โหลดครั้งเดียว
   renderLearned(); renderAiLog();   // เนื้อหานิ่งใน tab สอนระบบ — render ครั้งเดียว
   loadLiveLog();                    // log สดจาก pipeline — ดึงซ้ำเองทุก 5 นาที (เฉพาะข้อความ ไม่แตะส่วนอัปโหลด)
   if(_liveTimer) clearInterval(_liveTimer);
@@ -873,6 +882,34 @@ function renderTestTable(){
   });
   tbl.innerHTML=html+'</tbody>';
 }
+/* ── ที่มาผู้เยี่ยมชมเว็บ (ตาม IP → ประเทศ/เมือง) ── */
+function flagEmoji(cc){ try{ if(!cc||cc.length!==2) return '🌐'; return String.fromCodePoint(...[...cc.toUpperCase()].map(c=>127397+c.charCodeAt(0))); }catch(e){ return '🌐'; } }
+async function loadVisitorGeo(){
+  const panel=$('visitGeoPanel'); if(panel) panel.style.display='';
+  const body=$('visitGeoBody'); if(body) body.innerHTML='<span style="color:var(--mut)">กำลังโหลด…</span>';
+  try{
+    const d=await lineRpc('web_visits_geo',{ p_token:await adminToken() });
+    if(d?.error){ if(body) body.innerHTML=`<span style="color:var(--red)">เข้าถึงไม่ได้ (${esc(d.error)})</span>`; return; }
+    renderVisitorGeo(d);
+  }catch(e){ if(body) body.innerHTML=`<span style="color:var(--red)">โหลดไม่สำเร็จ: ${esc(e.message)}</span>`; }
+}
+function renderVisitorGeo(d){
+  const body=$('visitGeoBody'); if(!body) return;
+  const tot=d.total_visitors||0, list=Array.isArray(d.by_country)?d.by_country:[];
+  if(!list.length){ body.innerHTML='<span style="color:var(--mut)">ยังไม่มีข้อมูลผู้เยี่ยมชม (เริ่มเก็บหลังจาก deploy line-visit)</span>'; return; }
+  const max=Math.max(...list.map(x=>x.visitors||0),1);
+  let html=`<div style="color:var(--mut);margin-bottom:8px">ผู้เยี่ยมชมทั้งหมด <b style="color:var(--ink)">${N(tot)}</b> คน · ${list.length} ประเทศ/พื้นที่</div>`;
+  html+=list.slice(0,30).map(x=>{
+    const pct=Math.round(((x.visitors||0)/max)*100);
+    return `<div style="display:flex;align-items:center;gap:8px;margin:5px 0">
+      <span style="width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${flagEmoji(x.cc)} ${esc(x.country||'ไม่ทราบ')}</span>
+      <span style="flex:1;background:#0c0f18;border-radius:6px;overflow:hidden;height:16px"><span style="display:block;height:100%;width:${pct}%;background:#2f7d52"></span></span>
+      <span style="width:70px;text-align:right;color:var(--mut)">${N(x.visitors)} คน</span>
+    </div>`;
+  }).join('');
+  body.innerHTML=html;
+}
+
 /* ── สมาชิกที่อาจต้องใส่ใจเป็นพิเศษ (สัญญาณสุขภาพใจ) ── */
 let _careRows=[];
 async function loadCareList(){
