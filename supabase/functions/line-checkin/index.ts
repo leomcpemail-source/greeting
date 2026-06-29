@@ -50,16 +50,28 @@ function greetText(name: string, favCat: string | null): string {
   return [pick(openers), favTxt, tail].filter(Boolean).join("\n");
 }
 
-// รูปจากคลังตามหมวดที่ชอบ (ถ้ามี) — ใช้ manifest เดียวกับที่ส่งทุกเช้า
-async function favImageUrl(favCat: string | null): Promise<string | null> {
-  if (!favCat) return null;
+// เลือก "รูปคะแนนสูง (รองๆ ลงมา)" จากคลัง — ไม่สุ่มทั่วไป ; เข้าหมวดที่ชอบก่อนถ้ามี
+// การ์ดเช้าส่งอันดับ 1 ไปแล้ว → ตรงนี้สุ่มจาก top คะแนน "ข้ามอันดับ 1" เพื่อได้รูปดี ๆ ที่ไม่ซ้ำ
+async function bestImage(favCat: string | null): Promise<string | null> {
   for (const folder of [thaiDateISO(), "evergreen"]) {
     try {
       const r = await fetch(`${BASE}/img/${folder}/manifest.json?v=${Date.now()}`, { cache: "no-store" });
       if (!r.ok) continue;
       const m = await r.json();
-      const pool = (m?.categories?.[favCat] || []).filter((x: any) => x && x.file);
-      if (pool.length) return `${BASE}/img/${folder}/${pick(pool).file}`;
+      let imgs = (m?.images || [])
+        .map((x: any) => (typeof x === "string"
+          ? { file: x, score: 0, category: "" }
+          : { file: x?.file, score: Number(x?.score) || 0, category: x?.category || "" }))
+        .filter((x: any) => typeof x.file === "string" && x.file);
+      if (!imgs.length) continue;
+      if (favCat) {
+        const inCat = imgs.filter((x: any) => x.category === favCat);
+        if (inCat.length) imgs = inCat;             // มีหมวดที่ชอบ → ใช้หมวดนั้น
+      }
+      imgs.sort((a: any, b: any) => b.score - a.score);                 // คะแนนสูงสุดก่อน
+      const top = imgs.slice(0, Math.min(12, imgs.length));             // เฉพาะกลุ่มคะแนนสูง
+      const poolPick = top.length > 1 ? top.slice(1) : top;             // ข้ามอันดับ 1 (การ์ดเช้าส่งแล้ว)
+      return `${BASE}/img/${folder}/${pick(poolPick).file}`;
     } catch { /* next */ }
   }
   return null;
@@ -109,7 +121,7 @@ Deno.serve(async (req) => {
   for (const u of due) {
     const name = cleanName(u.name);
     const msgs: unknown[] = [{ type: "text", text: greetText(name, u.fav_cat) }];
-    const img = await favImageUrl(u.fav_cat);
+    const img = await bestImage(u.fav_cat);   // รูปคะแนนสูง (รองๆ ลงมา) — ส่งรูปดี ๆ ให้ทุกคน
     if (img) msgs.push({ type: "image", originalContentUrl: img, previewImageUrl: img });
     if (await pushTo(u.user_id, msgs)) sent.push(u.user_id);
     await sleep(120);
