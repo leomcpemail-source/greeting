@@ -111,6 +111,16 @@ async function lineReply(replyToken: string, messages: unknown[]) {
   }).catch(() => {});
 }
 const textMsg = (text: string) => ({ type: "text", text: text.slice(0, 4900) });
+// ทำความสะอาดข้อความก่อนตรวจ — ตัดอักขระล่องหน (zero-width/BOM/word-joiner/soft-hyphen) + NFC + รวมช่องว่าง
+// บางคีย์บอร์ด/แป้นพิมพ์แทรก zero-width ระหว่างตัวอักษรไทย ทำให้คำสั่ง (เช่น "กรอบสีแดง") ตรวจไม่เจอเฉพาะบางคน
+function normText(s: string): string {
+  return String(s)
+    .normalize("NFC")
+    .replace(/[​‌﻿⁠­]/g, "")
+    .replace(/ /g, " ")
+    .replace(/[ \t]+/g, " ")
+    .trim();
+}
 
 // แสดง loading animation ("กำลังพิมพ์…") ในแชต — LINE ไม่มี API mark-as-read โดยตรง
 // อันนี้คือสิ่งที่ใกล้เคียงที่สุด: โผล่ทันทีที่รับข้อความ = น้องใส่ใจเห็นแล้ว/กำลังตอบ
@@ -750,7 +760,7 @@ async function handleEvent(ev: any) {
     return;
   }
 
-  const text = String(msg.text || "").trim();
+  const text = normText(String(msg.text || ""));   // ตัด zero-width ฯลฯ ให้คำสั่งตรวจเจอเสมอ (กันปัญหาเฉพาะบางคีย์บอร์ด)
 
   // ── แอดมินตอบเคส/ดูเคส (ดักก่อนทุกอย่าง) — เช็ค is_admin เฉพาะตอนข้อความเข้ารูปแบบคำสั่ง กันยิง DB ทุกครั้ง ──
   if (userId && (ADMIN_REPLY_RE.test(text) || ADMIN_CASES_RE.test(text)) && await isAdminUser(userId)) {
