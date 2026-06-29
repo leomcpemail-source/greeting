@@ -14,7 +14,6 @@ const CRON_KEY = Deno.env.get("CRON_KEY") || G.CRON || "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || G.URL || "https://iuyiwpoupnuxnohpatyw.supabase.co";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || G.SK || "";
 const APP_URL = Deno.env.get("APP_URL") ?? "https://leomcpemail-source.github.io/greeting/";
-const CARDS_PER_DAY = Number(Deno.env.get("CARDS_PER_DAY") ?? "5");
 
 const REPO = "leomcpemail-source/greeting";
 const BRANCH = "daily-images";
@@ -28,14 +27,12 @@ const CORS = {
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { "Content-Type": "application/json", ...CORS } });
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-function shuffle<T>(a: T[]): T[] { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
 function ictNow(): Date { return new Date(Date.now() + 7 * 3600 * 1000); }
 function thaiDateISO(): string {
   const d = ictNow();
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 }
-function dayIndex(): number { const d = ictNow(); return Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / 86400000); }
 
 function cleanName(dn: string | null): string {
   if (!dn) return "";
@@ -54,25 +51,19 @@ async function fetchManifest(folder: string): Promise<any | null> {
   } catch { return null; }
 }
 
-async function pickCards(n: number): Promise<{ folder: string; file: string }[]> {
-  const out: { folder: string; file: string }[] = [];
-  const seen = new Set<string>();
+// เลือก "ภาพคะแนนสูงสุด" ของวัน (ส่งวันละ 1 ภาพ) — วันนี้ก่อน ถ้าไม่มีค่อยใช้ evergreen
+async function pickBest(): Promise<{ folder: string; file: string } | null> {
   for (const folder of [thaiDateISO(), "evergreen"]) {
     const m = await fetchManifest(folder);
-    let imgs = (m?.images || [])
-      .map((x: any) => (typeof x === "string" ? x : x?.file))
-      .filter((f: any) => typeof f === "string" && f);
-    imgs = shuffle(imgs);
-    for (const f of imgs) {
-      if (out.length >= n) break;
-      const key = `${folder}/${f}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push({ folder, file: f });
+    const imgs = (m?.images || [])
+      .map((x: any) => (typeof x === "string" ? { file: x, score: 0 } : { file: x?.file, score: Number(x?.score) || 0 }))
+      .filter((x: any) => typeof x.file === "string" && x.file);
+    if (imgs.length) {
+      imgs.sort((a: any, b: any) => b.score - a.score);   // คะแนนสูงสุดมาก่อน
+      return { folder, file: imgs[0].file };
     }
-    if (out.length >= n) break;
   }
-  return out;
+  return null;
 }
 
 const urlOf = (c: { folder: string; file: string }) => `${BASE}/img/${c.folder}/${c.file}`;
@@ -85,9 +76,9 @@ function introMsg(name: string) {
   return { type: "text", text: `${hi}\n${tail}` };
 }
 
-// ส่งการ์ดเป็น image message ล้วน — แต่ละใบ forward เป็น "รูปจริง" ได้ (เลี่ยง line.me/R/share ที่ส่งได้แค่ลิงก์)
-function buildMessages(cards: { folder: string; file: string }[], name: string) {
-  return [introMsg(name), ...cards.slice(0, 4).map(imageMsg)];
+// ส่งวันละ 1 ภาพ (คะแนนสูงสุด) — เป็น image message forward เป็น "รูปจริง" ได้
+function buildMessages(card: { folder: string; file: string }, name: string) {
+  return [introMsg(name), imageMsg(card)];
 }
 
 async function getActiveFriends(): Promise<{ user_id: string; display_name: string | null }[]> {
@@ -141,20 +132,16 @@ Deno.serve(async (req) => {
   }
   if (!isCron && !isAdmin) return json({ error: "unauthorized" }, 401);
 
-  const force = url.searchParams.get("style");
   const dry = url.searchParams.get("dry") === "1";
   const to = url.searchParams.get("to");   // ยิงรายคน (โหมดทดสอบ)
   // broadcast (ไม่มี to = ส่งทุกคน) อนุญาตเฉพาะ cron เท่านั้น — admin token ส่งได้แค่รายคน (กันสแปมหากโทเค็นหลุด)
   if (!to && !isCron) return json({ error: "broadcast_requires_cron" }, 403);
 
-  const style: "images" | "cards" = force === "cards" || force === "images"
-    ? force
-    : (dayIndex() % 2 === 0 ? "images" : "cards");
+  // ส่งวันละ 1 ภาพ = "ภาพคะแนนสูงสุด" ของวัน (ไม่สุ่ม)
+  const best = await pickBest();
+  if (!best) return json({ error: "no images" });
 
-  const cards = await pickCards(CARDS_PER_DAY);
-  if (!cards.length) return json({ error: "no images" });
-
-  if (dry) return json({ style, cards: cards.length, messages: buildMessages(cards, "ตัวอย่าง") });
+  if (dry) return json({ best, messages: buildMessages(best, "ตัวอย่าง") });
 
   let friends: { user_id: string; display_name: string | null }[];
   if (to) {
@@ -169,12 +156,12 @@ Deno.serve(async (req) => {
   const failed: { userId: string; status?: number; body?: string }[] = [];
   for (const f of friends) {
     const name = cleanName(f.display_name);
-    const res = await pushToFriend(f.user_id, buildMessages(cards, name));
+    const res = await pushToFriend(f.user_id, buildMessages(best, name));
     if (res.ok) { ok++; sent.push(f.user_id); } else { failed.push({ userId: f.user_id, status: res.status, body: res.body }); }
     await sleep(150);
   }
   // โหมดทดสอบรายคน (to) ไม่อัปเดต last_sent_at — สถิติ "ส่งถึงวันนี้" จะไม่รวมการทดสอบ
   if (!to) await markSent(sent);
 
-  return json({ style, cards: cards.length, total: friends.length, ok, failed, test: !!to });
+  return json({ image: best.file, total: friends.length, ok, failed, test: !!to });
 });
