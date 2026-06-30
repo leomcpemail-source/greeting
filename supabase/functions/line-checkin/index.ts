@@ -85,6 +85,8 @@ async function bestImage(favCat: string | null): Promise<string | null> {
       }
       const clean = imgs.filter((x: any) => blessOK(x.blessing));
       if (clean.length) imgs = clean;
+      const short = imgs.filter((x: any) => String(x.blessing || "").trim().length <= 42);  // คำอวยพรไม่เน้น
+      if (short.length) imgs = short;
       imgs.sort((a: any, b: any) => b.score - a.score);
       const top = imgs.slice(0, Math.min(12, imgs.length));
       const poolPick = top.length > 1 ? top.slice(1) : top;            // ข้ามอันดับ 1
