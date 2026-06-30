@@ -79,6 +79,9 @@ async function pickBest(): Promise<{ folder: string; file: string } | null> {
     if (inCat.length) imgs = inCat;                     // เฉพาะดอกไม้/วัด (evergreen ไม่มีหมวด → ใช้ทั้งหมดเป็น fallback)
     const clean = imgs.filter((x: any) => blessOK(x.blessing));
     if (clean.length) imgs = clean;                     // เอาเฉพาะคำอวยพรอ่านรู้เรื่อง
+    // เน้น "สวัสดี + วัน" → เลือกใบที่คำอวยพรสั้นที่สุด (ไม่เน้นคำอวยพร) แล้วค่อยคะแนน
+    const short = imgs.filter((x: any) => String(x.blessing || "").trim().length <= 42);
+    if (short.length) imgs = short;
     imgs.sort((a: any, b: any) => b.score - a.score);   // คะแนนสูงสุดมาก่อน
     return { folder, file: imgs[0].file };
   }
