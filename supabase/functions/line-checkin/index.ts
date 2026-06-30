@@ -50,8 +50,21 @@ function greetText(name: string, favCat: string | null): string {
   return [pick(openers), favTxt, tail].filter(Boolean).join("\n");
 }
 
-// เลือก "รูปคะแนนสูง (รองๆ ลงมา)" จากคลัง — ไม่สุ่มทั่วไป ; เข้าหมวดที่ชอบก่อนถ้ามี
-// การ์ดเช้าส่งอันดับ 1 ไปแล้ว → ตรงนี้สุ่มจาก top คะแนน "ข้ามอันดับ 1" เพื่อได้รูปดี ๆ ที่ไม่ซ้ำ
+// ส่งให้ user ได้เฉพาะ "ดอกไม้ + วัด(ธรรมะ)" เท่านั้น (เหมือนการ์ดเช้า)
+const ALLOWED_CATS = new Set(["flowers", "dharma"]);
+// คำอวยพรต้องอ่านรู้เรื่อง
+function blessOK(b: string): boolean {
+  const s = String(b || "").trim();
+  if (s.length < 10 || s.length > 140) return false;
+  const noSp = s.replace(/\s/g, "");
+  const thai = (s.match(/[฀-๿]/g) || []).length;
+  if (thai < noSp.length * 0.6) return false;
+  if (/(.)\1\1\1/.test(s)) return false;
+  if (!/\s/.test(s) && s.length > 45) return false;
+  return true;
+}
+
+// เลือก "รูปคะแนนสูง (รองๆ ลงมา)" — เฉพาะดอกไม้/วัด + คำอวยพรอ่านรู้เรื่อง ; ข้ามอันดับ 1 (การ์ดเช้าส่งแล้ว)
 async function bestImage(favCat: string | null): Promise<string | null> {
   for (const folder of [thaiDateISO(), "evergreen"]) {
     try {
@@ -60,17 +73,21 @@ async function bestImage(favCat: string | null): Promise<string | null> {
       const m = await r.json();
       let imgs = (m?.images || [])
         .map((x: any) => (typeof x === "string"
-          ? { file: x, score: 0, category: "" }
-          : { file: x?.file, score: Number(x?.score) || 0, category: x?.category || "" }))
+          ? { file: x, score: 0, category: "", blessing: "" }
+          : { file: x?.file, score: Number(x?.score) || 0, category: x?.category || "", blessing: x?.blessing || "" }))
         .filter((x: any) => typeof x.file === "string" && x.file);
       if (!imgs.length) continue;
-      if (favCat) {
+      const inAllowed = imgs.filter((x: any) => ALLOWED_CATS.has(x.category));
+      if (inAllowed.length) imgs = inAllowed;          // เฉพาะดอกไม้/วัด (evergreen ไม่มีหมวด → fallback ทั้งหมด)
+      if (favCat && ALLOWED_CATS.has(favCat)) {
         const inCat = imgs.filter((x: any) => x.category === favCat);
-        if (inCat.length) imgs = inCat;             // มีหมวดที่ชอบ → ใช้หมวดนั้น
+        if (inCat.length) imgs = inCat;               // ถ้าหมวดที่ชอบเป็นดอกไม้/วัด → ใช้หมวดนั้น
       }
-      imgs.sort((a: any, b: any) => b.score - a.score);                 // คะแนนสูงสุดก่อน
-      const top = imgs.slice(0, Math.min(12, imgs.length));             // เฉพาะกลุ่มคะแนนสูง
-      const poolPick = top.length > 1 ? top.slice(1) : top;             // ข้ามอันดับ 1 (การ์ดเช้าส่งแล้ว)
+      const clean = imgs.filter((x: any) => blessOK(x.blessing));
+      if (clean.length) imgs = clean;
+      imgs.sort((a: any, b: any) => b.score - a.score);
+      const top = imgs.slice(0, Math.min(12, imgs.length));
+      const poolPick = top.length > 1 ? top.slice(1) : top;            // ข้ามอันดับ 1
       return `${BASE}/img/${folder}/${pick(poolPick).file}`;
     } catch { /* next */ }
   }

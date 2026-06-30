@@ -51,17 +51,36 @@ async function fetchManifest(folder: string): Promise<any | null> {
   } catch { return null; }
 }
 
-// เลือก "ภาพคะแนนสูงสุด" ของวัน (ส่งวันละ 1 ภาพ) — วันนี้ก่อน ถ้าไม่มีค่อยใช้ evergreen
+// ส่งให้ user ได้เฉพาะ "ดอกไม้ + วัด(ธรรมะ)" เท่านั้น (หมวดอื่นมี catHeadline เพี้ยน เช่น "หายห้วงคิดถึง")
+const ALLOWED_CATS = new Set(["flowers", "dharma"]);
+// กรองคำอวยพรให้ "อ่านรู้เรื่อง" ก่อนส่ง — ตัดสั้นเกิน/ยาวเกิน/ไม่ใช่ไทย/อักขระซ้ำเพี้ยน/ยาวแต่ไม่มีเว้นวรรค
+function blessOK(b: string): boolean {
+  const s = String(b || "").trim();
+  if (s.length < 10 || s.length > 140) return false;
+  const noSp = s.replace(/\s/g, "");
+  const thai = (s.match(/[฀-๿]/g) || []).length;
+  if (thai < noSp.length * 0.6) return false;          // ส่วนใหญ่ต้องเป็นภาษาไทย
+  if (/(.)\1\1\1/.test(s)) return false;               // อักขระซ้ำผิดปกติ
+  if (!/\s/.test(s) && s.length > 45) return false;    // ยาวแต่ไม่มีเว้นวรรคเลย = น่าจะเพี้ยน
+  return true;
+}
+
+// เลือก "ภาพคะแนนสูงสุด" ของวัน — เฉพาะดอกไม้/วัด + คำอวยพรอ่านรู้เรื่อง (ส่งวันละ 1 ภาพ)
 async function pickBest(): Promise<{ folder: string; file: string } | null> {
   for (const folder of [thaiDateISO(), "evergreen"]) {
     const m = await fetchManifest(folder);
-    const imgs = (m?.images || [])
-      .map((x: any) => (typeof x === "string" ? { file: x, score: 0 } : { file: x?.file, score: Number(x?.score) || 0 }))
+    let imgs = (m?.images || [])
+      .map((x: any) => (typeof x === "string"
+        ? { file: x, score: 0, category: "", blessing: "" }
+        : { file: x?.file, score: Number(x?.score) || 0, category: x?.category || "", blessing: x?.blessing || "" }))
       .filter((x: any) => typeof x.file === "string" && x.file);
-    if (imgs.length) {
-      imgs.sort((a: any, b: any) => b.score - a.score);   // คะแนนสูงสุดมาก่อน
-      return { folder, file: imgs[0].file };
-    }
+    if (!imgs.length) continue;
+    const inCat = imgs.filter((x: any) => ALLOWED_CATS.has(x.category));
+    if (inCat.length) imgs = inCat;                     // เฉพาะดอกไม้/วัด (evergreen ไม่มีหมวด → ใช้ทั้งหมดเป็น fallback)
+    const clean = imgs.filter((x: any) => blessOK(x.blessing));
+    if (clean.length) imgs = clean;                     // เอาเฉพาะคำอวยพรอ่านรู้เรื่อง
+    imgs.sort((a: any, b: any) => b.score - a.score);   // คะแนนสูงสุดมาก่อน
+    return { folder, file: imgs[0].file };
   }
   return null;
 }
