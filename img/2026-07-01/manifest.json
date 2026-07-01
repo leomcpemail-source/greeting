@@ -1,0 +1,5553 @@
+{
+  "images": [
+    {
+      "file": "card_1782855686877_157.jpg",
+      "score": 94,
+      "blessing": "ดอกไม้บานฉันใด ขอให้ชีวิตเบ่งบานฉันนั้น",
+      "baseId": null,
+      "src": {
+        "name": "rose flower close up",
+        "by": "Alexas Fotos",
+        "link": "https://www.pexels.com/photo/close-up-of-vibrant-dahlia-flower-in-bloom-38161293/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        2,
+        2,
+        3,
+        1
+      ],
+      "sim": 0.8
+    },
+    {
+      "file": "card_1782844093347_38.jpg",
+      "score": 94,
+      "blessing": "ดอกไม้หอมชื่นใจ ขอให้คุณสดชื่นอยู่เสมอ",
+      "baseId": null,
+      "src": {
+        "name": "white jasmine on lush green foliage flower close up",
+        "by": "Plato Terentev",
+        "link": "https://www.pexels.com/photo/vibrant-pink-and-white-flowers-in-glass-vase-38241226/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        17,
+        12,
+        0,
+        5
+      ],
+      "sim": 0.79
+    },
+    {
+      "file": "card_1782889868390_32.jpg",
+      "score": 93,
+      "blessing": "ขอให้เฮงๆ รวยๆ โชคลาภเงินทองไหลมาเทมา สุขภาพแข็งแรง ครอบครัวอบอุ่นเป็นสุข",
+      "baseId": null,
+      "src": {
+        "name": "thai krathong lotus candle",
+        "by": "Zhou Zhou",
+        "link": "https://www.pexels.com/photo/petals-of-a-pink-flower-hidden-behind-a-leaf-15823398/"
+      },
+      "category": "festival",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        3,
+        1,
+        4,
+        5
+      ],
+      "sim": 0.84
+    },
+    {
+      "file": "card_1782849879563_75.jpg",
+      "score": 90,
+      "blessing": "เทศกาลแห่งความสุข ขอให้ได้รับสิ่งที่ดีที่สุด",
+      "baseId": null,
+      "src": null,
+      "category": "festival",
+      "subject": "an Asanha Bucha Dhamma wheel with candles, sacred and golden",
+      "headline": "สวัสดีวันพุธ"
+    },
+    {
+      "file": "card_1782864143629_129.jpg",
+      "score": 89,
+      "blessing": "อยู่ห่างกันแต่ใจไม่เคยห่าง",
+      "baseId": null,
+      "src": {
+        "name": "two birds together branch",
+        "by": "Ankit Mitra",
+        "link": "https://www.pexels.com/photo/bird-feeding-nestlings-in-sunlit-forest-38011018/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "ห่างหายคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        4,
+        15,
+        4,
+        5
+      ],
+      "sim": 0.73
+    },
+    {
+      "file": "card_1782855329155_120.jpg",
+      "score": 89,
+      "blessing": "บุญรักษา เทวดาคุ้มครอง ขอให้ชีวิตพบแต่ความสุขความเจริญ ทุกข์โศกโรคภัยอย่าได้มาแผ้วพาน",
+      "baseId": null,
+      "src": {
+        "name": "thai buddhist temple golden",
+        "by": "Rahul Sapra",
+        "link": "https://www.pexels.com/photo/grayscale-photo-of-royal-cenotaph-chhatris-of-orchha-madhya-pradesh-india-14092724/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        6,
+        8,
+        2,
+        2
+      ],
+      "sim": 0.72
+    },
+    {
+      "file": "card_1782872397656_107.jpg",
+      "score": 89,
+      "blessing": "ขออวยพรให้ท่านมีอายุวัฒนะ พลานามัยสมบูรณ์",
+      "baseId": null,
+      "src": {
+        "name": "old couple silhouette sunset bench",
+        "by": "Ayşegül  Aytören",
+        "link": "https://www.pexels.com/photo/rustic-outdoor-scene-with-wooden-bench-and-door-34131703/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "อายุยืนยาว\nสวัสดีวันพุธ",
+      "sty": [
+        16,
+        7,
+        1,
+        5
+      ],
+      "sim": 0.65
+    },
+    {
+      "file": "card_1782855665371_156.jpg",
+      "score": 88,
+      "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "sunflower field bright",
+        "by": "Valeri Mak",
+        "link": "https://www.pexels.com/photo/a-bee-perched-on-a-yellow-flower-8480194/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        8,
+        15,
+        1,
+        0
+      ],
+      "sim": 0.8
+    },
+    {
+      "file": "card_1782839614237_9.jpg",
+      "score": 88,
+      "blessing": "ใจสงบ ชีวิตสุข ขอให้จิตใจร่มเย็น",
+      "baseId": null,
+      "src": null,
+      "category": "dharma",
+      "subject": "ancient Thai Buddhist temple with golden pagoda at sunrise, still water reflection, no people",
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        19,
+        1,
+        0,
+        2
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782854287763_6.jpg",
+      "score": 88,
+      "blessing": "วันนี้ขอให้ท่านพักผ่อนให้สบาย และมีความสุขนะคะ",
+      "baseId": null,
+      "src": null,
+      "category": "elderly",
+      "subject": "elder hands writing calligraphy with ink brush, wisdom and skill",
+      "headline": "อายุยืนยาว\nสวัสดีวันพุธ",
+      "sty": [
+        13,
+        5,
+        2,
+        0
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782845352727_180.jpg",
+      "score": 88,
+      "blessing": "ส่งดอกไม้แห่งความรักและความสุขให้คุณ",
+      "baseId": null,
+      "src": {
+        "name": "flower macro closeup",
+        "by": "Hanifi Sarıkaya",
+        "link": "https://www.pexels.com/photo/macro-shot-of-bee-in-flight-near-blossoms-31312367/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        2,
+        14,
+        1,
+        5
+      ],
+      "sim": 0.65
+    },
+    {
+      "file": "card_1782845566144_195.jpg",
+      "score": 87,
+      "blessing": "ขอให้วันนี้สดชื่นหอมหวานดั่งดอกไม้ยามเช้า",
+      "baseId": null,
+      "src": {
+        "name": "rose flower close up",
+        "by": "Joris Eschalier",
+        "link": "https://www.pexels.com/photo/delicate-cherokee-rose-19249516/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        16,
+        19,
+        4,
+        4
+      ],
+      "sim": 0.82
+    },
+    {
+      "file": "card_1782839861152_33.jpg",
+      "score": 87,
+      "blessing": "ขอให้สุขภาพแข็งแรง อายุมั่นขวัญยืน ลูกหลานกตัญญู รายล้อมด้วยความรัก อยู่เย็นเป็นสุขตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "elderly couple walking park behind",
+        "by": "Yaroslav Shuraev",
+        "link": "https://www.pexels.com/photo/a-woman-in-yellow-raincoat-training-her-dogs-8499242/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "อายุยืนยาว\nสวัสดีวันพุธ",
+      "sty": [
+        6,
+        3,
+        2,
+        4
+      ],
+      "sim": 0.65
+    },
+    {
+      "file": "card_1782871711770_32.jpg",
+      "score": 86,
+      "blessing": "Happy Birthday! ขอให้ทุกวันเป็นวันที่ดีที่สุด",
+      "baseId": null,
+      "src": {
+        "name": "birthday cake candles",
+        "by": "劉芷安",
+        "link": "https://www.pexels.com/photo/close-up-shot-of-desserts-on-the-table-11719204/"
+      },
+      "category": "birthday",
+      "subject": null,
+      "headline": "แสนสุขในวันเกิด\nสวัสดีวันพุธ",
+      "sty": [
+        3,
+        22,
+        1,
+        0
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782850031678_84.jpg",
+      "score": 86,
+      "blessing": "ทำบุญทำทาน จิตใจย่อมผ่องใสเป็นสุข",
+      "baseId": null,
+      "src": {
+        "name": "golden buddhist pagoda stupa",
+        "by": "Deepak Ramesha",
+        "link": "https://www.pexels.com/photo/view-of-a-sunset-25310026/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        15,
+        1,
+        2,
+        2
+      ],
+      "sim": 0.64
+    },
+    {
+      "file": "card_1782854226685_3.jpg",
+      "score": 85,
+      "blessing": "ผู้ใหญ่ที่เคารพรัก ขอให้ท่านโชคดีมีสุขนะคะ",
+      "baseId": null,
+      "src": null,
+      "category": "elderly",
+      "subject": "a golden path through autumn trees, representing life journey",
+      "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ",
+      "sty": [
+        16,
+        4,
+        0,
+        0
+      ],
+      "sim": 0.79
+    },
+    {
+      "file": "card_1782845444146_186.jpg",
+      "score": 85,
+      "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "white jasmine on lush green foliage bloom macro",
+        "by": "Nikolaeva Nastia",
+        "link": "https://www.pexels.com/photo/yellow-flowers-in-tilt-shift-lens-13163971/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        20,
+        20,
+        3,
+        2
+      ],
+      "sim": 0.77
+    },
+    {
+      "file": "card_1782886817692_69.jpg",
+      "score": 85,
+      "blessing": "บุญรักษา เทวดาคุ้มครอง ขอให้ชีวิตพบแต่ความสุขความเจริญ ทุกข์โศกโรคภัยอย่าได้มาแผ้วพาน",
+      "baseId": null,
+      "src": {
+        "name": "gold buddha statue serene",
+        "by": "Cihat Dede",
+        "link": "https://www.pexels.com/photo/ornate-baroque-ceiling-with-elegant-chandelier-37441917/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        8,
+        9,
+        0,
+        0
+      ],
+      "sim": 0.74
+    },
+    {
+      "file": "card_1782844273930_51.jpg",
+      "score": 85,
+      "blessing": "อีกหนึ่งปีที่ผ่านมา ขอให้ปีนี้ดีกว่าเดิม",
+      "baseId": null,
+      "src": {
+        "name": "colorful balloons celebration",
+        "by": "Matt Becker",
+        "link": "https://www.pexels.com/photo/colorful-hot-air-balloons-flying-under-the-blue-sky-13706469/"
+      },
+      "category": "birthday",
+      "subject": null,
+      "headline": "แสนสุขในวันเกิด\nสวัสดีวันพุธ",
+      "sty": [
+        9,
+        4,
+        1,
+        0
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782863946439_105.jpg",
+      "score": 85,
+      "blessing": "คิดถึงเสมอนะ ขอให้อยู่ดีมีสุข แข็งแรงปลอดภัย พบเจอแต่สิ่งดีๆ ตลอดวัน",
+      "baseId": null,
+      "src": {
+        "name": "two birds together branch",
+        "by": "Elliot Connor",
+        "link": "https://www.pexels.com/photo/close-up-shot-of-two-white-fronted-bee-eaters-perched-on-the-branch-on-white-background-12914836/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "ห่างหายคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        16,
+        21,
+        3,
+        3
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782843820817_14.jpg",
+      "score": 85,
+      "blessing": "สุขสันต์วันเกิด ขอให้มีความสุขมากๆ นะคะ",
+      "baseId": null,
+      "src": {
+        "name": "birthday cake candles",
+        "by": "Any Lane",
+        "link": "https://www.pexels.com/photo/baked-sweet-dessert-on-plate-5945565/"
+      },
+      "category": "birthday",
+      "subject": null,
+      "headline": "เชิญฉลองวันเกิด\nสวัสดีวันพุธ",
+      "sty": [
+        7,
+        21,
+        3,
+        5
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782871890745_42.jpg",
+      "score": 85,
+      "blessing": "ขอให้หายจากความเจ็บป่วยไวๆ และกลับมาแข็งแรง",
+      "baseId": null,
+      "src": {
+        "name": "green smoothie healthy",
+        "by": "Christina Voinova",
+        "link": "https://www.pexels.com/photo/berries-and-strawberries-in-a-glass-jar-7368018/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ",
+      "sty": [
+        18,
+        7,
+        4,
+        3
+      ],
+      "sim": 0.67
+    },
+    {
+      "file": "card_1782839579376_8.jpg",
+      "score": 85,
+      "blessing": "ขอให้วันนี้สดชื่นหอมหวานดั่งดอกไม้ยามเช้า",
+      "baseId": null,
+      "src": {
+        "name": "orchid flower bloom",
+        "by": "Emil Mondoa",
+        "link": "https://www.pexels.com/photo/close-up-of-flowers-12701196/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        10,
+        13,
+        0,
+        4
+      ],
+      "sim": 0.63
+    },
+    {
+      "file": "card_1782843974914_30.jpg",
+      "score": 85,
+      "blessing": "เช้าวันใหม่ กาแฟใหม่ ความสุขใหม่",
+      "baseId": null,
+      "src": null,
+      "category": "coffee",
+      "subject": "coffee and a book on a cozy blanket, perfect morning",
+      "headline": "สวัสดีวันพุธ"
+    },
+    {
+      "file": "card_1782844012785_31.jpg",
+      "score": 84,
+      "blessing": "ขอให้วันนี้ไหลลื่นสบายๆ เหมือนดื่มกาแฟอุ่นๆ",
+      "baseId": null,
+      "src": null,
+      "category": "coffee",
+      "subject": "steam rising from a hot espresso in the morning light, aromatic",
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        3,
+        22,
+        1,
+        2
+      ],
+      "sim": 0.79
+    },
+    {
+      "file": "card_1782839959380_44.jpg",
+      "score": 84,
+      "blessing": "ขอให้ครอบครัวอยู่พร้อมหน้ากัน สุขสันต์ตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "family silhouette sunset beach",
+        "by": "Traveler stories photos  旅人故事相片集",
+        "link": "https://www.pexels.com/photo/back-view-of-people-sitting-by-the-table-near-the-window-in-a-cafe-18625039/"
+      },
+      "category": "family",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        11,
+        12,
+        4,
+        0
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782855241623_111.jpg",
+      "score": 84,
+      "blessing": "ขอให้คุณและน้องสี่ขาแข็งแรง อยู่ด้วยกันไปนานๆ มีความสุขอบอุ่นใจทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "cute dog puppy",
+        "by": "Alexas Fotos",
+        "link": "https://www.pexels.com/photo/close-up-photo-of-a-brown-pomeranian-dog-11060036/"
+      },
+      "category": "pets",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        17,
+        15,
+        4,
+        1
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782843680090_3.jpg",
+      "score": 84,
+      "blessing": "ขอให้วันนี้เป็นวันที่ดีที่สุดในชีวิต",
+      "baseId": null,
+      "src": {
+        "name": "morning golden light sky clouds",
+        "by": "Zetong Li",
+        "link": "https://www.pexels.com/photo/aerial-view-of-foggy-valley-with-houses-and-trees-18780418/"
+      },
+      "category": "inspire",
+      "subject": null,
+      "headline": "ให้กำลังใจ\nสวัสดีวันพุธ",
+      "sty": [
+        16,
+        1,
+        2,
+        4
+      ],
+      "sim": 0.65
+    },
+    {
+      "file": "card_1782872699387_134.jpg",
+      "score": 84,
+      "blessing": "ความห่วงใยจากลูกหลาน ส่งให้ถึงมือท่านทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "grandparent child hands holding",
+        "by": "Dario Moscato",
+        "link": "https://www.pexels.com/photo/a-young-girl-in-knitted-sweater-7860729/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ",
+      "sty": [
+        10,
+        12,
+        4,
+        4
+      ],
+      "sim": 0.64
+    },
+    {
+      "file": "card_1782857789116_1.jpg",
+      "score": 84,
+      "blessing": "กาแฟหนึ่งแก้ว เติมรอยยิ้มให้วันได้เลย",
+      "baseId": null,
+      "src": {
+        "name": "roasted coffee beans",
+        "by": "Fatih Arslan",
+        "link": "https://www.pexels.com/photo/coffee-beans-in-brown-box-5926957/"
+      },
+      "category": "coffee",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        16,
+        20,
+        2,
+        4
+      ],
+      "sim": 0.62
+    },
+    {
+      "file": "card_1782839771851_24.jpg",
+      "score": 84,
+      "blessing": "ขอให้รู้ว่าฉันนึกถึงคุณเสมอ",
+      "baseId": null,
+      "src": {
+        "name": "two birds together branch",
+        "by": "A. G. Rosales",
+        "link": "https://www.pexels.com/photo/blue-jay-perched-on-leafless-branch-in-spring-29425756/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "หายห้วงคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        18,
+        21,
+        3,
+        0
+      ],
+      "sim": 0.6
+    },
+    {
+      "file": "card_1782839532523_3.jpg",
+      "score": 84,
+      "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+      "baseId": null,
+      "src": null,
+      "category": "flowers",
+      "subject": "white jasmine on lush green foliage, beautiful blooming flowers closeup",
+      "headline": "สวัสดีวันพุธ"
+    },
+    {
+      "file": "card_1782855836019_163.jpg",
+      "score": 83,
+      "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+      "baseId": null,
+      "src": {
+        "name": "fresh green flowers macro no people",
+        "by": "Fabio Andrés",
+        "link": "https://www.pexels.com/photo/vivid-pink-hibiscus-flower-in-bloom-31178497/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        7,
+        18,
+        0,
+        4
+      ],
+      "sim": 0.83
+    },
+    {
+      "file": "card_1782849907548_76.jpg",
+      "score": 83,
+      "blessing": "ขอให้เทศกาลครั้งนี้สนุกสนานและประทับใจตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "lantern festival night lights",
+        "by": "brokenadmiral_",
+        "link": "https://www.pexels.com/photo/amusement-park-at-night-16061970/"
+      },
+      "category": "festival",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        4,
+        25,
+        3,
+        2
+      ],
+      "sim": 0.7
+    },
+    {
+      "file": "card_1782872075669_53.jpg",
+      "score": 82,
+      "blessing": "ขอให้หายจากความเจ็บป่วยไวๆ และกลับมาแข็งแรง",
+      "baseId": null,
+      "src": {
+        "name": "fresh fruits bowl",
+        "by": "Boryslav Shoot",
+        "link": "https://www.pexels.com/photo/wet-red-and-yellow-apples-14456110/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ",
+      "sty": [
+        6,
+        15,
+        4,
+        4
+      ],
+      "sim": 0.73
+    },
+    {
+      "file": "card_1782855505607_139.jpg",
+      "score": 82,
+      "blessing": "ดอกไม้หอมชื่นใจ ขอให้คุณสดชื่นอยู่เสมอ",
+      "baseId": null,
+      "src": {
+        "name": "white jasmine on lush green foliage flower close up",
+        "by": "Plato Terentev",
+        "link": "https://www.pexels.com/photo/close-up-of-wet-red-leaves-in-a-park-setting-38241348/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        4,
+        10,
+        3,
+        4
+      ],
+      "sim": 0.65
+    },
+    {
+      "file": "card_1782872719644_137.jpg",
+      "score": 82,
+      "blessing": "ดูแลสุขภาพด้วยนะคะ เพราะคุณสำคัญมาก",
+      "baseId": null,
+      "src": {
+        "name": "fresh vegetables healthy",
+        "by": "Seamlesstextures",
+        "link": "https://www.pexels.com/photo/green-leaves-on-ground-11255748/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ",
+      "sty": [
+        11,
+        23,
+        2,
+        3
+      ],
+      "sim": 0.65
+    },
+    {
+      "file": "card_1782863126410_10.jpg",
+      "score": 82,
+      "blessing": "ครอบครัวที่รักกัน คือสมบัติล้ำค่าที่สุดในโลก",
+      "baseId": null,
+      "src": null,
+      "category": "family",
+      "subject": "parents and adult children reunion at a family home, homecoming",
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        3,
+        21,
+        4,
+        4
+      ],
+      "sim": 0.61
+    },
+    {
+      "file": "card_1782849721325_65.jpg",
+      "score": 82,
+      "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+      "baseId": null,
+      "src": null,
+      "category": "miss",
+      "subject": "a bouquet of red and pink roses tied with ribbon, love, romantic light",
+      "headline": "ห่างหายคิดถึง\nสวัสดีวันพุธ"
+    },
+    {
+      "file": "card_1782854401842_16.jpg",
+      "score": 82,
+      "blessing": "ขอให้เช้าวันนี้สดชื่น เหมือนกาแฟหอมๆ",
+      "baseId": null,
+      "src": null,
+      "category": "coffee",
+      "subject": "beautiful latte art in a ceramic cup, warm morning light, close-up",
+      "headline": "สวัสดีวันพุธ"
+    },
+    {
+      "file": "card_1782887010304_94.jpg",
+      "score": 81,
+      "blessing": "ขออวยพรให้ท่านมีอายุวัฒนะ พลานามัยสมบูรณ์",
+      "baseId": null,
+      "src": {
+        "name": "old couple silhouette sunset bench",
+        "by": "mauro savoca",
+        "link": "https://www.pexels.com/photo/old-monuments-under-sunset-sky-in-town-7514998/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ",
+      "sty": [
+        12,
+        5,
+        4,
+        3
+      ],
+      "sim": 0.73
+    },
+    {
+      "file": "card_1782863331569_25.jpg",
+      "score": 80,
+      "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+      "baseId": null,
+      "src": {
+        "name": "love letter envelope dried flowers",
+        "by": "jojoy creations",
+        "link": "https://www.pexels.com/photo/ribbon-on-pillow-5201565/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "ใจบ่นคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        15,
+        18,
+        1,
+        1
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782845535006_194.jpg",
+      "score": 80,
+      "blessing": "ส่งดอกไม้แห่งความรักและความสุขให้คุณ",
+      "baseId": null,
+      "src": {
+        "name": "white jasmine on lush green foliage flower close up",
+        "by": "Francesco Morrone",
+        "link": "https://www.pexels.com/photo/man-in-white-tank-top-looking-at-a-tree-4185398/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        18,
+        17,
+        2,
+        5
+      ],
+      "sim": 0.61
+    },
+    {
+      "file": "card_1782863362869_29.jpg",
+      "score": 80,
+      "blessing": "Happy Birthday! ขอให้ทุกวันเป็นวันที่ดีที่สุด",
+      "baseId": null,
+      "src": null,
+      "category": "birthday",
+      "subject": "a whimsical birthday cupcake with sprinkles and a candle, kawaii style",
+      "headline": "วันเกิดอันดี\nสวัสดีวันพุธ"
+    },
+    {
+      "file": "card_1782855537235_144.jpg",
+      "score": 79,
+      "blessing": "ดอกไม้หอมชื่นใจ ขอให้คุณสดชื่นอยู่เสมอ",
+      "baseId": null,
+      "src": {
+        "name": "orchid flower bloom",
+        "by": "杨",
+        "link": "https://www.pexels.com/photo/close-up-of-spotted-orchid-flower-on-soil-36163052/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        6,
+        8,
+        3,
+        3
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782839654517_10.jpg",
+      "score": 79,
+      "blessing": "อย่าท้อ เพราะรุ้งงามเสมอหลังสายฝน",
+      "baseId": null,
+      "src": null,
+      "category": "inspire",
+      "subject": "lotus flowers rising from muddy water into sunlight, overcoming adversity",
+      "headline": "ให้กำลังใจ\nสวัสดีวันพุธ"
+    },
+    {
+      "file": "card_1782843852625_19.jpg",
+      "score": 78,
+      "blessing": "ขอให้ร่างกายแข็งแรง จิตใจสดชื่นทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "fresh fruits bowl",
+        "by": "Nikolaeva Nastia",
+        "link": "https://www.pexels.com/photo/close-up-shot-of-apples-in-a-basket-9602170/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ",
+      "sty": [
+        7,
+        17,
+        4,
+        1
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782886795637_67.jpg",
+      "score": 76,
+      "blessing": "ขอให้จิตใจผ่องใส ห่างไกลทุกข์โศก",
+      "baseId": null,
+      "src": {
+        "name": "golden buddhist pagoda stupa",
+        "by": "Yiğit  KARAALİOĞLU",
+        "link": "https://www.pexels.com/photo/god-figurine-on-altar-16308801/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        18,
+        16,
+        4,
+        3
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782845292905_178.jpg",
+      "score": 75,
+      "blessing": "ดอกไม้บานฉันใด ขอให้ชีวิตเบ่งบานฉันนั้น",
+      "baseId": null,
+      "src": {
+        "name": "white jasmine on lush green foliage flower close up",
+        "by": "Irina Iriser",
+        "link": "https://www.pexels.com/photo/green-plants-in-close-up-photography-12180748/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        7,
+        25,
+        2,
+        0
+      ],
+      "sim": 0.76
+    },
+    {
+      "file": "card_1782844933157_138.jpg",
+      "score": 73,
+      "blessing": "ดอกไม้บานรับวันใหม่ ขอให้โชคลาภไหลมาเทมา พบแต่สิ่งดีงาม จิตใจเบิกบานทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "sunflower field bright",
+        "by": "burcubyzt_85",
+        "link": "https://www.pexels.com/photo/albino-wallaby-in-a-grassy-field-outdoors-37114988/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        20,
+        16,
+        2,
+        2
+      ],
+      "sim": 0.71
+    },
+    {
+      "file": "card_1782885996908_21.jpg",
+      "score": 73,
+      "blessing": "ความสุขในเทศกาล ขอให้อยู่กับคุณทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "lantern festival night lights",
+        "by": "Marstion",
+        "link": "https://www.pexels.com/photo/close-up-of-traditional-asian-lantern-8311558/"
+      },
+      "category": "festival",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        12,
+        18,
+        1,
+        2
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782890211282_69.jpg",
+      "score": 67,
+      "blessing": "อยู่ห่างกันแต่ใจไม่เคยห่าง",
+      "baseId": null,
+      "src": {
+        "name": "two coffee cups together table",
+        "by": "Dmitry Rodionov",
+        "link": "https://www.pexels.com/photo/woman-hands-holding-cup-over-typewriter-20107126/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "คิดถึงเสมอ\nสวัสดีวันพุธ",
+      "sty": [
+        16,
+        17,
+        4,
+        4
+      ],
+      "sim": 0.66
+    },
+    {
+      "file": "card_1782839556598_7.jpg",
+      "score": 64,
+      "blessing": "ขอให้วันนี้สดชื่นหอมหวานดั่งดอกไม้ยามเช้า",
+      "baseId": null,
+      "src": null,
+      "category": "flowers",
+      "subject": "white jasmine on lush green foliage, beautiful blooming flowers closeup",
+      "headline": "สวัสดีวันพุธ"
+    },
+    {
+      "file": "card_1782844068780_37.jpg",
+      "score": 64,
+      "blessing": "ขอให้วันนี้สดชื่นหอมหวานดั่งดอกไม้ยามเช้า",
+      "baseId": null,
+      "src": null,
+      "category": "flowers",
+      "subject": "white jasmine on lush green foliage, beautiful blooming flowers closeup",
+      "headline": "สวัสดีวันพุธ"
+    },
+    {
+      "file": "card_1782885963558_9.jpg",
+      "score": 61,
+      "blessing": "ขอให้ทุกคนในครอบครัวแข็งแรงและมีความสุข",
+      "baseId": null,
+      "src": {
+        "name": "family walking silhouette sunrise",
+        "by": "lhthoai",
+        "link": "https://www.pexels.com/photo/sunset-beach-volleyball-game-with-friends-37973777/"
+      },
+      "category": "family",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        12,
+        14,
+        2,
+        3
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782855712488_158.jpg",
+      "score": 60,
+      "blessing": "ขอให้ความสุขเบ่งบานในชีวิตทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "orchid flower bloom",
+        "by": "Chiaroscuro",
+        "link": "https://www.pexels.com/photo/purple-phalaenopsis-flowers-27028233/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        4,
+        3,
+        0,
+        0
+      ],
+      "sim": 0.86
+    },
+    {
+      "file": "card_1782844218739_46.jpg",
+      "score": 60,
+      "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+      "baseId": null,
+      "src": {
+        "name": "heart shape rose petals",
+        "by": "Joolsmagools  ®️",
+        "link": "https://www.pexels.com/photo/vibrant-orange-roses-with-dew-drops-36780318/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "คิดถึงเสมอ\nสวัสดีวันพุธ",
+      "sty": [
+        6,
+        25,
+        1,
+        5
+      ],
+      "sim": 0.84
+    },
+    {
+      "file": "card_1782855594446_149.jpg",
+      "score": 60,
+      "blessing": "ขอให้วันนี้สดชื่นหอมหวานดั่งดอกไม้ยามเช้า",
+      "baseId": null,
+      "src": {
+        "name": "fresh green flowers macro no people",
+        "by": "Em  Hopper",
+        "link": "https://www.pexels.com/photo/close-up-shot-of-pink-hibiscus-flowers-in-bloom-8757649/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        18,
+        3,
+        0,
+        5
+      ],
+      "sim": 0.81
+    },
+    {
+      "file": "card_1782845627511_198.jpg",
+      "score": 60,
+      "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+      "baseId": null,
+      "src": {
+        "name": "orchid flower bloom",
+        "by": "Tiểu Bảo Trương",
+        "link": "https://www.pexels.com/photo/white-and-red-flower-in-macro-lens-8030999/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        3,
+        8,
+        3,
+        2
+      ],
+      "sim": 0.8
+    },
+    {
+      "file": "card_1782857963467_19.jpg",
+      "score": 60,
+      "blessing": "ขอให้ชีวิตสดใสเขียวขจีดั่งป่าเขาที่สวยงาม",
+      "baseId": null,
+      "src": {
+        "name": "sea beach sunrise",
+        "by": "coline petrault",
+        "link": "https://www.pexels.com/photo/breathtaking-sunset-over-sarzeau-beach-31071489/"
+      },
+      "category": "nature",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        8,
+        25,
+        0,
+        2
+      ],
+      "sim": 0.8
+    },
+    {
+      "file": "card_1782872918647_156.jpg",
+      "score": 60,
+      "blessing": "ขอพรอันประเสริฐจงบังเกิดแก่ท่าน ให้แข็งแรงปราศจากโรคภัย จิตใจเบิกบาน มีความสุขทุกคืนวัน",
+      "baseId": null,
+      "src": {
+        "name": "elderly couple walking park behind",
+        "by": "Jordi Gamundi Domenech",
+        "link": "https://www.pexels.com/photo/people-walking-outdoors-near-buildings-8457467/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ",
+      "sty": [
+        6,
+        7,
+        3,
+        2
+      ],
+      "sim": 0.8
+    },
+    {
+      "file": "card_1782854338803_9.jpg",
+      "score": 60,
+      "blessing": "ขอให้ครอบครัวอยู่พร้อมหน้ากัน สุขสันต์ตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "family walking silhouette sunrise",
+        "by": "i.am.anatolia",
+        "link": "https://www.pexels.com/photo/sunset-silhouette-by-tranquil-waters-28750113/"
+      },
+      "category": "family",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        4,
+        8,
+        0,
+        3
+      ],
+      "sim": 0.78
+    },
+    {
+      "file": "card_1782871738188_34.jpg",
+      "score": 60,
+      "blessing": "วันนี้ขอให้ท่านพักผ่อนให้สบาย และมีความสุขนะคะ",
+      "baseId": null,
+      "src": {
+        "name": "elderly couple walking park behind",
+        "by": "Tris Truong",
+        "link": "https://www.pexels.com/photo/people-walking-under-cherry-blossom-20607247/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ",
+      "sty": [
+        5,
+        19,
+        4,
+        4
+      ],
+      "sim": 0.78
+    },
+    {
+      "file": "card_1782872591252_119.jpg",
+      "score": 60,
+      "blessing": "ผู้ใหญ่ที่เคารพรัก ขอให้ท่านโชคดีมีสุขนะคะ",
+      "baseId": null,
+      "src": {
+        "name": "elderly couple walking park behind",
+        "by": "mitbg000",
+        "link": "https://www.pexels.com/photo/people-sitting-at-park-20728214/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ",
+      "sty": [
+        15,
+        0,
+        1,
+        5
+      ],
+      "sim": 0.78
+    },
+    {
+      "file": "card_1782845266459_177.jpg",
+      "score": 60,
+      "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+      "baseId": null,
+      "src": {
+        "name": "flower macro closeup",
+        "by": "Tom Fisk",
+        "link": "https://www.pexels.com/photo/a-pink-flower-on-black-background-12998909/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        15,
+        20,
+        0,
+        4
+      ],
+      "sim": 0.77
+    },
+    {
+      "file": "card_1782844184992_45.jpg",
+      "score": 60,
+      "blessing": "ขอให้ร่ำรวยเงินทอง ค้าขายรุ่งเรือง กิจการก้าวหน้า เงินทองไหลมาเทมา ครอบครัวเป็นสุข",
+      "baseId": null,
+      "src": {
+        "name": "rainbow after rain sky",
+        "by": "Sena",
+        "link": "https://www.pexels.com/photo/colorful-hot-air-balloon-against-moody-sky-32571762/"
+      },
+      "category": "inspire",
+      "subject": null,
+      "headline": "ทำได้แน่นอน\nสวัสดีวันพุธ",
+      "sty": [
+        4,
+        19,
+        0,
+        1
+      ],
+      "sim": 0.76
+    },
+    {
+      "file": "card_1782844309380_58.jpg",
+      "score": 60,
+      "blessing": "ขอให้สุขภาพแข็งแรง ปราศจากโรคภัย กายใจเป็นสุข อายุมั่นขวัญยืน อยู่กับลูกหลานไปนานๆ",
+      "baseId": null,
+      "src": {
+        "name": "fresh vegetables healthy",
+        "by": "Larisa P.",
+        "link": "https://www.pexels.com/photo/fresh-organic-leeks-on-white-surface-4965038/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ",
+      "sty": [
+        20,
+        5,
+        4,
+        1
+      ],
+      "sim": 0.76
+    },
+    {
+      "file": "card_1782844497783_96.jpg",
+      "score": 60,
+      "blessing": "คิดถึงเสมอ ไม่ว่าจะอยู่ที่ไหน",
+      "baseId": null,
+      "src": {
+        "name": "love letter envelope dried flowers",
+        "by": "Manuel Sechi",
+        "link": "https://www.pexels.com/photo/a-bare-tree-on-a-field-on-a-foggy-weather-5556742/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "หายห้วงคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        0,
+        8,
+        3,
+        5
+      ],
+      "sim": 0.76
+    },
+    {
+      "file": "card_1782844713992_116.jpg",
+      "score": 60,
+      "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+      "baseId": null,
+      "src": {
+        "name": "orchid flower bloom",
+        "by": "HM  Zubayer",
+        "link": "https://www.pexels.com/photo/close-up-photo-of-lily-flower-7819730/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        0,
+        21,
+        2,
+        0
+      ],
+      "sim": 0.76
+    },
+    {
+      "file": "card_1782845197346_165.jpg",
+      "score": 60,
+      "blessing": "ขอให้ความสุขเบ่งบานในชีวิตทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "white jasmine on lush green foliage flower close up",
+        "by": "Rodion Kutsaiev",
+        "link": "https://www.pexels.com/photo/a-close-up-of-a-wild-white-flower-16638042/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        19,
+        7,
+        4,
+        5
+      ],
+      "sim": 0.76
+    },
+    {
+      "file": "card_1782863408651_35.jpg",
+      "score": 60,
+      "blessing": "ความห่วงใยจากลูกหลาน ส่งให้ถึงมือท่านทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "elderly hands tea cup",
+        "by": "- landsmann -",
+        "link": "https://www.pexels.com/photo/close-up-of-elderly-hands-in-black-and-white-34566488/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ",
+      "sty": [
+        2,
+        18,
+        3,
+        3
+      ],
+      "sim": 0.76
+    },
+    {
+      "file": "card_1782844468204_94.jpg",
+      "score": 60,
+      "blessing": "ขอให้ร่ำรวยเงินทอง ค้าขายรุ่งเรือง กิจการก้าวหน้า เงินทองไหลมาเทมา ครอบครัวเป็นสุข",
+      "baseId": null,
+      "src": {
+        "name": "sunrise rays through clouds",
+        "by": "Niklas Jeromin",
+        "link": "https://www.pexels.com/photo/brown-wooden-post-on-green-grass-field-near-snow-covered-mountain-under-white-clouds-and-blue-12801806/"
+      },
+      "category": "inspire",
+      "subject": null,
+      "headline": "ทำได้แน่นอน\nสวัสดีวันพุธ",
+      "sty": [
+        3,
+        4,
+        0,
+        5
+      ],
+      "sim": 0.75
+    },
+    {
+      "file": "card_1782845085196_149.jpg",
+      "score": 60,
+      "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+      "baseId": null,
+      "src": {
+        "name": "flower macro closeup",
+        "by": "Neil Yonamine",
+        "link": "https://www.pexels.com/photo/blue-flower-in-close-up-photography-10113169/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        3,
+        11,
+        3,
+        4
+      ],
+      "sim": 0.75
+    },
+    {
+      "file": "card_1782854475707_25.jpg",
+      "score": 60,
+      "blessing": "วันนี้ขอให้ท่านพักผ่อนให้สบาย และมีความสุขนะคะ",
+      "baseId": null,
+      "src": {
+        "name": "grandparent child hands holding",
+        "by": "Rakta  Kunda",
+        "link": "https://www.pexels.com/photo/mother-and-daughter-on-dirt-road-in-black-and-white-19205992/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ",
+      "sty": [
+        10,
+        9,
+        0,
+        0
+      ],
+      "sim": 0.75
+    },
+    {
+      "file": "card_1782855040278_93.jpg",
+      "score": 60,
+      "blessing": "ดูแลสุขภาพด้วยนะคะ เพราะคุณสำคัญมาก",
+      "baseId": null,
+      "src": {
+        "name": "fresh fruits bowl",
+        "by": "Barbara Webb",
+        "link": "https://www.pexels.com/photo/lemon-iced-tea-with-lemon-fruits-792613/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ",
+      "sty": [
+        3,
+        16,
+        0,
+        3
+      ],
+      "sim": 0.75
+    },
+    {
+      "file": "card_1782864020919_116.jpg",
+      "score": 60,
+      "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+      "baseId": null,
+      "src": {
+        "name": "heart shape rose petals",
+        "by": "Banithani Jewelry",
+        "link": "https://www.pexels.com/photo/pink-gemstone-earrings-6636001/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "หายห้วงคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        20,
+        5,
+        2,
+        2
+      ],
+      "sim": 0.75
+    },
+    {
+      "file": "card_1782872755539_140.jpg",
+      "score": 60,
+      "blessing": "ขอพรอันประเสริฐจงบังเกิดแก่ท่าน ให้แข็งแรงปราศจากโรคภัย จิตใจเบิกบาน มีความสุขทุกคืนวัน",
+      "baseId": null,
+      "src": {
+        "name": "old couple silhouette sunset bench",
+        "by": "Ksenia Chernaya",
+        "link": "https://www.pexels.com/photo/photo-of-a-wooden-stool-chair-11112743/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ",
+      "sty": [
+        16,
+        7,
+        3,
+        5
+      ],
+      "sim": 0.75
+    },
+    {
+      "file": "card_1782845503445_189.jpg",
+      "score": 60,
+      "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "lotus flower water",
+        "by": "Evie Shaffer",
+        "link": "https://www.pexels.com/photo/elegant-lily-flower-reflections-on-dark-surface-35639408/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        18,
+        25,
+        1,
+        1
+      ],
+      "sim": 0.74
+    },
+    {
+      "file": "card_1782855135783_99.jpg",
+      "score": 60,
+      "blessing": "ขอให้มีสติปัญญา เมตตา กรุณา เป็นเครื่องนำทาง",
+      "baseId": null,
+      "src": {
+        "name": "white stupa pagoda sunrise",
+        "by": "Yash Chainani",
+        "link": "https://www.pexels.com/photo/body-of-water-during-sunset-8442922/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        11,
+        19,
+        1,
+        2
+      ],
+      "sim": 0.74
+    },
+    {
+      "file": "card_1782855802379_162.jpg",
+      "score": 60,
+      "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "white jasmine on lush green foliage bloom macro",
+        "by": "Studio Naae",
+        "link": "https://www.pexels.com/photo/photograph-of-a-glass-of-coffee-near-a-hat-13758600/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        10,
+        25,
+        3,
+        4
+      ],
+      "sim": 0.74
+    },
+    {
+      "file": "card_1782858053602_27.jpg",
+      "score": 60,
+      "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+      "baseId": null,
+      "src": {
+        "name": "love letter envelope dried flowers",
+        "by": "Marco Sebastian Mueller",
+        "link": "https://www.pexels.com/photo/love-is-pain-text-6289099/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "คิดถึงเสมอ\nสวัสดีวันพุธ",
+      "sty": [
+        6,
+        20,
+        3,
+        1
+      ],
+      "sim": 0.74
+    },
+    {
+      "file": "card_1782871434304_5.jpg",
+      "score": 60,
+      "blessing": "รวยสุข รวยทรัพย์ รวยความดี มั่งคั่ง มั่งมี สุขภาพแข็งแรง คิดสิ่งใดสมความปรารถนา",
+      "baseId": null,
+      "src": {
+        "name": "hot air balloon sunrise sky",
+        "by": "Wolfgang Weiser",
+        "link": "https://www.pexels.com/photo/yellow-hot-air-balloon-flying-20783357/"
+      },
+      "category": "inspire",
+      "subject": null,
+      "headline": "ทำได้แน่นอน\nสวัสดีวันพุธ",
+      "sty": [
+        3,
+        18,
+        2,
+        0
+      ],
+      "sim": 0.74
+    },
+    {
+      "file": "card_1782844456654_93.jpg",
+      "score": 60,
+      "blessing": "ส่งดอกไม้แห่งความรักและความสุขให้คุณ",
+      "baseId": null,
+      "src": {
+        "name": "lotus flower water",
+        "by": "Simon Berger",
+        "link": "https://www.pexels.com/photo/red-bed-of-flowers-with-blue-background-998554/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        12,
+        9,
+        3,
+        3
+      ],
+      "sim": 0.73
+    },
+    {
+      "file": "card_1782855416170_132.jpg",
+      "score": 60,
+      "blessing": "ขอให้ความสุขเบ่งบานในชีวิตทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "white jasmine on lush green foliage flower close up",
+        "by": "sparkle light",
+        "link": "https://www.pexels.com/photo/close-up-of-white-roses-in-garden-setting-38345788/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        8,
+        7,
+        2,
+        1
+      ],
+      "sim": 0.73
+    },
+    {
+      "file": "card_1782863692606_69.jpg",
+      "score": 60,
+      "blessing": "ส่งความคิดถึงให้ถึงมือคุณทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "two birds together branch",
+        "by": "Stephen Noulton",
+        "link": "https://www.pexels.com/photo/european-green-woodpeckers-on-a-tree-branch-35054029/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "ใจบ่นคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        5,
+        17,
+        4,
+        5
+      ],
+      "sim": 0.73
+    },
+    {
+      "file": "card_1782854447714_22.jpg",
+      "score": 60,
+      "blessing": "ขอให้ชีวิตสงบเย็นดั่งสายน้ำ มั่นคงดั่งขุนเขา สดใสดั่งตะวันยามเช้า มีความสุขตลอดวัน",
+      "baseId": null,
+      "src": {
+        "name": "sea beach sunrise",
+        "by": "Flickr",
+        "link": "https://www.pexels.com/photo/sea-near-rock-formation-155309/"
+      },
+      "category": "nature",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        1,
+        9,
+        4,
+        3
+      ],
+      "sim": 0.72
+    },
+    {
+      "file": "card_1782854831191_65.jpg",
+      "score": 60,
+      "blessing": "ขออวยพรให้ท่านมีอายุวัฒนะ พลานามัยสมบูรณ์",
+      "baseId": null,
+      "src": {
+        "name": "elderly couple walking park behind",
+        "by": "Malcolm Garret",
+        "link": "https://www.pexels.com/photo/grayscale-photo-of-people-playing-table-tennis-on-the-park-14134115/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "อายุยืนยาว\nสวัสดีวันพุธ",
+      "sty": [
+        13,
+        15,
+        3,
+        1
+      ],
+      "sim": 0.72
+    },
+    {
+      "file": "card_1782864076881_126.jpg",
+      "score": 60,
+      "blessing": "ความรักและความคิดถึง ส่งให้ถึงคุณทุกเวลา",
+      "baseId": null,
+      "src": {
+        "name": "red roses bouquet romantic",
+        "by": "Studio Naae",
+        "link": "https://www.pexels.com/photo/chocolates-in-form-of-a-heart-lying-in-white-petals-15466367/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "คิดถึงเสมอ\nสวัสดีวันพุธ",
+      "sty": [
+        4,
+        17,
+        3,
+        3
+      ],
+      "sim": 0.72
+    },
+    {
+      "file": "card_1782844627482_107.jpg",
+      "score": 60,
+      "blessing": "สุขภาพดีคือสมบัติที่ดีที่สุด ขอให้มีไว้ตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "fresh green tea cup",
+        "by": "LOL Bubble Tea 🍓",
+        "link": "https://www.pexels.com/photo/peach-bubble-tea-with-fresh-peaches-on-pink-background-33212324/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ",
+      "sty": [
+        8,
+        7,
+        3,
+        3
+      ],
+      "sim": 0.71
+    },
+    {
+      "file": "card_1782854640072_36.jpg",
+      "score": 60,
+      "blessing": "ผู้ใหญ่ที่เคารพรัก ขอให้ท่านโชคดีมีสุขนะคะ",
+      "baseId": null,
+      "src": {
+        "name": "old couple silhouette sunset bench",
+        "by": "Guillermo Berlin",
+        "link": "https://www.pexels.com/photo/romantic-couple-on-bench-by-lake-in-chascomus-31052089/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "อายุยืนยาว\nสวัสดีวันพุธ",
+      "sty": [
+        17,
+        22,
+        3,
+        5
+      ],
+      "sim": 0.71
+    },
+    {
+      "file": "card_1782858373927_99.jpg",
+      "score": 60,
+      "blessing": "รักน้องหมาน้องแมว ขอให้สุขภาพแข็งแรงทั้งคนและสัตว์",
+      "baseId": null,
+      "src": {
+        "name": "golden retriever puppy",
+        "by": "Maksudur Rahman",
+        "link": "https://www.pexels.com/photo/grayscale-photo-of-short-coated-dog-11053689/"
+      },
+      "category": "pets",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        17,
+        18,
+        0,
+        3
+      ],
+      "sim": 0.71
+    },
+    {
+      "file": "card_1782863470593_43.jpg",
+      "score": 60,
+      "blessing": "เช้าวันใหม่ กาแฟใหม่ ความสุขใหม่",
+      "baseId": null,
+      "src": {
+        "name": "hot coffee steam cup",
+        "by": "Studio Naae",
+        "link": "https://www.pexels.com/photo/mug-with-coffee-beans-and-foam-with-pink-flowers-on-fluffy-blanket-24743540/"
+      },
+      "category": "coffee",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        20,
+        11,
+        0,
+        0
+      ],
+      "sim": 0.71
+    },
+    {
+      "file": "card_1782863833631_94.jpg",
+      "score": 60,
+      "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+      "baseId": null,
+      "src": {
+        "name": "two birds together branch",
+        "by": "aboodi vesakaran",
+        "link": "https://www.pexels.com/photo/small-birds-perching-on-tree-17366086/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "หายห้วงคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        6,
+        16,
+        1,
+        3
+      ],
+      "sim": 0.71
+    },
+    {
+      "file": "card_1782871795996_37.jpg",
+      "score": 60,
+      "blessing": "ธรรมชาติสอนเราว่าทุกวันคือวันใหม่ที่สวยงาม",
+      "baseId": null,
+      "src": {
+        "name": "green forest morning mist",
+        "by": "Thomas P",
+        "link": "https://www.pexels.com/photo/tree-in-a-foggy-field-19544769/"
+      },
+      "category": "nature",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        12,
+        0,
+        2,
+        2
+      ],
+      "sim": 0.71
+    },
+    {
+      "file": "card_1782871981199_47.jpg",
+      "score": 60,
+      "blessing": "สุขสันต์วันเกิดนะลูก",
+      "baseId": null,
+      "src": {
+        "name": "birthday cake candles",
+        "by": "Ememe .",
+        "link": "https://www.pexels.com/photo/a-person-lighting-a-candle-10771476/"
+      },
+      "category": "birthday",
+      "subject": null,
+      "headline": "ขอให้วันเกิดสดใส\nสวัสดีวันพุธ",
+      "sty": [
+        9,
+        13,
+        4,
+        0
+      ],
+      "sim": 0.71
+    },
+    {
+      "file": "card_1782872144565_66.jpg",
+      "score": 60,
+      "blessing": "วิวสวยยามเช้า เหมือนวันใหม่ที่เต็มไปด้วยความหวัง",
+      "baseId": null,
+      "src": {
+        "name": "lake reflection morning",
+        "by": "Tomas Anunziata",
+        "link": "https://www.pexels.com/photo/person-standing-on-brown-rock-formation-near-body-of-water-3876394/"
+      },
+      "category": "nature",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        20,
+        8,
+        2,
+        1
+      ],
+      "sim": 0.71
+    },
+    {
+      "file": "card_1782872782930_141.jpg",
+      "score": 60,
+      "blessing": "สุขภาพดีคือสมบัติที่ดีที่สุด ขอให้มีไว้ตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "green smoothie healthy",
+        "by": "Piyapong Sayduang",
+        "link": "https://www.pexels.com/photo/top-view-of-colorful-chili-peppers-on-dark-background-4541339/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ",
+      "sty": [
+        17,
+        23,
+        0,
+        3
+      ],
+      "sim": 0.71
+    },
+    {
+      "file": "card_1782872818877_142.jpg",
+      "score": 60,
+      "blessing": "ขอให้สุขภาพแข็งแรง อายุยืนยาว มีความสุขทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "old couple silhouette sunset bench",
+        "by": "İrem Güneç",
+        "link": "https://www.pexels.com/photo/silhouette-of-a-couple-by-the-seaside-31590327/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ",
+      "sty": [
+        4,
+        9,
+        1,
+        1
+      ],
+      "sim": 0.71
+    },
+    {
+      "file": "card_1782839933366_41.jpg",
+      "score": 60,
+      "blessing": "ขอให้เทศกาลครั้งนี้สนุกสนานและประทับใจตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "lantern festival night lights",
+        "by": "Pexels User",
+        "link": "https://www.pexels.com/photo/chinese-lanterns-hanging-on-the-ceiling-6163757/"
+      },
+      "category": "festival",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        6,
+        11,
+        1,
+        3
+      ],
+      "sim": 0.7
+    },
+    {
+      "file": "card_1782845143044_162.jpg",
+      "score": 60,
+      "blessing": "ขอให้พลังงานเต็มเปี่ยม พร้อมทำทุกอย่างที่ต้องการ",
+      "baseId": null,
+      "src": {
+        "name": "fresh fruits bowl",
+        "by": "Jane  T D.",
+        "link": "https://www.pexels.com/photo/assorted-foods-892649/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ",
+      "sty": [
+        2,
+        2,
+        3,
+        4
+      ],
+      "sim": 0.7
+    },
+    {
+      "file": "card_1782850215364_117.jpg",
+      "score": 60,
+      "blessing": "ขอบุญบารมีคุ้มครองปกป้อง พบแต่สิ่งที่ดีๆ มั่งมีศรีสุข เจริญรุ่งเรือง สำเร็จสมปรารถนา สุขภาพแข็งแรง",
+      "baseId": null,
+      "src": {
+        "name": "thai buddhist temple golden",
+        "by": "yuki kiki",
+        "link": "https://www.pexels.com/photo/scenic-torii-gate-at-japanese-shinto-shrine-34756122/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        11,
+        14,
+        1,
+        2
+      ],
+      "sim": 0.7
+    },
+    {
+      "file": "card_1782854497944_26.jpg",
+      "score": 60,
+      "blessing": "ขอให้ครอบครัวร่มเย็นเป็นสุข ลูกหลานเจริญก้าวหน้า กิจการงานรุ่งเรือง เงินทองไม่ขาดมือ",
+      "baseId": null,
+      "src": {
+        "name": "family walking silhouette sunrise",
+        "by": "Valentine Kulikov",
+        "link": "https://www.pexels.com/photo/toddler-on-a-stroller-10840740/"
+      },
+      "category": "family",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        11,
+        17,
+        1,
+        3
+      ],
+      "sim": 0.7
+    },
+    {
+      "file": "card_1782854653895_39.jpg",
+      "score": 60,
+      "blessing": "ความรักในครอบครัวคือพลังที่แข็งแกร่งที่สุด",
+      "baseId": null,
+      "src": {
+        "name": "family silhouette sunset beach",
+        "by": "Rahul Sapra",
+        "link": "https://www.pexels.com/photo/grayscale-photo-of-people-on-the-beach-13140170/"
+      },
+      "category": "family",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        7,
+        15,
+        3,
+        4
+      ],
+      "sim": 0.7
+    },
+    {
+      "file": "card_1782858285488_80.jpg",
+      "score": 60,
+      "blessing": "ฉลองด้วยกัน ขอให้ความสุขอยู่เต็มหัวใจ",
+      "baseId": null,
+      "src": {
+        "name": "lantern festival night lights",
+        "by": "Piotr Arnoldes",
+        "link": "https://www.pexels.com/photo/glowing-christmas-tree-in-darkness-6109584/"
+      },
+      "category": "festival",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        5,
+        4,
+        4,
+        0
+      ],
+      "sim": 0.7
+    },
+    {
+      "file": "card_1782863865178_101.jpg",
+      "score": 60,
+      "blessing": "คิดถึงเสมอ ไม่ว่าจะอยู่ที่ไหน",
+      "baseId": null,
+      "src": {
+        "name": "two birds together branch",
+        "by": "Furkan  Aktaş",
+        "link": "https://www.pexels.com/photo/two-parrots-are-sitting-on-a-tree-branch-27224238/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "ใจบ่นคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        12,
+        23,
+        1,
+        2
+      ],
+      "sim": 0.7
+    },
+    {
+      "file": "card_1782871527741_10.jpg",
+      "score": 60,
+      "blessing": "ขอให้ทุกความฝันกลายเป็นความจริง",
+      "baseId": null,
+      "src": {
+        "name": "hot air balloon sunrise sky",
+        "by": "Eren Sever",
+        "link": "https://www.pexels.com/photo/cappadocia-hot-air-balloons-at-sunrise-33704657/"
+      },
+      "category": "inspire",
+      "subject": null,
+      "headline": "ให้กำลังใจ\nสวัสดีวันพุธ",
+      "sty": [
+        14,
+        7,
+        1,
+        0
+      ],
+      "sim": 0.7
+    },
+    {
+      "file": "card_1782871946578_45.jpg",
+      "score": 60,
+      "blessing": "ขอให้จิตใจสงบเย็นดั่งธรรมชาติที่งดงาม",
+      "baseId": null,
+      "src": {
+        "name": "waterfall nature",
+        "by": "Evi",
+        "link": "https://www.pexels.com/photo/brown-wheat-grass-in-the-field-11288849/"
+      },
+      "category": "nature",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        20,
+        8,
+        2,
+        4
+      ],
+      "sim": 0.7
+    },
+    {
+      "file": "card_1782872544795_117.jpg",
+      "score": 60,
+      "blessing": "ขอบุญบารมีคุ้มครองปกป้อง พบแต่สิ่งที่ดีๆ มั่งมีศรีสุข เจริญรุ่งเรือง สำเร็จสมปรารถนา สุขภาพแข็งแรง",
+      "baseId": null,
+      "src": {
+        "name": "gold buddha statue serene",
+        "by": "Sebaswhitev Valeriano",
+        "link": "https://www.pexels.com/photo/2-white-ceramic-figurines-on-white-surface-12566547/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        0,
+        4,
+        1,
+        1
+      ],
+      "sim": 0.7
+    },
+    {
+      "file": "card_1782840300197_107.jpg",
+      "score": 60,
+      "blessing": "บุญรักษา เทวดาคุ้มครอง ขอให้ชีวิตพบแต่ความสุขความเจริญ ทุกข์โศกโรคภัยอย่าได้มาแผ้วพาน",
+      "baseId": null,
+      "src": {
+        "name": "incense candle temple offering",
+        "by": "Shardar Tarikul Islam",
+        "link": "https://www.pexels.com/photo/photo-of-a-match-stick-with-smoke-8886039/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        10,
+        21,
+        4,
+        2
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782845027039_147.jpg",
+      "score": 60,
+      "blessing": "สุขสันต์วันเกิด ขอให้มีความสุขมากๆ นะคะ",
+      "baseId": null,
+      "src": {
+        "name": "colorful balloons celebration",
+        "by": "Brett Sayles",
+        "link": "https://www.pexels.com/photo/assorted-colour-hot-air-balloons-3027217/"
+      },
+      "category": "birthday",
+      "subject": null,
+      "headline": "สุขสันต์วันเกิด\nสวัสดีวันพุธ",
+      "sty": [
+        0,
+        6,
+        1,
+        1
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782845653007_199.jpg",
+      "score": 60,
+      "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "sunflower field bright",
+        "by": "Barış İpekçi",
+        "link": "https://www.pexels.com/photo/silhouetted-trees-and-illuminated-house-under-a-starry-night-sky-18279463/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        12,
+        12,
+        2,
+        0
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782849393210_18.jpg",
+      "score": 60,
+      "blessing": "รักน้องหมาน้องแมว ขอให้สุขภาพแข็งแรงทั้งคนและสัตว์",
+      "baseId": null,
+      "src": {
+        "name": "fluffy kitten closeup",
+        "by": "Neil Yonamine",
+        "link": "https://www.pexels.com/photo/close-up-shot-of-a-cat-face-8310631/"
+      },
+      "category": "pets",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        18,
+        8,
+        0,
+        4
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782849478177_28.jpg",
+      "score": 60,
+      "blessing": "ขอให้เทศกาลครั้งนี้สนุกสนานและประทับใจตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "lantern festival night lights",
+        "by": "Carsten Ruthemann",
+        "link": "https://www.pexels.com/photo/dark-ferris-wheel-at-night-26791443/"
+      },
+      "category": "festival",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        14,
+        14,
+        0,
+        0
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782863522786_50.jpg",
+      "score": 60,
+      "blessing": "ส่งความคิดถึงให้ถึงมือคุณทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "heart shape rose petals",
+        "by": "Aryan",
+        "link": "https://www.pexels.com/photo/solitary-red-leaf-on-cracked-turquoise-surface-38297696/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "หายห้วงคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        16,
+        18,
+        1,
+        1
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782863712947_78.jpg",
+      "score": 60,
+      "blessing": "ขอให้เทศกาลนี้นำพาสิ่งดีๆ มาสู่ชีวิต",
+      "baseId": null,
+      "src": {
+        "name": "lantern festival night lights",
+        "by": "Thới Nam Cao",
+        "link": "https://www.pexels.com/photo/elegant-courtyard-with-evening-lighting-ambiance-31213889/"
+      },
+      "category": "festival",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        11,
+        22,
+        4,
+        4
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782864049698_121.jpg",
+      "score": 60,
+      "blessing": "คิดถึงเสมอนะ ขอให้อยู่ดีมีสุข แข็งแรงปลอดภัย พบเจอแต่สิ่งดีๆ ตลอดวัน",
+      "baseId": null,
+      "src": {
+        "name": "two coffee cups together table",
+        "by": "Viktoria Alipatova",
+        "link": "https://www.pexels.com/photo/waffles-on-plates-2074108/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "ใจบ่นคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        0,
+        24,
+        4,
+        2
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782871834774_39.jpg",
+      "score": 60,
+      "blessing": "วันเกิดของคุณคือวันที่โลกได้คนดีเพิ่มขึ้นหนึ่งคน",
+      "baseId": null,
+      "src": {
+        "name": "colorful balloons celebration",
+        "by": "Nadiye Şamlı",
+        "link": "https://www.pexels.com/photo/colorful-birthday-cake-on-decorated-table-32191357/"
+      },
+      "category": "birthday",
+      "subject": null,
+      "headline": "ขอให้วันเกิดสดใส\nสวัสดีวันพุธ",
+      "sty": [
+        20,
+        25,
+        1,
+        1
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782872007209_49.jpg",
+      "score": 60,
+      "blessing": "ขออวยพรให้ท่านมีอายุวัฒนะ พลานามัยสมบูรณ์",
+      "baseId": null,
+      "src": {
+        "name": "elderly hands tea cup",
+        "by": "Lydia Irene",
+        "link": "https://www.pexels.com/photo/close-up-photo-of-a-cup-of-tea-6195509/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "อายุยืนยาว\nสวัสดีวันพุธ",
+      "sty": [
+        8,
+        9,
+        3,
+        5
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782872227370_79.jpg",
+      "score": 60,
+      "blessing": "ขอให้สุขภาพแข็งแรง อายุมั่นขวัญยืน ลูกหลานกตัญญู รายล้อมด้วยความรัก อยู่เย็นเป็นสุขตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "elderly hands tea cup",
+        "by": "Giulia",
+        "link": "https://www.pexels.com/photo/a-slice-of-bread-and-a-cup-of-tea-10148398/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "อายุยืนยาว\nสวัสดีวันพุธ",
+      "sty": [
+        4,
+        20,
+        2,
+        2
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782872343204_105.jpg",
+      "score": 60,
+      "blessing": "ขออวยพรให้ท่านมีอายุวัฒนะ พลานามัยสมบูรณ์",
+      "baseId": null,
+      "src": {
+        "name": "old couple silhouette sunset bench",
+        "by": "Vincent Nguyen",
+        "link": "https://www.pexels.com/photo/couple-enjoying-riverside-view-in-ho-chi-minh-city-29158231/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "อายุยืนยาว\nสวัสดีวันพุธ",
+      "sty": [
+        8,
+        1,
+        4,
+        0
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782872874250_147.jpg",
+      "score": 60,
+      "blessing": "ดูแลสุขภาพด้วยนะคะ เพราะคุณสำคัญมาก",
+      "baseId": null,
+      "src": {
+        "name": "green smoothie healthy",
+        "by": "Suzy Hazelwood",
+        "link": "https://www.pexels.com/photo/strawberries-1788912/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ",
+      "sty": [
+        2,
+        23,
+        3,
+        2
+      ],
+      "sim": 0.69
+    },
+    {
+      "file": "card_1782849356388_17.jpg",
+      "score": 60,
+      "blessing": "ขอให้เทศกาลนี้เต็มไปด้วยความสุขและรอยยิ้ม",
+      "baseId": null,
+      "src": {
+        "name": "thai krathong lotus candle",
+        "by": "ALOK DAS",
+        "link": "https://www.pexels.com/photo/lamp-in-shape-of-conch-18751035/"
+      },
+      "category": "festival",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        14,
+        10,
+        0,
+        3
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782849628408_58.jpg",
+      "score": 60,
+      "blessing": "รื่นเริงในเทศกาล ขอให้ความสุขไม่มีวันหมด",
+      "baseId": null,
+      "src": {
+        "name": "thai krathong lotus candle",
+        "by": "Hao Liang",
+        "link": "https://www.pexels.com/photo/close-up-of-a-white-water-lily-flower-in-bloom-31957273/"
+      },
+      "category": "festival",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        15,
+        1,
+        2,
+        5
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782850174585_111.jpg",
+      "score": 60,
+      "blessing": "ขอให้สุขภาพแข็งแรง ห่างไกลโรคภัยทุกอย่าง",
+      "baseId": null,
+      "src": {
+        "name": "fresh vegetables healthy",
+        "by": "Channabo Yos",
+        "link": "https://www.pexels.com/photo/close-up-of-green-leaves-15934124/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ",
+      "sty": [
+        1,
+        9,
+        1,
+        4
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782855085655_97.jpg",
+      "score": 60,
+      "blessing": "ความรักจากน้องสี่ขา ทำให้ชีวิตอบอุ่นและมีความหมาย",
+      "baseId": null,
+      "src": {
+        "name": "fluffy kitten closeup",
+        "by": "Q. Hưng Phạm",
+        "link": "https://www.pexels.com/photo/adorable-cat-scratching-itself-outdoors-28998600/"
+      },
+      "category": "pets",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        18,
+        5,
+        3,
+        4
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782855383131_130.jpg",
+      "score": 60,
+      "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+      "baseId": null,
+      "src": {
+        "name": "fresh green flowers macro no people",
+        "by": "Jude Mitchell-Hedges",
+        "link": "https://www.pexels.com/photo/close-up-of-a-poppy-17555405/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        16,
+        18,
+        4,
+        3
+      ],
+      "sim": 0.68
+    },
+    {
+      "file": "card_1782855871041_164.jpg",
+      "score": 60,
+      "blessing": "ขอให้ความสุขเบ่งบานในชีวิตทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "orchid flower bloom",
+        "by": "Takeshi Arai",
+        "link": "https://www.pexels.com/photo/black-and-white-photo-of-orchid-flower-12150461/"
+      },
+      "category": "flowers",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        13,
+        24,
+        2,
+        0
+      ],
+      "sim": 0.67
+    },
+    {
+      "file": "card_1782872374455_106.jpg",
+      "score": 60,
+      "blessing": "กินอาหารดี นอนหลับพักผ่อนดี ใจก็ดีตามมา",
+      "baseId": null,
+      "src": {
+        "name": "fresh vegetables healthy",
+        "by": "Mario K",
+        "link": "https://www.pexels.com/photo/food-on-blue-ceramic-bowl-12756070/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ",
+      "sty": [
+        15,
+        13,
+        2,
+        4
+      ],
+      "sim": 0.67
+    },
+    {
+      "file": "card_1782843939117_26.jpg",
+      "score": 60,
+      "blessing": "ความรักจากน้องสี่ขา ทำให้ชีวิตอบอุ่นและมีความหมาย",
+      "baseId": null,
+      "src": {
+        "name": "golden retriever puppy",
+        "by": "Jorge Zaldívar Marroquín",
+        "link": "https://www.pexels.com/photo/close-up-shot-of-labrador-retriever-lying-on-white-surface-13085125/"
+      },
+      "category": "pets",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        13,
+        14,
+        2,
+        3
+      ],
+      "sim": 0.66
+    },
+    {
+      "file": "card_1782844748308_119.jpg",
+      "score": 60,
+      "blessing": "ใจสงบ ชีวิตสุข ขอให้จิตใจร่มเย็น",
+      "baseId": null,
+      "src": {
+        "name": "gold buddha statue serene",
+        "by": "Olga V",
+        "link": "https://www.pexels.com/photo/dark-acrylic-painting-5506217/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        19,
+        25,
+        2,
+        1
+      ],
+      "sim": 0.66
+    },
+    {
+      "file": "card_1782844898500_137.jpg",
+      "score": 60,
+      "blessing": "ขอให้สุขภาพแข็งแรง ปราศจากโรคภัย กายใจเป็นสุข อายุมั่นขวัญยืน อยู่กับลูกหลานไปนานๆ",
+      "baseId": null,
+      "src": {
+        "name": "fresh vegetables healthy",
+        "by": "Kei Scampa",
+        "link": "https://www.pexels.com/photo/mix-of-healthy-fresh-vegetables-and-shrimps-in-bowl-5514819/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ",
+      "sty": [
+        1,
+        24,
+        2,
+        0
+      ],
+      "sim": 0.66
+    },
+    {
+      "file": "card_1782854865940_72.jpg",
+      "score": 60,
+      "blessing": "ความรักจากน้องสี่ขา ทำให้ชีวิตอบอุ่นและมีความหมาย",
+      "baseId": null,
+      "src": {
+        "name": "cute dog puppy",
+        "by": "Nishant Aneja",
+        "link": "https://www.pexels.com/photo/three-children-smiling-2385657/"
+      },
+      "category": "pets",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        14,
+        24,
+        4,
+        3
+      ],
+      "sim": 0.66
+    },
+    {
+      "file": "card_1782844877396_136.jpg",
+      "score": 60,
+      "blessing": "Happy Birthday! ขอให้ทุกวันเป็นวันที่ดีที่สุด",
+      "baseId": null,
+      "src": {
+        "name": "birthday cake candles",
+        "by": "Haberdoedas Photography",
+        "link": "https://www.pexels.com/photo/delicious-blueberry-tart-with-meringue-topping-33215789/"
+      },
+      "category": "birthday",
+      "subject": null,
+      "headline": "แสนสุขในวันเกิด\nสวัสดีวันพุธ",
+      "sty": [
+        18,
+        8,
+        1,
+        0
+      ],
+      "sim": 0.65
+    },
+    {
+      "file": "card_1782850149618_109.jpg",
+      "score": 60,
+      "blessing": "บุญกุศลที่สั่งสมมาคุ้มครองให้ชีวิตดีงาม",
+      "baseId": null,
+      "src": {
+        "name": "thai buddhist temple golden",
+        "by": "VipinVihari  Murari Das",
+        "link": "https://www.pexels.com/photo/colorful-hindu-deity-idol-with-floral-decorations-31513868/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        11,
+        17,
+        1,
+        5
+      ],
+      "sim": 0.65
+    },
+    {
+      "file": "card_1782858114518_34.jpg",
+      "score": 60,
+      "blessing": "สุขสันต์วันเกิด ขอให้มีความสุขมากๆ นะคะ",
+      "baseId": null,
+      "src": {
+        "name": "colorful balloons celebration",
+        "by": "Alvaro Ugas Tasso",
+        "link": "https://www.pexels.com/photo/woman-in-a-colorful-folk-costume-dancing-during-a-parade-18063939/"
+      },
+      "category": "birthday",
+      "subject": null,
+      "headline": "ขอให้วันเกิดสดใส\nสวัสดีวันพุธ",
+      "sty": [
+        13,
+        13,
+        4,
+        1
+      ],
+      "sim": 0.65
+    },
+    {
+      "file": "card_1782871564042_11.jpg",
+      "score": 60,
+      "blessing": "ความงามของธรรมชาติ เตือนใจให้ขอบคุณทุกวัน",
+      "baseId": null,
+      "src": {
+        "name": "waterfall nature",
+        "by": "Seamlesstextures",
+        "link": "https://www.pexels.com/photo/green-speckles-on-a-gray-surface-11255415/"
+      },
+      "category": "nature",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        19,
+        4,
+        0,
+        2
+      ],
+      "sim": 0.65
+    },
+    {
+      "file": "card_1782849662746_60.jpg",
+      "score": 60,
+      "blessing": "น้องสัตว์เลี้ยงคือยาวิเศษ ขอให้อยู่เคียงข้างนานๆ",
+      "baseId": null,
+      "src": {
+        "name": "fluffy kitten closeup",
+        "by": "Can Ceylan",
+        "link": "https://www.pexels.com/photo/relaxed-ginger-cat-sleeping-on-wooden-surface-30389394/"
+      },
+      "category": "pets",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        5,
+        10,
+        1,
+        3
+      ],
+      "sim": 0.64
+    },
+    {
+      "file": "card_1782850001675_83.jpg",
+      "score": 60,
+      "blessing": "น้องขน ๆ ทำให้วันนี้อบอุ่นขึ้นมากเลย",
+      "baseId": null,
+      "src": {
+        "name": "cute cat kitten",
+        "by": "Tường Chopper",
+        "link": "https://www.pexels.com/photo/a-cat-looking-at-a-duckling-8935989/"
+      },
+      "category": "pets",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        12,
+        4,
+        4,
+        0
+      ],
+      "sim": 0.64
+    },
+    {
+      "file": "card_1782854535769_27.jpg",
+      "score": 60,
+      "blessing": "ธรรมชาติงดงาม ขอให้ชีวิตงดงามเช่นนั้น",
+      "baseId": null,
+      "src": {
+        "name": "lake reflection morning",
+        "by": "Guerrero De la Luz",
+        "link": "https://www.pexels.com/photo/elegant-tern-reflected-on-calm-waters-33498475/"
+      },
+      "category": "nature",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        18,
+        13,
+        0,
+        5
+      ],
+      "sim": 0.64
+    },
+    {
+      "file": "card_1782871767914_35.jpg",
+      "score": 60,
+      "blessing": "ขอให้เช้าวันนี้สดชื่น เหมือนกาแฟหอมๆ",
+      "baseId": null,
+      "src": {
+        "name": "coffee cup on table morning",
+        "by": "Luthvika Arkaputra",
+        "link": "https://www.pexels.com/photo/cold-drink-to-accompany-the-afternoon-18635173/"
+      },
+      "category": "coffee",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        12,
+        0,
+        2,
+        0
+      ],
+      "sim": 0.64
+    },
+    {
+      "file": "card_1782872113052_64.jpg",
+      "score": 60,
+      "blessing": "ขอให้เช้าวันนี้สดชื่น เหมือนกาแฟหอมๆ",
+      "baseId": null,
+      "src": {
+        "name": "coffee cup on table morning",
+        "by": "Thông Nguyễn",
+        "link": "https://www.pexels.com/photo/iced-coffee-in-plastic-cup-by-sunny-window-37028601/"
+      },
+      "category": "coffee",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        12,
+        2,
+        0,
+        1
+      ],
+      "sim": 0.64
+    },
+    {
+      "file": "card_1782872259774_80.jpg",
+      "score": 60,
+      "blessing": "ขอให้สุขภาพแข็งแรง ห่างไกลโรคภัยทุกอย่าง",
+      "baseId": null,
+      "src": {
+        "name": "fresh green tea cup",
+        "by": "Dmitriy Steinke",
+        "link": "https://www.pexels.com/photo/cup-on-straw-stand-in-home-interior-16805280/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ",
+      "sty": [
+        1,
+        23,
+        4,
+        5
+      ],
+      "sim": 0.64
+    },
+    {
+      "file": "card_1782872487390_111.jpg",
+      "score": 60,
+      "blessing": "กินอาหารดี นอนหลับพักผ่อนดี ใจก็ดีตามมา",
+      "baseId": null,
+      "src": {
+        "name": "fresh vegetables healthy",
+        "by": "Emmanuel Zua",
+        "link": "https://www.pexels.com/photo/close-up-shot-of-a-delicious-sushi-on-a-black-plate-7243416/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ",
+      "sty": [
+        12,
+        15,
+        0,
+        5
+      ],
+      "sim": 0.64
+    },
+    {
+      "file": "card_1782844037455_34.jpg",
+      "score": 60,
+      "blessing": "ธรรมชาติสอนเราว่าทุกวันคือวันใหม่ที่สวยงาม",
+      "baseId": null,
+      "src": {
+        "name": "lake reflection morning",
+        "by": "Alperen  Erfidan",
+        "link": "https://www.pexels.com/photo/boat-in-lake-19480651/"
+      },
+      "category": "nature",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        6,
+        2,
+        3,
+        5
+      ],
+      "sim": 0.63
+    },
+    {
+      "file": "card_1782849451959_26.jpg",
+      "score": 60,
+      "blessing": "ธรรมชาติงดงาม ขอให้ชีวิตงดงามเช่นนั้น",
+      "baseId": null,
+      "src": {
+        "name": "sea beach sunrise",
+        "by": "Rhiannon Stone",
+        "link": "https://www.pexels.com/photo/man-in-blue-shirt-near-blue-sea-and-white-boat-under-blue-sky-515158/"
+      },
+      "category": "nature",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        5,
+        21,
+        1,
+        0
+      ],
+      "sim": 0.63
+    },
+    {
+      "file": "card_1782849537188_37.jpg",
+      "score": 60,
+      "blessing": "น้องสัตว์เลี้ยงคือยาวิเศษ ขอให้อยู่เคียงข้างนานๆ",
+      "baseId": null,
+      "src": {
+        "name": "cute cat kitten",
+        "by": "Thomas Svensson",
+        "link": "https://www.pexels.com/photo/a-cat-with-blue-eyes-5681903/"
+      },
+      "category": "pets",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        16,
+        8,
+        2,
+        4
+      ],
+      "sim": 0.63
+    },
+    {
+      "file": "card_1782855265540_112.jpg",
+      "score": 60,
+      "blessing": "บุญรักษา เทวดาคุ้มครอง ขอให้ชีวิตพบแต่ความสุขความเจริญ ทุกข์โศกโรคภัยอย่าได้มาแผ้วพาน",
+      "baseId": null,
+      "src": {
+        "name": "incense candle temple offering",
+        "by": "Farhad Ibrahimzade",
+        "link": "https://www.pexels.com/photo/couple-sitting-and-eating-healthy-meals-on-a-dining-table-8697540/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        10,
+        12,
+        4,
+        3
+      ],
+      "sim": 0.63
+    },
+    {
+      "file": "card_1782863749210_80.jpg",
+      "score": 60,
+      "blessing": "ขอให้คุณอบอุ่นใจรู้ว่ามีคนคิดถึง",
+      "baseId": null,
+      "src": {
+        "name": "two coffee cups together table",
+        "by": "Din Aziz",
+        "link": "https://www.pexels.com/photo/top-view-of-people-holding-decorative-coffees-in-green-cups-19485852/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "ห่างหายคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        9,
+        11,
+        1,
+        0
+      ],
+      "sim": 0.63
+    },
+    {
+      "file": "card_1782863896797_102.jpg",
+      "score": 60,
+      "blessing": "ขอให้จิตใจผ่องใส ห่างไกลทุกข์โศก",
+      "baseId": null,
+      "src": {
+        "name": "thai buddhist temple golden",
+        "by": "nana liu",
+        "link": "https://www.pexels.com/photo/fresh-seafood-display-at-phuket-market-33939170/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        6,
+        16,
+        4,
+        0
+      ],
+      "sim": 0.63
+    },
+    {
+      "file": "card_1782844369234_70.jpg",
+      "score": 60,
+      "blessing": "วันนี้คิดถึงครอบครัว ขอส่งความรักถึงทุกคน",
+      "baseId": null,
+      "src": {
+        "name": "warm home window light evening",
+        "by": "Yaroslava Borz",
+        "link": "https://www.pexels.com/photo/brown-leaf-on-car-windshield-10012630/"
+      },
+      "category": "family",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        11,
+        5,
+        0,
+        2
+      ],
+      "sim": 0.62
+    },
+    {
+      "file": "card_1782845048425_148.jpg",
+      "score": 60,
+      "blessing": "สุขภาพกายดี สุขภาพใจดี ชีวิตก็ดีตามมา",
+      "baseId": null,
+      "src": {
+        "name": "fresh green tea cup",
+        "by": "Dina Nasyrova",
+        "link": "https://www.pexels.com/photo/notebook-with-herbal-tea-and-tulip-on-greeting-card-7070912/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ",
+      "sty": [
+        15,
+        11,
+        1,
+        3
+      ],
+      "sim": 0.62
+    },
+    {
+      "file": "card_1782844592959_101.jpg",
+      "score": 60,
+      "blessing": "ขอให้พรวันเกิดทุกข้อเป็นจริง",
+      "baseId": null,
+      "src": {
+        "name": "gift box ribbon bow",
+        "by": "Haberdoedas Photography",
+        "link": "https://www.pexels.com/photo/colorful-flower-arrangement-in-local-gift-shop-33315774/"
+      },
+      "category": "birthday",
+      "subject": null,
+      "headline": "วันเกิดอันดี\nสวัสดีวันพุธ",
+      "sty": [
+        13,
+        20,
+        3,
+        1
+      ],
+      "sim": 0.61
+    },
+    {
+      "file": "card_1782849688773_61.jpg",
+      "score": 60,
+      "blessing": "ขอให้พบแต่สิ่งดีงาม ตามครรลองธรรม",
+      "baseId": null,
+      "src": {
+        "name": "gold buddha statue serene",
+        "by": "Ayşegül  Aytören",
+        "link": "https://www.pexels.com/photo/ancient-stone-heads-on-mount-nemrut-at-dusk-33207462/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        10,
+        5,
+        4,
+        4
+      ],
+      "sim": 0.61
+    },
+    {
+      "file": "card_1782855352483_122.jpg",
+      "score": 60,
+      "blessing": "ขอบุญบารมีคุ้มครองปกป้อง พบแต่สิ่งที่ดีๆ มั่งมีศรีสุข เจริญรุ่งเรือง สำเร็จสมปรารถนา สุขภาพแข็งแรง",
+      "baseId": null,
+      "src": {
+        "name": "gold buddha statue serene",
+        "by": "leopoldo  zenteno",
+        "link": "https://www.pexels.com/photo/marble-sculptures-in-art-gallery-20550208/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        12,
+        1,
+        2,
+        5
+      ],
+      "sim": 0.61
+    },
+    {
+      "file": "card_1782857843351_6.jpg",
+      "score": 60,
+      "blessing": "กาแฟหนึ่งแก้ว เติมรอยยิ้มให้วันได้เลย",
+      "baseId": null,
+      "src": {
+        "name": "roasted coffee beans",
+        "by": "Jimmy Ramírez",
+        "link": "https://www.pexels.com/photo/coffee-beans-in-close-up-photography-6007665/"
+      },
+      "category": "coffee",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        7,
+        3,
+        3,
+        0
+      ],
+      "sim": 0.61
+    },
+    {
+      "file": "card_1782857900572_15.jpg",
+      "score": 60,
+      "blessing": "ขอให้วันนี้สดใสตั้งแต่ต้น เหมือนกาแฟยามเช้า",
+      "baseId": null,
+      "src": {
+        "name": "roasted coffee beans",
+        "by": "Yunus  Kılıç",
+        "link": "https://www.pexels.com/photo/close-up-of-a-heap-of-coffee-beans-25547393/"
+      },
+      "category": "coffee",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        6,
+        13,
+        1,
+        3
+      ],
+      "sim": 0.61
+    },
+    {
+      "file": "card_1782871854351_41.jpg",
+      "score": 60,
+      "blessing": "ความรักและกตัญญูจากลูกหลาน ฝากถึงท่านเสมอ",
+      "baseId": null,
+      "src": {
+        "name": "old couple silhouette sunset bench",
+        "by": "Pușcaș Adryan",
+        "link": "https://www.pexels.com/photo/elegant-grand-piano-surrounded-by-purple-flowers-31785088/"
+      },
+      "category": "elderly",
+      "subject": null,
+      "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ",
+      "sty": [
+        1,
+        20,
+        4,
+        3
+      ],
+      "sim": 0.61
+    },
+    {
+      "file": "card_1782886607725_55.jpg",
+      "score": 60,
+      "blessing": "วันนี้ขอให้รับพลังงานดีๆ จากธรรมชาติ",
+      "baseId": null,
+      "src": {
+        "name": "green rice field",
+        "by": "Son Hoa Nguyen",
+        "link": "https://www.pexels.com/photo/scenic-rice-terraces-in-ha-giang-vietnam-34199085/"
+      },
+      "category": "nature",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        16,
+        18,
+        1,
+        4
+      ],
+      "sim": 0.61
+    },
+    {
+      "file": "card_1782871924007_44.jpg",
+      "score": 60,
+      "blessing": "กาแฟหนึ่งแก้ว เติมรอยยิ้มให้วันได้เลย",
+      "baseId": null,
+      "src": {
+        "name": "roasted coffee beans",
+        "by": "Din Aziz",
+        "link": "https://www.pexels.com/photo/coffee-table-with-coffee-cup-beans-and-magazine-20736684/"
+      },
+      "category": "coffee",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        4,
+        12,
+        4,
+        1
+      ],
+      "sim": 0.6
+    },
+    {
+      "file": "card_1782872650420_124.jpg",
+      "score": 60,
+      "blessing": "ดูแลตัวเองด้วยนะคะ เพราะทุกคนรักและห่วงใยคุณ",
+      "baseId": null,
+      "src": {
+        "name": "fresh vegetables healthy",
+        "by": "Justin Doherty",
+        "link": "https://www.pexels.com/photo/meals-on-table-4929676/"
+      },
+      "category": "health",
+      "subject": null,
+      "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ",
+      "sty": [
+        1,
+        3,
+        0,
+        3
+      ],
+      "sim": 0.6
+    },
+    {
+      "file": "card_1782858263254_79.jpg",
+      "score": 60,
+      "blessing": "ขอให้เฮงๆ รวยๆ โชคลาภเงินทองไหลมาเทมา สุขภาพแข็งแรง ครอบครัวอบอุ่นเป็นสุข",
+      "baseId": null,
+      "src": {
+        "name": "red chinese lanterns",
+        "by": "Wong Peter",
+        "link": "https://www.pexels.com/photo/traditional-chinese-shopfront-in-urban-setting-37536341/"
+      },
+      "category": "festival",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        2,
+        3,
+        0,
+        5
+      ],
+      "sim": 0.59
+    },
+    {
+      "file": "card_1782854981214_90.jpg",
+      "score": 60,
+      "blessing": "น้องสัตว์เลี้ยงคือยาวิเศษ ขอให้อยู่เคียงข้างนานๆ",
+      "baseId": null,
+      "src": {
+        "name": "fluffy kitten closeup",
+        "by": "Sherry",
+        "link": "https://www.pexels.com/photo/close-up-shot-of-calico-cat-sitting-on-wooden-surface-11497291/"
+      },
+      "category": "pets",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        15,
+        20,
+        2,
+        3
+      ],
+      "sim": 0.58
+    },
+    {
+      "file": "card_1782849610571_52.jpg",
+      "score": 60,
+      "blessing": "ความรักและความคิดถึง ส่งให้ถึงคุณทุกเวลา",
+      "baseId": null,
+      "src": {
+        "name": "two coffee cups together table",
+        "by": "Jakub Krystkiewicz",
+        "link": "https://www.pexels.com/photo/artistic-latte-art-with-heart-and-leaf-designs-28936789/"
+      },
+      "category": "miss",
+      "subject": null,
+      "headline": "ห่างหายคิดถึง\nสวัสดีวันพุธ",
+      "sty": [
+        0,
+        21,
+        4,
+        0
+      ],
+      "sim": 0.57
+    },
+    {
+      "file": "card_1782840115611_75.jpg",
+      "score": 60,
+      "blessing": "ทำบุญทำทาน จิตใจย่อมผ่องใสเป็นสุข",
+      "baseId": null,
+      "src": {
+        "name": "white stupa pagoda sunrise",
+        "by": "Simon Berger",
+        "link": "https://www.pexels.com/photo/gray-wooden-house-burning-731577/"
+      },
+      "category": "dharma",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        17,
+        6,
+        4,
+        1
+      ],
+      "sim": 0.56
+    },
+    {
+      "file": "card_1782871646852_26.jpg",
+      "score": 56,
+      "blessing": "ธรรมชาติมอบความสงบ ขอให้คุณพบความสงบเช่นนั้น",
+      "baseId": null,
+      "src": {
+        "name": "green forest morning mist",
+        "by": "Snapwire",
+        "link": "https://www.pexels.com/photo/sea-shore-view-during-afternoon-116149/"
+      },
+      "category": "nature",
+      "subject": null,
+      "headline": "สวัสดีวันพุธ",
+      "sty": [
+        15,
+        4,
+        2,
+        4
+      ],
+      "sim": 0.76
+    }
+  ],
+  "pending": [],
+  "usedSeeds": [
+    243450363,
+    711484472,
+    116667843,
+    950177548,
+    699026957,
+    725617142,
+    185823430,
+    367933989,
+    318241817,
+    430976364,
+    597249694,
+    975023883,
+    712060410,
+    203208050,
+    68998112,
+    83959195,
+    937894080,
+    641410673,
+    440316534,
+    103343028,
+    9435838,
+    930388227,
+    854658050,
+    21019834,
+    512618094,
+    526561357,
+    26671583,
+    397824207,
+    233252137,
+    106379801,
+    905510400,
+    673744585,
+    250799849,
+    621940898,
+    56802466,
+    814988957,
+    702052574,
+    809528134,
+    511768622,
+    995403480,
+    716245901,
+    775111597,
+    321318107,
+    462116109,
+    857269348,
+    427886508,
+    243359849,
+    496365972,
+    585990843,
+    386969674,
+    286050200,
+    813394781,
+    265154263,
+    577640834,
+    776245118,
+    821225432,
+    293638844,
+    862096867,
+    626927648,
+    222144603,
+    9528266,
+    375570008,
+    838450621,
+    292279141,
+    618524301,
+    862294664,
+    62469145,
+    164030142,
+    158738852,
+    836096805,
+    52891213,
+    695254353,
+    730892853,
+    510560890,
+    214611860,
+    932397802,
+    405254558,
+    488911580,
+    692151819,
+    805312902,
+    601440026,
+    192628959,
+    893775915,
+    998463565,
+    311731343,
+    795904144,
+    684668568,
+    93175324,
+    4969742,
+    239186744,
+    15282428,
+    17215124,
+    57334553,
+    692437738,
+    325408522,
+    537779077,
+    463290656,
+    828741057,
+    224845394,
+    205380379,
+    198689354,
+    980683762,
+    561319531,
+    677115674,
+    379400711,
+    660370308,
+    994551786,
+    119933484,
+    444114632,
+    989849430,
+    118290579,
+    937958425,
+    38763098,
+    558403948,
+    470542301,
+    592844533,
+    453031111,
+    415581718,
+    326820431,
+    51346470,
+    67844243,
+    855168329,
+    489997296,
+    460883937,
+    974918308,
+    408015195,
+    508684082,
+    880158382,
+    137759988,
+    723975605,
+    839353997,
+    756093454,
+    73744581,
+    801968303,
+    78236994,
+    942200566,
+    578815785,
+    255467084,
+    351967699,
+    946317820,
+    928248043,
+    935051506,
+    670440015,
+    816714626,
+    597447642,
+    643578242,
+    732175456,
+    131231636,
+    259151145,
+    777909162
+  ],
+  "hashes": [
+    "3284412427950073743",
+    "5386344507122947300",
+    "15089711142410556514",
+    "3047306006270863466",
+    "3046831606977848062",
+    "17075658514270190072",
+    "15092924348093070942",
+    "16204216221614273776",
+    "17627876066276145896",
+    "16926642883268061862",
+    "7805939621146669653",
+    "15158454361146208860",
+    "11931276395590347854",
+    "10761431928711918291",
+    "3916543401946631061",
+    "7812709857989840178",
+    "10769713397598936804",
+    "12532847000601322645",
+    "15742643480196662259",
+    "14179770282777254000",
+    "4715664978445668864",
+    "11195271588109182405",
+    "12851942142814017440",
+    "3226313786768757768",
+    "3401139751941760747",
+    "10454287977300273418",
+    "5234339611238763232",
+    "10513060029654921920",
+    "4866014357153796422",
+    "8311794078740333506",
+    "2229903926402279656",
+    "2851774775693259356",
+    "12240122527965833493",
+    "8897474440714709710",
+    "3405454201992419568",
+    "448969651034426342",
+    "12315449863655250741",
+    "472409266958479640",
+    "6945787172063867972",
+    "10849993121881516526",
+    "13016506611256018662",
+    "9692960578012338852",
+    "3780643560733659820",
+    "2598622790495168704",
+    "11014843064168633963",
+    "6709982183176965578",
+    "15298994451136923680",
+    "1442299790351600512",
+    "18226057194795024",
+    "13871671981625336160",
+    "4874069540858935634",
+    "15688459016801001568",
+    "15579523629105312559",
+    "7616050595482246662",
+    "7590093026132543650",
+    "10789108849309406237",
+    "15193079112262269168",
+    "11914081850245354101",
+    "17956892719377825889",
+    "116343349248000",
+    "14258628189001863321",
+    "16995366104464057409",
+    "14288835618746346845",
+    "17035589539191127294",
+    "17931188722327661614",
+    "3931253593853361910",
+    "12343887303919618772",
+    "2905036073772673280",
+    "4941805747654062585",
+    "11984977096987323994",
+    "8760247458735019186",
+    "12997765186188009712",
+    "11802671863578211917",
+    "1302552070416549962",
+    "4041458788871293475",
+    "13156743535773018761",
+    "4224485935316618894",
+    "14752273853373369521",
+    "11179189687256749840",
+    "6455288126357461721",
+    "11126324935723871274",
+    "3183319752307237843",
+    "3576608540221538432",
+    "5050160579879447116",
+    "17391752692238800149",
+    "4488943646014220152",
+    "4556523022319616",
+    "11912430740026183085",
+    "13010606205801584744",
+    "4943493134583081558",
+    "16451726301065474411",
+    "12166626578610566907",
+    "15227198533788607379",
+    "12146903845321190729",
+    "3128219662899793208",
+    "5419276670493833677",
+    "14681397597579880619",
+    "14186568009371615232",
+    "12426037084285706656",
+    "979635529090076800",
+    "10387931410910127253",
+    "14757390911979782144",
+    "17940358379711757560",
+    "12463936593709047189",
+    "6960224362949813998",
+    "17948200677979728190",
+    "4859491276979748083",
+    "14720413064510920776",
+    "849172808936096409",
+    "7557820595164608761",
+    "12076022610112369872",
+    "4636962520685930736",
+    "17058132120459595883",
+    "510776074068716223",
+    "966069655054697998",
+    "13602461506350152956",
+    "3556819806238374348",
+    "5302176148242871918",
+    "49810045595085024",
+    "15086587857257965897",
+    "6114580070941758008",
+    "17053192602236798072",
+    "5615650679839607441",
+    "6130177878495489354",
+    "13922480521914020949",
+    "16785039998904990308",
+    "14371520553388888899",
+    "14174078972512229497",
+    "4939578879706770056",
+    "12800446494629085890",
+    "8565475898539034318",
+    "6275579516592511845",
+    "4670321623851614208",
+    "14930727690585296053",
+    "5171773641205807228",
+    "10603958093826527785",
+    "2672074195490057077",
+    "16621747006229203622",
+    "7875120009621027924",
+    "12353014051552667851",
+    "3653732356157665496",
+    "10588356021725870690",
+    "16661183256832362338",
+    "2677764811740500650",
+    "13580662650654471352",
+    "10792865968107209970",
+    "13868780684247724722",
+    "10911593338660869065",
+    "6103945094138056012",
+    "8233677340005217326",
+    "5934172369555781060",
+    "12008135827863852074",
+    "7577635562735127720",
+    "13036894306054809843",
+    "10326066505104282055",
+    "6496172647474864218",
+    "942820892178499407",
+    "17049119426301042880",
+    "4512471645301857397",
+    "8945932625695673617",
+    "6940087251197060818",
+    "11769424626257843410",
+    "13013901645912314117",
+    "2389491568570278964",
+    "6221396014693874495",
+    "6382074693821952914",
+    "15836321988780249386",
+    "7586821234716944037",
+    "12382054048188365236",
+    "10973177278104217998",
+    "6751505889284905557",
+    "7409175242548030948",
+    "6902561198377713287",
+    "4982438665183123993",
+    "7743651110504802866",
+    "5878669575986249034",
+    "10033159813814088905",
+    "14802725786910503862",
+    "10806512439119374047",
+    "4078460070391105254",
+    "527601641780383671",
+    "16903512369087701208",
+    "5934703803162060090",
+    "5598620920821690673",
+    "861992146869908385",
+    "6257579820897119964",
+    "10742550014592576142",
+    "7239664858401612032",
+    "9631322465489668160",
+    "3987257259126205854",
+    "8533880169294627460",
+    "13443855419569550212",
+    "5643891743260583418",
+    "5806398493732482212",
+    "15371284510833424600",
+    "16787432527305959672",
+    "18437472849393352191",
+    "7107765044856152795",
+    "16744427601993404432",
+    "17479985996437543386",
+    "15061864929708920928",
+    "16282466213633378533",
+    "14291787653466191359",
+    "12968934965216600288",
+    "12986957349939200132",
+    "7578316453320411863",
+    "13471043161341573672",
+    "2251834307641348",
+    "6096432310984035145",
+    "364511940805771957",
+    "17931069756665819344",
+    "1611436496377929458",
+    "16930113600919573587",
+    "4131326820822947513",
+    "14525627969892048108",
+    "16177949854319626007",
+    "14123606402777676028",
+    "16195104600361388522",
+    "593127590421977292",
+    "6191804584786196676",
+    "15773934054188699921",
+    "10536074191296997780",
+    "4825069572401802791",
+    "13352839664435089005",
+    "7733784067373185634",
+    "15763569228838120014",
+    "1371105688828789056",
+    "14693925531469923777",
+    "13268823980059428898",
+    "11652939030071632369",
+    "7643316153394833094",
+    "7479820306856079600",
+    "10435869688793379360",
+    "15801593512851785540",
+    "14252384774745669824",
+    "6346168974594512360",
+    "17700886555751262234",
+    "5453967831084120404",
+    "5040138956341248032",
+    "15333109882596506293",
+    "4931130534999929070",
+    "8734969859996672248",
+    "5896752194003971264",
+    "10236620139573391584",
+    "10713538020092753963",
+    "4940901367394676153",
+    "10094607822861634082",
+    "3437845540718881501",
+    "13639534211907559289",
+    "8154704621041693229",
+    "5392395607244879130",
+    "1862742686531493080",
+    "10778745896219047397",
+    "18136031635024433265",
+    "11245415764969493452",
+    "13055326702669715186",
+    "8752875540566679154",
+    "5513585393271156424",
+    "14439210025144549376",
+    "3185789197240560339",
+    "6653264956307086734",
+    "13759825863285159972",
+    "14964218416370091754",
+    "7789295181814381718",
+    "5463452809979658329",
+    "14141408815583333440",
+    "1640420171463193830",
+    "12582451265508758121",
+    "577611226300632136",
+    "12564969752254832574",
+    "17940270345365421302",
+    "13013331814496163367",
+    "18076157994817813439",
+    "12810945085899158965",
+    "7660287390687518180",
+    "11122560218629983270",
+    "14534075571609664",
+    "13794399455315755007",
+    "4611779649386061828",
+    "4146276401100722449",
+    "7164536059559917610",
+    "2582507788760844640",
+    "13453118355921238526",
+    "448720764452471308",
+    "8675466918927640718",
+    "7074825841164439668",
+    "2707143563217246257",
+    "15804069685259564010",
+    "7229998730046856812",
+    "9958075787723009384",
+    "5045523987609957691",
+    "9588914759209999543",
+    "14825531913778558192",
+    "9715682394325931318",
+    "14999043072674339878",
+    "10879275858051203072",
+    "5913110431679441378",
+    "9922654376922278822",
+    "17326950412764951829",
+    "7523511549522274416",
+    "5209123338472303533",
+    "9597568147617437037",
+    "2719376454203550267",
+    "4661349742787698688",
+    "6139921717819202323",
+    "5054059786171330736",
+    "10056691669608687321",
+    "16945512973215643110",
+    "15152068531259643149",
+    "13889313099080591584",
+    "7197838366126629064"
+  ],
+  "subjectCount": {
+    "white jasmine on lush green foliage, beautiful blooming flowers closeup": 3,
+    "ancient Thai Buddhist temple with golden pagoda at sunrise, still water reflection, no people": 1,
+    "lotus flowers rising from muddy water into sunlight, overcoming adversity": 1,
+    "a dandelion seed head with seeds drifting on the wind, wishes, soft light, macro": 1,
+    "a parrot eating fresh fruit, colorful and lively, tropical": 1,
+    "coffee and a book on a cozy blanket, perfect morning": 2,
+    "steam rising from a hot espresso in the morning light, aromatic": 1,
+    "bamboo grove in morning mist, strength and flexibility, serene mood": 1,
+    "a bouquet of red and pink roses tied with ribbon, love, romantic light": 1,
+    "a red rose in a vase by a rainy window, longing and warmth": 1,
+    "Thai traditional dance performance in full costume, cultural festival": 1,
+    "an Asanha Bucha Dhamma wheel with candles, sacred and golden": 1,
+    "a playful kitten chasing a butterfly, youth and wonder": 1,
+    "a golden path through autumn trees, representing life journey": 2,
+    "a cozy reading corner with a rocking chair, warm lamp, and books": 1,
+    "elder hands writing calligraphy with ink brush, wisdom and skill": 1,
+    "beautiful latte art in a ceramic cup, warm morning light, close-up": 1,
+    "Vietnamese egg coffee in a glass, golden and creamy": 1,
+    "Vietnamese ca phe sua da and tropical fruits, cafe culture": 1,
+    "a handwritten letter with a dried flower pressed inside, nostalgia, warmth": 1,
+    "a moonlit night with flowers on a windowsill, longing, romantic mood": 1,
+    "parents and adult children reunion at a family home, homecoming": 1,
+    "sea of clouds from a mountain summit, aerial dreamlike view": 1,
+    "a firefly-lit forest at night, magical glowing insects, enchanted": 1,
+    "a blooming sakura tunnel, pink archway, spring delight": 1,
+    "a whimsical birthday cupcake with sprinkles and a candle, kawaii style": 1,
+    "a message in a bottle on a beach at sunrise, longing, poetic": 1,
+    "a photo album open with flowers beside it, memories and nostalgia": 1
+  },
+  "blessings": [
+    "ขอให้วันนี้เป็นวันที่ดี",
+    "สุขกายสบายใจตลอดวัน",
+    "โชคดีมีชัยในทุกสิ่ง",
+    "มีแต่สิ่งดีๆ เข้ามา",
+    "สมหวังดังใจปรารถนา",
+    "สุขภาพแข็งแรงทุกวัน",
+    "จิตใจเบิกบานแจ่มใส",
+    "เงินทองไหลมาเทมา",
+    "แคล้วคลาดปลอดภัยเสมอ",
+    "ได้รับแต่ความสุข",
+    "บุญรักษา เทวดาคุ้มครอง",
+    "มีแต่คนรักเมตตา",
+    "ทุกย่างก้าวมีแต่ความเจริญ",
+    "การงานราบรื่นสำเร็จ",
+    "ความรักสดใสเบ่งบาน",
+    "ความคิดสร้างสรรค์บังเกิด",
+    "ขอให้เช้านี้เริ่มต้นด้วยพลังบวก สดชื่นแจ่มใสไปตลอดทั้งวัน มีรอยยิ้มอิ่มเอมใจ",
+    "ขอให้ทุกก้าวเดินในวันนี้เต็มไปด้วยความมั่นใจ พบเจอแต่โอกาสดีๆ และความสำเร็จที่รออยู่",
+    "เช้านี้ขอให้จิตใจสงบเยือกเย็น ปลอดโปร่งเบาสบาย ไร้กังวล มีแต่ความสุขกายสบายใจ",
+    "ขอให้โชคลาภหลั่งไหลเข้ามาไม่ขาดสาย หยิบจับสิ่งใดก็เป็นเงินเป็นทอง มั่งมีศรีสุขตลอดไป",
+    "ขอให้ครอบครัวอบอุ่นปรองดอง มีแต่ความรักความเข้าใจ ส่งเสริมซึ่งกันและกันตลอดกาล",
+    "บุญบารมีที่สั่งสมมาแต่หนหลัง จงดลบันดาลให้พบเจอแต่คนดีๆ และเรื่องราวดีๆ ในชีวิต",
+    "ขอให้พลังแห่งความเมตตาและกรุณา นำพาให้ได้รับความรักและความปรารถนาดีจากคนรอบข้าง",
+    "เช้านี้ขอให้มีแรงกายแรงใจที่เข้มแข็ง พร้อมเผชิญทุกสิ่งอย่างด้วยความกระตือรือร้นและมุ่งมั่น",
+    "ขอให้ทุกความฝันและความตั้งใจ จงแปรเปลี่ยนเป็นความจริงได้ในวันนี้และวันต่อๆ ไป",
+    "ตื่นเช้ามาด้วยความสดใส ขอให้สุขภาพกายใจแข็งแรงปราศจากโรคภัยไข้เจ็บใดๆ มาเบียดเบียน",
+    "ขอให้ทุกปัญหาและอุปสรรคคลี่คลายลงได้โดยง่ายดาย พบทางออกที่ดีที่สุดเสมอในทุกสถานการณ์",
+    "ขอให้วันนี้เป็นอีกวันที่น่าจดจำ เต็มไปด้วยเรื่องราวดีๆ และความทรงจำอันมีค่าไม่รู้ลืม",
+    "ขอให้บุญบารมีที่สั่งสมมาจงคุ้มครอง พบแต่สิ่งที่ดีงาม มีแต่ความสุขสวัสดี เจริญรุ่งเรือง มั่งคั่งร่ำรวยยิ่งๆ ขึ้นไป",
+    "ในยามเช้าอันสดใสนี้ ขอให้จิตใจเบิกบาน สำราญกาย สำเร็จสมดังใจปรารถนาในทุกสิ่งที่คิดและลงมือทำ",
+    "ขอให้สุขภาพพลานามัยแข็งแรงสมบูรณ์ ปราศจากโรคภัยไข้เจ็บใดๆ มาเบียดเบียน มีอายุยืนยาว มีความสุขกับชีวิตทุกวันคืน",
+    "ขอให้เงินทองไหลมาเทมาไม่ขาดสาย หยิบจับสิ่งใดก็เป็นทองเป็นเพชร มีโชคลาภวาสนาดี มีความมั่งคั่งร่ำรวยตลอดไป",
+    "ขอให้ความรักความเมตตาจากคนรอบข้างห้อมล้อม มีแต่กัลยาณมิตรที่ดี มีครอบครัวที่อบอุ่นเป็นสุข ตลอดนิรันดร์",
+    "ขอให้แคล้วคลาดปลอดภัยจากภยันตรายทั้งปวง เดินทางไปไหนมาไหนก็ไร้ซึ่งอุปสรรค ขอให้พบเจอแต่ความราบรื่นตลอดเส้นทาง",
+    "ในทุกก้าวของชีวิต ขอให้มีสติปัญญาเฉลียวฉลาด แก้ไขปัญหาได้ทุกเรื่องราว พัฒนาตนเองให้ดียิ่งขึ้นไปในทุกๆ วัน",
+    "ขอให้การงานเจริญก้าวหน้ายิ่งใหญ่ ได้รับการสนับสนุนจากผู้หลักผู้ใหญ่ มีลูกน้องบริวารที่ดี มีความสำเร็จที่มั่นคงยั่งยืน",
+    "ขอให้พลังแห่งธรรมคุ้มครองจิตใจให้สงบเย็น มีความสุขจากภายในที่แท้จริง ไม่หวั่นไหวกับโลกภายนอก มีชีวิตที่เป็นสุขโดยธรรม",
+    "ขอให้ความสุขสดใสแผ่กระจายไปทั่วทั้งวัน พบเจอแต่รอยยิ้ม เสียงหัวเราะ และความทรงจำที่ดีงาม ไม่มีวันเลือนหาย",
+    "ขอให้มีกำลังใจที่เข้มแข็ง ไม่ย่อท้อต่ออุปสรรคใดๆ พร้อมที่จะก้าวเดินต่อไปข้างหน้าด้วยความมุ่งมั่นและเปี่ยมด้วยหวัง",
+    "ขอบุญบารมีคุ้มครองปกป้อง พบแต่สิ่งที่ดีๆ มั่งมีศรีสุข เจริญรุ่งเรือง สำเร็จสมปรารถนา สุขภาพแข็งแรง",
+    "รวยสุข รวยทรัพย์ รวยความดี มั่งคั่ง มั่งมี สุขภาพแข็งแรง ครอบครัวอบอุ่นเป็นสุข",
+    "ขอสิ่งศักดิ์สิทธิ์คุ้มครอง ให้แคล้วคลาดปลอดภัย โชคลาภเงินทองไหลมาเทมา คิดสิ่งใดสมปรารถนา",
+    "ขอให้สุขภาพแข็งแรง อายุมั่นขวัญยืน ลูกหลานกตัญญู อยู่เย็นเป็นสุขตลอดไป",
+    "ขอให้วันนี้มีแต่ความสุขความเจริญ การงานราบรื่น เงินทองคล่องมือ จิตใจเบิกบานแจ่มใส"
+  ],
+  "date": "2026-07-01",
+  "dateThai": "วันพุธ ที่ 1 กรกฎาคม 2569",
+  "dayTh": "พุธ",
+  "dayEn": "Wednesday",
+  "headline": "สวัสดีวันพุธ",
+  "isFestival": false,
+  "festival": null,
+  "color": "#1E9E55",
+  "color2": "#0f5e31",
+  "wanPhra": false,
+  "wanPhraSpecial": null,
+  "lunarDate": null,
+  "version": "1782890350143",
+  "catHeadlines": {
+    "birthday": [
+      "สุขสันต์วันเกิด",
+      "ขอให้วันเกิดสดใส",
+      "แสนสุขในวันเกิด",
+      "วันเกิดอันดี",
+      "เชิญฉลองวันเกิด"
+    ],
+    "miss": [
+      "คิดถึงเสมอ",
+      "ห่างหายคิดถึง",
+      "หายห้วงคิดถึง",
+      "ใจบ่นคิดถึง"
+    ],
+    "inspire": [
+      "ให้กำลังใจ",
+      "ทำได้แน่นอน"
+    ],
+    "health": [
+      "ดูแลสุขภาพดี",
+      "ใส่ใจสุขภาพใจ"
+    ],
+    "elderly": [
+      "สุขภาพดีเหมือนทอง",
+      "อายุยืนยาว"
+    ]
+  },
+  "categories": {
+    "flowers": [
+      {
+        "file": "card_1782855686877_157.jpg",
+        "blessing": "ดอกไม้บานฉันใด ขอให้ชีวิตเบ่งบานฉันนั้น",
+        "src": {
+          "name": "rose flower close up",
+          "by": "Alexas Fotos",
+          "link": "https://www.pexels.com/photo/close-up-of-vibrant-dahlia-flower-in-bloom-38161293/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844093347_38.jpg",
+        "blessing": "ดอกไม้หอมชื่นใจ ขอให้คุณสดชื่นอยู่เสมอ",
+        "src": {
+          "name": "white jasmine on lush green foliage flower close up",
+          "by": "Plato Terentev",
+          "link": "https://www.pexels.com/photo/vibrant-pink-and-white-flowers-in-glass-vase-38241226/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855665371_156.jpg",
+        "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+        "src": {
+          "name": "sunflower field bright",
+          "by": "Valeri Mak",
+          "link": "https://www.pexels.com/photo/a-bee-perched-on-a-yellow-flower-8480194/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845352727_180.jpg",
+        "blessing": "ส่งดอกไม้แห่งความรักและความสุขให้คุณ",
+        "src": {
+          "name": "flower macro closeup",
+          "by": "Hanifi Sarıkaya",
+          "link": "https://www.pexels.com/photo/macro-shot-of-bee-in-flight-near-blossoms-31312367/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845566144_195.jpg",
+        "blessing": "ขอให้วันนี้สดชื่นหอมหวานดั่งดอกไม้ยามเช้า",
+        "src": {
+          "name": "rose flower close up",
+          "by": "Joris Eschalier",
+          "link": "https://www.pexels.com/photo/delicate-cherokee-rose-19249516/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845444146_186.jpg",
+        "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+        "src": {
+          "name": "white jasmine on lush green foliage bloom macro",
+          "by": "Nikolaeva Nastia",
+          "link": "https://www.pexels.com/photo/yellow-flowers-in-tilt-shift-lens-13163971/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782839579376_8.jpg",
+        "blessing": "ขอให้วันนี้สดชื่นหอมหวานดั่งดอกไม้ยามเช้า",
+        "src": {
+          "name": "orchid flower bloom",
+          "by": "Emil Mondoa",
+          "link": "https://www.pexels.com/photo/close-up-of-flowers-12701196/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782839532523_3.jpg",
+        "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+        "src": null,
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855836019_163.jpg",
+        "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+        "src": {
+          "name": "fresh green flowers macro no people",
+          "by": "Fabio Andrés",
+          "link": "https://www.pexels.com/photo/vivid-pink-hibiscus-flower-in-bloom-31178497/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855505607_139.jpg",
+        "blessing": "ดอกไม้หอมชื่นใจ ขอให้คุณสดชื่นอยู่เสมอ",
+        "src": {
+          "name": "white jasmine on lush green foliage flower close up",
+          "by": "Plato Terentev",
+          "link": "https://www.pexels.com/photo/close-up-of-wet-red-leaves-in-a-park-setting-38241348/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845535006_194.jpg",
+        "blessing": "ส่งดอกไม้แห่งความรักและความสุขให้คุณ",
+        "src": {
+          "name": "white jasmine on lush green foliage flower close up",
+          "by": "Francesco Morrone",
+          "link": "https://www.pexels.com/photo/man-in-white-tank-top-looking-at-a-tree-4185398/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855537235_144.jpg",
+        "blessing": "ดอกไม้หอมชื่นใจ ขอให้คุณสดชื่นอยู่เสมอ",
+        "src": {
+          "name": "orchid flower bloom",
+          "by": "杨",
+          "link": "https://www.pexels.com/photo/close-up-of-spotted-orchid-flower-on-soil-36163052/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845292905_178.jpg",
+        "blessing": "ดอกไม้บานฉันใด ขอให้ชีวิตเบ่งบานฉันนั้น",
+        "src": {
+          "name": "white jasmine on lush green foliage flower close up",
+          "by": "Irina Iriser",
+          "link": "https://www.pexels.com/photo/green-plants-in-close-up-photography-12180748/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844933157_138.jpg",
+        "blessing": "ดอกไม้บานรับวันใหม่ ขอให้โชคลาภไหลมาเทมา พบแต่สิ่งดีงาม จิตใจเบิกบานทุกวัน",
+        "src": {
+          "name": "sunflower field bright",
+          "by": "burcubyzt_85",
+          "link": "https://www.pexels.com/photo/albino-wallaby-in-a-grassy-field-outdoors-37114988/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782839556598_7.jpg",
+        "blessing": "ขอให้วันนี้สดชื่นหอมหวานดั่งดอกไม้ยามเช้า",
+        "src": null,
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844068780_37.jpg",
+        "blessing": "ขอให้วันนี้สดชื่นหอมหวานดั่งดอกไม้ยามเช้า",
+        "src": null,
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855712488_158.jpg",
+        "blessing": "ขอให้ความสุขเบ่งบานในชีวิตทุกวัน",
+        "src": {
+          "name": "orchid flower bloom",
+          "by": "Chiaroscuro",
+          "link": "https://www.pexels.com/photo/purple-phalaenopsis-flowers-27028233/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855594446_149.jpg",
+        "blessing": "ขอให้วันนี้สดชื่นหอมหวานดั่งดอกไม้ยามเช้า",
+        "src": {
+          "name": "fresh green flowers macro no people",
+          "by": "Em  Hopper",
+          "link": "https://www.pexels.com/photo/close-up-shot-of-pink-hibiscus-flowers-in-bloom-8757649/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845627511_198.jpg",
+        "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+        "src": {
+          "name": "orchid flower bloom",
+          "by": "Tiểu Bảo Trương",
+          "link": "https://www.pexels.com/photo/white-and-red-flower-in-macro-lens-8030999/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845266459_177.jpg",
+        "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+        "src": {
+          "name": "flower macro closeup",
+          "by": "Tom Fisk",
+          "link": "https://www.pexels.com/photo/a-pink-flower-on-black-background-12998909/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844713992_116.jpg",
+        "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+        "src": {
+          "name": "orchid flower bloom",
+          "by": "HM  Zubayer",
+          "link": "https://www.pexels.com/photo/close-up-photo-of-lily-flower-7819730/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845197346_165.jpg",
+        "blessing": "ขอให้ความสุขเบ่งบานในชีวิตทุกวัน",
+        "src": {
+          "name": "white jasmine on lush green foliage flower close up",
+          "by": "Rodion Kutsaiev",
+          "link": "https://www.pexels.com/photo/a-close-up-of-a-wild-white-flower-16638042/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845085196_149.jpg",
+        "blessing": "ขอให้ชีวิตสดใสงดงามดั่งดอกไม้ที่บาน",
+        "src": {
+          "name": "flower macro closeup",
+          "by": "Neil Yonamine",
+          "link": "https://www.pexels.com/photo/blue-flower-in-close-up-photography-10113169/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845503445_189.jpg",
+        "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+        "src": {
+          "name": "lotus flower water",
+          "by": "Evie Shaffer",
+          "link": "https://www.pexels.com/photo/elegant-lily-flower-reflections-on-dark-surface-35639408/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855802379_162.jpg",
+        "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+        "src": {
+          "name": "white jasmine on lush green foliage bloom macro",
+          "by": "Studio Naae",
+          "link": "https://www.pexels.com/photo/photograph-of-a-glass-of-coffee-near-a-hat-13758600/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844456654_93.jpg",
+        "blessing": "ส่งดอกไม้แห่งความรักและความสุขให้คุณ",
+        "src": {
+          "name": "lotus flower water",
+          "by": "Simon Berger",
+          "link": "https://www.pexels.com/photo/red-bed-of-flowers-with-blue-background-998554/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855416170_132.jpg",
+        "blessing": "ขอให้ความสุขเบ่งบานในชีวิตทุกวัน",
+        "src": {
+          "name": "white jasmine on lush green foliage flower close up",
+          "by": "sparkle light",
+          "link": "https://www.pexels.com/photo/close-up-of-white-roses-in-garden-setting-38345788/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845653007_199.jpg",
+        "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+        "src": {
+          "name": "sunflower field bright",
+          "by": "Barış İpekçi",
+          "link": "https://www.pexels.com/photo/silhouetted-trees-and-illuminated-house-under-a-starry-night-sky-18279463/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855383131_130.jpg",
+        "blessing": "ขอให้ชีวิตเบ่งบานงดงาม มั่งมีศรีสุข สมหวังดั่งใจ สุขภาพแข็งแรง ตลอดวันตลอดไป",
+        "src": {
+          "name": "fresh green flowers macro no people",
+          "by": "Jude Mitchell-Hedges",
+          "link": "https://www.pexels.com/photo/close-up-of-a-poppy-17555405/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855871041_164.jpg",
+        "blessing": "ขอให้ความสุขเบ่งบานในชีวิตทุกวัน",
+        "src": {
+          "name": "orchid flower bloom",
+          "by": "Takeshi Arai",
+          "link": "https://www.pexels.com/photo/black-and-white-photo-of-orchid-flower-12150461/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      }
+    ],
+    "festival": [
+      {
+        "file": "card_1782889868390_32.jpg",
+        "blessing": "ขอให้เฮงๆ รวยๆ โชคลาภเงินทองไหลมาเทมา สุขภาพแข็งแรง ครอบครัวอบอุ่นเป็นสุข",
+        "src": {
+          "name": "thai krathong lotus candle",
+          "by": "Zhou Zhou",
+          "link": "https://www.pexels.com/photo/petals-of-a-pink-flower-hidden-behind-a-leaf-15823398/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849879563_75.jpg",
+        "blessing": "เทศกาลแห่งความสุข ขอให้ได้รับสิ่งที่ดีที่สุด",
+        "src": null,
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849907548_76.jpg",
+        "blessing": "ขอให้เทศกาลครั้งนี้สนุกสนานและประทับใจตลอดไป",
+        "src": {
+          "name": "lantern festival night lights",
+          "by": "brokenadmiral_",
+          "link": "https://www.pexels.com/photo/amusement-park-at-night-16061970/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782885996908_21.jpg",
+        "blessing": "ความสุขในเทศกาล ขอให้อยู่กับคุณทุกวัน",
+        "src": {
+          "name": "lantern festival night lights",
+          "by": "Marstion",
+          "link": "https://www.pexels.com/photo/close-up-of-traditional-asian-lantern-8311558/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782839933366_41.jpg",
+        "blessing": "ขอให้เทศกาลครั้งนี้สนุกสนานและประทับใจตลอดไป",
+        "src": {
+          "name": "lantern festival night lights",
+          "by": "Pexels User",
+          "link": "https://www.pexels.com/photo/chinese-lanterns-hanging-on-the-ceiling-6163757/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782858285488_80.jpg",
+        "blessing": "ฉลองด้วยกัน ขอให้ความสุขอยู่เต็มหัวใจ",
+        "src": {
+          "name": "lantern festival night lights",
+          "by": "Piotr Arnoldes",
+          "link": "https://www.pexels.com/photo/glowing-christmas-tree-in-darkness-6109584/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849478177_28.jpg",
+        "blessing": "ขอให้เทศกาลครั้งนี้สนุกสนานและประทับใจตลอดไป",
+        "src": {
+          "name": "lantern festival night lights",
+          "by": "Carsten Ruthemann",
+          "link": "https://www.pexels.com/photo/dark-ferris-wheel-at-night-26791443/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863712947_78.jpg",
+        "blessing": "ขอให้เทศกาลนี้นำพาสิ่งดีๆ มาสู่ชีวิต",
+        "src": {
+          "name": "lantern festival night lights",
+          "by": "Thới Nam Cao",
+          "link": "https://www.pexels.com/photo/elegant-courtyard-with-evening-lighting-ambiance-31213889/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849356388_17.jpg",
+        "blessing": "ขอให้เทศกาลนี้เต็มไปด้วยความสุขและรอยยิ้ม",
+        "src": {
+          "name": "thai krathong lotus candle",
+          "by": "ALOK DAS",
+          "link": "https://www.pexels.com/photo/lamp-in-shape-of-conch-18751035/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849628408_58.jpg",
+        "blessing": "รื่นเริงในเทศกาล ขอให้ความสุขไม่มีวันหมด",
+        "src": {
+          "name": "thai krathong lotus candle",
+          "by": "Hao Liang",
+          "link": "https://www.pexels.com/photo/close-up-of-a-white-water-lily-flower-in-bloom-31957273/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782858263254_79.jpg",
+        "blessing": "ขอให้เฮงๆ รวยๆ โชคลาภเงินทองไหลมาเทมา สุขภาพแข็งแรง ครอบครัวอบอุ่นเป็นสุข",
+        "src": {
+          "name": "red chinese lanterns",
+          "by": "Wong Peter",
+          "link": "https://www.pexels.com/photo/traditional-chinese-shopfront-in-urban-setting-37536341/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      }
+    ],
+    "miss": [
+      {
+        "file": "card_1782864143629_129.jpg",
+        "blessing": "อยู่ห่างกันแต่ใจไม่เคยห่าง",
+        "src": {
+          "name": "two birds together branch",
+          "by": "Ankit Mitra",
+          "link": "https://www.pexels.com/photo/bird-feeding-nestlings-in-sunlit-forest-38011018/"
+        },
+        "headline": "ห่างหายคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863946439_105.jpg",
+        "blessing": "คิดถึงเสมอนะ ขอให้อยู่ดีมีสุข แข็งแรงปลอดภัย พบเจอแต่สิ่งดีๆ ตลอดวัน",
+        "src": {
+          "name": "two birds together branch",
+          "by": "Elliot Connor",
+          "link": "https://www.pexels.com/photo/close-up-shot-of-two-white-fronted-bee-eaters-perched-on-the-branch-on-white-background-12914836/"
+        },
+        "headline": "ห่างหายคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782839771851_24.jpg",
+        "blessing": "ขอให้รู้ว่าฉันนึกถึงคุณเสมอ",
+        "src": {
+          "name": "two birds together branch",
+          "by": "A. G. Rosales",
+          "link": "https://www.pexels.com/photo/blue-jay-perched-on-leafless-branch-in-spring-29425756/"
+        },
+        "headline": "หายห้วงคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849721325_65.jpg",
+        "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+        "src": null,
+        "headline": "ห่างหายคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863331569_25.jpg",
+        "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+        "src": {
+          "name": "love letter envelope dried flowers",
+          "by": "jojoy creations",
+          "link": "https://www.pexels.com/photo/ribbon-on-pillow-5201565/"
+        },
+        "headline": "ใจบ่นคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782890211282_69.jpg",
+        "blessing": "อยู่ห่างกันแต่ใจไม่เคยห่าง",
+        "src": {
+          "name": "two coffee cups together table",
+          "by": "Dmitry Rodionov",
+          "link": "https://www.pexels.com/photo/woman-hands-holding-cup-over-typewriter-20107126/"
+        },
+        "headline": "คิดถึงเสมอ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844218739_46.jpg",
+        "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+        "src": {
+          "name": "heart shape rose petals",
+          "by": "Joolsmagools  ®️",
+          "link": "https://www.pexels.com/photo/vibrant-orange-roses-with-dew-drops-36780318/"
+        },
+        "headline": "คิดถึงเสมอ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844497783_96.jpg",
+        "blessing": "คิดถึงเสมอ ไม่ว่าจะอยู่ที่ไหน",
+        "src": {
+          "name": "love letter envelope dried flowers",
+          "by": "Manuel Sechi",
+          "link": "https://www.pexels.com/photo/a-bare-tree-on-a-field-on-a-foggy-weather-5556742/"
+        },
+        "headline": "หายห้วงคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782864020919_116.jpg",
+        "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+        "src": {
+          "name": "heart shape rose petals",
+          "by": "Banithani Jewelry",
+          "link": "https://www.pexels.com/photo/pink-gemstone-earrings-6636001/"
+        },
+        "headline": "หายห้วงคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782858053602_27.jpg",
+        "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+        "src": {
+          "name": "love letter envelope dried flowers",
+          "by": "Marco Sebastian Mueller",
+          "link": "https://www.pexels.com/photo/love-is-pain-text-6289099/"
+        },
+        "headline": "คิดถึงเสมอ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863692606_69.jpg",
+        "blessing": "ส่งความคิดถึงให้ถึงมือคุณทุกวัน",
+        "src": {
+          "name": "two birds together branch",
+          "by": "Stephen Noulton",
+          "link": "https://www.pexels.com/photo/european-green-woodpeckers-on-a-tree-branch-35054029/"
+        },
+        "headline": "ใจบ่นคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782864076881_126.jpg",
+        "blessing": "ความรักและความคิดถึง ส่งให้ถึงคุณทุกเวลา",
+        "src": {
+          "name": "red roses bouquet romantic",
+          "by": "Studio Naae",
+          "link": "https://www.pexels.com/photo/chocolates-in-form-of-a-heart-lying-in-white-petals-15466367/"
+        },
+        "headline": "คิดถึงเสมอ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863833631_94.jpg",
+        "blessing": "ระยะทางไม่อาจขวางกั้นความห่วงใย",
+        "src": {
+          "name": "two birds together branch",
+          "by": "aboodi vesakaran",
+          "link": "https://www.pexels.com/photo/small-birds-perching-on-tree-17366086/"
+        },
+        "headline": "หายห้วงคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863865178_101.jpg",
+        "blessing": "คิดถึงเสมอ ไม่ว่าจะอยู่ที่ไหน",
+        "src": {
+          "name": "two birds together branch",
+          "by": "Furkan  Aktaş",
+          "link": "https://www.pexels.com/photo/two-parrots-are-sitting-on-a-tree-branch-27224238/"
+        },
+        "headline": "ใจบ่นคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863522786_50.jpg",
+        "blessing": "ส่งความคิดถึงให้ถึงมือคุณทุกวัน",
+        "src": {
+          "name": "heart shape rose petals",
+          "by": "Aryan",
+          "link": "https://www.pexels.com/photo/solitary-red-leaf-on-cracked-turquoise-surface-38297696/"
+        },
+        "headline": "หายห้วงคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782864049698_121.jpg",
+        "blessing": "คิดถึงเสมอนะ ขอให้อยู่ดีมีสุข แข็งแรงปลอดภัย พบเจอแต่สิ่งดีๆ ตลอดวัน",
+        "src": {
+          "name": "two coffee cups together table",
+          "by": "Viktoria Alipatova",
+          "link": "https://www.pexels.com/photo/waffles-on-plates-2074108/"
+        },
+        "headline": "ใจบ่นคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863749210_80.jpg",
+        "blessing": "ขอให้คุณอบอุ่นใจรู้ว่ามีคนคิดถึง",
+        "src": {
+          "name": "two coffee cups together table",
+          "by": "Din Aziz",
+          "link": "https://www.pexels.com/photo/top-view-of-people-holding-decorative-coffees-in-green-cups-19485852/"
+        },
+        "headline": "ห่างหายคิดถึง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849610571_52.jpg",
+        "blessing": "ความรักและความคิดถึง ส่งให้ถึงคุณทุกเวลา",
+        "src": {
+          "name": "two coffee cups together table",
+          "by": "Jakub Krystkiewicz",
+          "link": "https://www.pexels.com/photo/artistic-latte-art-with-heart-and-leaf-designs-28936789/"
+        },
+        "headline": "ห่างหายคิดถึง\nสวัสดีวันพุธ"
+      }
+    ],
+    "dharma": [
+      {
+        "file": "card_1782855329155_120.jpg",
+        "blessing": "บุญรักษา เทวดาคุ้มครอง ขอให้ชีวิตพบแต่ความสุขความเจริญ ทุกข์โศกโรคภัยอย่าได้มาแผ้วพาน",
+        "src": {
+          "name": "thai buddhist temple golden",
+          "by": "Rahul Sapra",
+          "link": "https://www.pexels.com/photo/grayscale-photo-of-royal-cenotaph-chhatris-of-orchha-madhya-pradesh-india-14092724/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782839614237_9.jpg",
+        "blessing": "ใจสงบ ชีวิตสุข ขอให้จิตใจร่มเย็น",
+        "src": null,
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782850031678_84.jpg",
+        "blessing": "ทำบุญทำทาน จิตใจย่อมผ่องใสเป็นสุข",
+        "src": {
+          "name": "golden buddhist pagoda stupa",
+          "by": "Deepak Ramesha",
+          "link": "https://www.pexels.com/photo/view-of-a-sunset-25310026/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782886817692_69.jpg",
+        "blessing": "บุญรักษา เทวดาคุ้มครอง ขอให้ชีวิตพบแต่ความสุขความเจริญ ทุกข์โศกโรคภัยอย่าได้มาแผ้วพาน",
+        "src": {
+          "name": "gold buddha statue serene",
+          "by": "Cihat Dede",
+          "link": "https://www.pexels.com/photo/ornate-baroque-ceiling-with-elegant-chandelier-37441917/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782886795637_67.jpg",
+        "blessing": "ขอให้จิตใจผ่องใส ห่างไกลทุกข์โศก",
+        "src": {
+          "name": "golden buddhist pagoda stupa",
+          "by": "Yiğit  KARAALİOĞLU",
+          "link": "https://www.pexels.com/photo/god-figurine-on-altar-16308801/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855135783_99.jpg",
+        "blessing": "ขอให้มีสติปัญญา เมตตา กรุณา เป็นเครื่องนำทาง",
+        "src": {
+          "name": "white stupa pagoda sunrise",
+          "by": "Yash Chainani",
+          "link": "https://www.pexels.com/photo/body-of-water-during-sunset-8442922/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782850215364_117.jpg",
+        "blessing": "ขอบุญบารมีคุ้มครองปกป้อง พบแต่สิ่งที่ดีๆ มั่งมีศรีสุข เจริญรุ่งเรือง สำเร็จสมปรารถนา สุขภาพแข็งแรง",
+        "src": {
+          "name": "thai buddhist temple golden",
+          "by": "yuki kiki",
+          "link": "https://www.pexels.com/photo/scenic-torii-gate-at-japanese-shinto-shrine-34756122/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872544795_117.jpg",
+        "blessing": "ขอบุญบารมีคุ้มครองปกป้อง พบแต่สิ่งที่ดีๆ มั่งมีศรีสุข เจริญรุ่งเรือง สำเร็จสมปรารถนา สุขภาพแข็งแรง",
+        "src": {
+          "name": "gold buddha statue serene",
+          "by": "Sebaswhitev Valeriano",
+          "link": "https://www.pexels.com/photo/2-white-ceramic-figurines-on-white-surface-12566547/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782840300197_107.jpg",
+        "blessing": "บุญรักษา เทวดาคุ้มครอง ขอให้ชีวิตพบแต่ความสุขความเจริญ ทุกข์โศกโรคภัยอย่าได้มาแผ้วพาน",
+        "src": {
+          "name": "incense candle temple offering",
+          "by": "Shardar Tarikul Islam",
+          "link": "https://www.pexels.com/photo/photo-of-a-match-stick-with-smoke-8886039/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844748308_119.jpg",
+        "blessing": "ใจสงบ ชีวิตสุข ขอให้จิตใจร่มเย็น",
+        "src": {
+          "name": "gold buddha statue serene",
+          "by": "Olga V",
+          "link": "https://www.pexels.com/photo/dark-acrylic-painting-5506217/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782850149618_109.jpg",
+        "blessing": "บุญกุศลที่สั่งสมมาคุ้มครองให้ชีวิตดีงาม",
+        "src": {
+          "name": "thai buddhist temple golden",
+          "by": "VipinVihari  Murari Das",
+          "link": "https://www.pexels.com/photo/colorful-hindu-deity-idol-with-floral-decorations-31513868/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855265540_112.jpg",
+        "blessing": "บุญรักษา เทวดาคุ้มครอง ขอให้ชีวิตพบแต่ความสุขความเจริญ ทุกข์โศกโรคภัยอย่าได้มาแผ้วพาน",
+        "src": {
+          "name": "incense candle temple offering",
+          "by": "Farhad Ibrahimzade",
+          "link": "https://www.pexels.com/photo/couple-sitting-and-eating-healthy-meals-on-a-dining-table-8697540/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863896797_102.jpg",
+        "blessing": "ขอให้จิตใจผ่องใส ห่างไกลทุกข์โศก",
+        "src": {
+          "name": "thai buddhist temple golden",
+          "by": "nana liu",
+          "link": "https://www.pexels.com/photo/fresh-seafood-display-at-phuket-market-33939170/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849688773_61.jpg",
+        "blessing": "ขอให้พบแต่สิ่งดีงาม ตามครรลองธรรม",
+        "src": {
+          "name": "gold buddha statue serene",
+          "by": "Ayşegül  Aytören",
+          "link": "https://www.pexels.com/photo/ancient-stone-heads-on-mount-nemrut-at-dusk-33207462/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855352483_122.jpg",
+        "blessing": "ขอบุญบารมีคุ้มครองปกป้อง พบแต่สิ่งที่ดีๆ มั่งมีศรีสุข เจริญรุ่งเรือง สำเร็จสมปรารถนา สุขภาพแข็งแรง",
+        "src": {
+          "name": "gold buddha statue serene",
+          "by": "leopoldo  zenteno",
+          "link": "https://www.pexels.com/photo/marble-sculptures-in-art-gallery-20550208/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782840115611_75.jpg",
+        "blessing": "ทำบุญทำทาน จิตใจย่อมผ่องใสเป็นสุข",
+        "src": {
+          "name": "white stupa pagoda sunrise",
+          "by": "Simon Berger",
+          "link": "https://www.pexels.com/photo/gray-wooden-house-burning-731577/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      }
+    ],
+    "elderly": [
+      {
+        "file": "card_1782872397656_107.jpg",
+        "blessing": "ขออวยพรให้ท่านมีอายุวัฒนะ พลานามัยสมบูรณ์",
+        "src": {
+          "name": "old couple silhouette sunset bench",
+          "by": "Ayşegül  Aytören",
+          "link": "https://www.pexels.com/photo/rustic-outdoor-scene-with-wooden-bench-and-door-34131703/"
+        },
+        "headline": "อายุยืนยาว\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854287763_6.jpg",
+        "blessing": "วันนี้ขอให้ท่านพักผ่อนให้สบาย และมีความสุขนะคะ",
+        "src": null,
+        "headline": "อายุยืนยาว\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782839861152_33.jpg",
+        "blessing": "ขอให้สุขภาพแข็งแรง อายุมั่นขวัญยืน ลูกหลานกตัญญู รายล้อมด้วยความรัก อยู่เย็นเป็นสุขตลอดไป",
+        "src": {
+          "name": "elderly couple walking park behind",
+          "by": "Yaroslav Shuraev",
+          "link": "https://www.pexels.com/photo/a-woman-in-yellow-raincoat-training-her-dogs-8499242/"
+        },
+        "headline": "อายุยืนยาว\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854226685_3.jpg",
+        "blessing": "ผู้ใหญ่ที่เคารพรัก ขอให้ท่านโชคดีมีสุขนะคะ",
+        "src": null,
+        "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872699387_134.jpg",
+        "blessing": "ความห่วงใยจากลูกหลาน ส่งให้ถึงมือท่านทุกวัน",
+        "src": {
+          "name": "grandparent child hands holding",
+          "by": "Dario Moscato",
+          "link": "https://www.pexels.com/photo/a-young-girl-in-knitted-sweater-7860729/"
+        },
+        "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782887010304_94.jpg",
+        "blessing": "ขออวยพรให้ท่านมีอายุวัฒนะ พลานามัยสมบูรณ์",
+        "src": {
+          "name": "old couple silhouette sunset bench",
+          "by": "mauro savoca",
+          "link": "https://www.pexels.com/photo/old-monuments-under-sunset-sky-in-town-7514998/"
+        },
+        "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872918647_156.jpg",
+        "blessing": "ขอพรอันประเสริฐจงบังเกิดแก่ท่าน ให้แข็งแรงปราศจากโรคภัย จิตใจเบิกบาน มีความสุขทุกคืนวัน",
+        "src": {
+          "name": "elderly couple walking park behind",
+          "by": "Jordi Gamundi Domenech",
+          "link": "https://www.pexels.com/photo/people-walking-outdoors-near-buildings-8457467/"
+        },
+        "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871738188_34.jpg",
+        "blessing": "วันนี้ขอให้ท่านพักผ่อนให้สบาย และมีความสุขนะคะ",
+        "src": {
+          "name": "elderly couple walking park behind",
+          "by": "Tris Truong",
+          "link": "https://www.pexels.com/photo/people-walking-under-cherry-blossom-20607247/"
+        },
+        "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872591252_119.jpg",
+        "blessing": "ผู้ใหญ่ที่เคารพรัก ขอให้ท่านโชคดีมีสุขนะคะ",
+        "src": {
+          "name": "elderly couple walking park behind",
+          "by": "mitbg000",
+          "link": "https://www.pexels.com/photo/people-sitting-at-park-20728214/"
+        },
+        "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863408651_35.jpg",
+        "blessing": "ความห่วงใยจากลูกหลาน ส่งให้ถึงมือท่านทุกวัน",
+        "src": {
+          "name": "elderly hands tea cup",
+          "by": "- landsmann -",
+          "link": "https://www.pexels.com/photo/close-up-of-elderly-hands-in-black-and-white-34566488/"
+        },
+        "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854475707_25.jpg",
+        "blessing": "วันนี้ขอให้ท่านพักผ่อนให้สบาย และมีความสุขนะคะ",
+        "src": {
+          "name": "grandparent child hands holding",
+          "by": "Rakta  Kunda",
+          "link": "https://www.pexels.com/photo/mother-and-daughter-on-dirt-road-in-black-and-white-19205992/"
+        },
+        "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872755539_140.jpg",
+        "blessing": "ขอพรอันประเสริฐจงบังเกิดแก่ท่าน ให้แข็งแรงปราศจากโรคภัย จิตใจเบิกบาน มีความสุขทุกคืนวัน",
+        "src": {
+          "name": "old couple silhouette sunset bench",
+          "by": "Ksenia Chernaya",
+          "link": "https://www.pexels.com/photo/photo-of-a-wooden-stool-chair-11112743/"
+        },
+        "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854831191_65.jpg",
+        "blessing": "ขออวยพรให้ท่านมีอายุวัฒนะ พลานามัยสมบูรณ์",
+        "src": {
+          "name": "elderly couple walking park behind",
+          "by": "Malcolm Garret",
+          "link": "https://www.pexels.com/photo/grayscale-photo-of-people-playing-table-tennis-on-the-park-14134115/"
+        },
+        "headline": "อายุยืนยาว\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854640072_36.jpg",
+        "blessing": "ผู้ใหญ่ที่เคารพรัก ขอให้ท่านโชคดีมีสุขนะคะ",
+        "src": {
+          "name": "old couple silhouette sunset bench",
+          "by": "Guillermo Berlin",
+          "link": "https://www.pexels.com/photo/romantic-couple-on-bench-by-lake-in-chascomus-31052089/"
+        },
+        "headline": "อายุยืนยาว\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872818877_142.jpg",
+        "blessing": "ขอให้สุขภาพแข็งแรง อายุยืนยาว มีความสุขทุกวัน",
+        "src": {
+          "name": "old couple silhouette sunset bench",
+          "by": "İrem Güneç",
+          "link": "https://www.pexels.com/photo/silhouette-of-a-couple-by-the-seaside-31590327/"
+        },
+        "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872007209_49.jpg",
+        "blessing": "ขออวยพรให้ท่านมีอายุวัฒนะ พลานามัยสมบูรณ์",
+        "src": {
+          "name": "elderly hands tea cup",
+          "by": "Lydia Irene",
+          "link": "https://www.pexels.com/photo/close-up-photo-of-a-cup-of-tea-6195509/"
+        },
+        "headline": "อายุยืนยาว\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872227370_79.jpg",
+        "blessing": "ขอให้สุขภาพแข็งแรง อายุมั่นขวัญยืน ลูกหลานกตัญญู รายล้อมด้วยความรัก อยู่เย็นเป็นสุขตลอดไป",
+        "src": {
+          "name": "elderly hands tea cup",
+          "by": "Giulia",
+          "link": "https://www.pexels.com/photo/a-slice-of-bread-and-a-cup-of-tea-10148398/"
+        },
+        "headline": "อายุยืนยาว\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872343204_105.jpg",
+        "blessing": "ขออวยพรให้ท่านมีอายุวัฒนะ พลานามัยสมบูรณ์",
+        "src": {
+          "name": "old couple silhouette sunset bench",
+          "by": "Vincent Nguyen",
+          "link": "https://www.pexels.com/photo/couple-enjoying-riverside-view-in-ho-chi-minh-city-29158231/"
+        },
+        "headline": "อายุยืนยาว\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871854351_41.jpg",
+        "blessing": "ความรักและกตัญญูจากลูกหลาน ฝากถึงท่านเสมอ",
+        "src": {
+          "name": "old couple silhouette sunset bench",
+          "by": "Pușcaș Adryan",
+          "link": "https://www.pexels.com/photo/elegant-grand-piano-surrounded-by-purple-flowers-31785088/"
+        },
+        "headline": "สุขภาพดีเหมือนทอง\nสวัสดีวันพุธ"
+      }
+    ],
+    "birthday": [
+      {
+        "file": "card_1782871711770_32.jpg",
+        "blessing": "Happy Birthday! ขอให้ทุกวันเป็นวันที่ดีที่สุด",
+        "src": {
+          "name": "birthday cake candles",
+          "by": "劉芷安",
+          "link": "https://www.pexels.com/photo/close-up-shot-of-desserts-on-the-table-11719204/"
+        },
+        "headline": "แสนสุขในวันเกิด\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844273930_51.jpg",
+        "blessing": "อีกหนึ่งปีที่ผ่านมา ขอให้ปีนี้ดีกว่าเดิม",
+        "src": {
+          "name": "colorful balloons celebration",
+          "by": "Matt Becker",
+          "link": "https://www.pexels.com/photo/colorful-hot-air-balloons-flying-under-the-blue-sky-13706469/"
+        },
+        "headline": "แสนสุขในวันเกิด\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782843820817_14.jpg",
+        "blessing": "สุขสันต์วันเกิด ขอให้มีความสุขมากๆ นะคะ",
+        "src": {
+          "name": "birthday cake candles",
+          "by": "Any Lane",
+          "link": "https://www.pexels.com/photo/baked-sweet-dessert-on-plate-5945565/"
+        },
+        "headline": "เชิญฉลองวันเกิด\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863362869_29.jpg",
+        "blessing": "Happy Birthday! ขอให้ทุกวันเป็นวันที่ดีที่สุด",
+        "src": null,
+        "headline": "วันเกิดอันดี\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871981199_47.jpg",
+        "blessing": "สุขสันต์วันเกิดนะลูก",
+        "src": {
+          "name": "birthday cake candles",
+          "by": "Ememe .",
+          "link": "https://www.pexels.com/photo/a-person-lighting-a-candle-10771476/"
+        },
+        "headline": "ขอให้วันเกิดสดใส\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845027039_147.jpg",
+        "blessing": "สุขสันต์วันเกิด ขอให้มีความสุขมากๆ นะคะ",
+        "src": {
+          "name": "colorful balloons celebration",
+          "by": "Brett Sayles",
+          "link": "https://www.pexels.com/photo/assorted-colour-hot-air-balloons-3027217/"
+        },
+        "headline": "สุขสันต์วันเกิด\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871834774_39.jpg",
+        "blessing": "วันเกิดของคุณคือวันที่โลกได้คนดีเพิ่มขึ้นหนึ่งคน",
+        "src": {
+          "name": "colorful balloons celebration",
+          "by": "Nadiye Şamlı",
+          "link": "https://www.pexels.com/photo/colorful-birthday-cake-on-decorated-table-32191357/"
+        },
+        "headline": "ขอให้วันเกิดสดใส\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844877396_136.jpg",
+        "blessing": "Happy Birthday! ขอให้ทุกวันเป็นวันที่ดีที่สุด",
+        "src": {
+          "name": "birthday cake candles",
+          "by": "Haberdoedas Photography",
+          "link": "https://www.pexels.com/photo/delicious-blueberry-tart-with-meringue-topping-33215789/"
+        },
+        "headline": "แสนสุขในวันเกิด\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782858114518_34.jpg",
+        "blessing": "สุขสันต์วันเกิด ขอให้มีความสุขมากๆ นะคะ",
+        "src": {
+          "name": "colorful balloons celebration",
+          "by": "Alvaro Ugas Tasso",
+          "link": "https://www.pexels.com/photo/woman-in-a-colorful-folk-costume-dancing-during-a-parade-18063939/"
+        },
+        "headline": "ขอให้วันเกิดสดใส\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844592959_101.jpg",
+        "blessing": "ขอให้พรวันเกิดทุกข้อเป็นจริง",
+        "src": {
+          "name": "gift box ribbon bow",
+          "by": "Haberdoedas Photography",
+          "link": "https://www.pexels.com/photo/colorful-flower-arrangement-in-local-gift-shop-33315774/"
+        },
+        "headline": "วันเกิดอันดี\nสวัสดีวันพุธ"
+      }
+    ],
+    "health": [
+      {
+        "file": "card_1782871890745_42.jpg",
+        "blessing": "ขอให้หายจากความเจ็บป่วยไวๆ และกลับมาแข็งแรง",
+        "src": {
+          "name": "green smoothie healthy",
+          "by": "Christina Voinova",
+          "link": "https://www.pexels.com/photo/berries-and-strawberries-in-a-glass-jar-7368018/"
+        },
+        "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872075669_53.jpg",
+        "blessing": "ขอให้หายจากความเจ็บป่วยไวๆ และกลับมาแข็งแรง",
+        "src": {
+          "name": "fresh fruits bowl",
+          "by": "Boryslav Shoot",
+          "link": "https://www.pexels.com/photo/wet-red-and-yellow-apples-14456110/"
+        },
+        "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872719644_137.jpg",
+        "blessing": "ดูแลสุขภาพด้วยนะคะ เพราะคุณสำคัญมาก",
+        "src": {
+          "name": "fresh vegetables healthy",
+          "by": "Seamlesstextures",
+          "link": "https://www.pexels.com/photo/green-leaves-on-ground-11255748/"
+        },
+        "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782843852625_19.jpg",
+        "blessing": "ขอให้ร่างกายแข็งแรง จิตใจสดชื่นทุกวัน",
+        "src": {
+          "name": "fresh fruits bowl",
+          "by": "Nikolaeva Nastia",
+          "link": "https://www.pexels.com/photo/close-up-shot-of-apples-in-a-basket-9602170/"
+        },
+        "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844309380_58.jpg",
+        "blessing": "ขอให้สุขภาพแข็งแรง ปราศจากโรคภัย กายใจเป็นสุข อายุมั่นขวัญยืน อยู่กับลูกหลานไปนานๆ",
+        "src": {
+          "name": "fresh vegetables healthy",
+          "by": "Larisa P.",
+          "link": "https://www.pexels.com/photo/fresh-organic-leeks-on-white-surface-4965038/"
+        },
+        "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855040278_93.jpg",
+        "blessing": "ดูแลสุขภาพด้วยนะคะ เพราะคุณสำคัญมาก",
+        "src": {
+          "name": "fresh fruits bowl",
+          "by": "Barbara Webb",
+          "link": "https://www.pexels.com/photo/lemon-iced-tea-with-lemon-fruits-792613/"
+        },
+        "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844627482_107.jpg",
+        "blessing": "สุขภาพดีคือสมบัติที่ดีที่สุด ขอให้มีไว้ตลอดไป",
+        "src": {
+          "name": "fresh green tea cup",
+          "by": "LOL Bubble Tea 🍓",
+          "link": "https://www.pexels.com/photo/peach-bubble-tea-with-fresh-peaches-on-pink-background-33212324/"
+        },
+        "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872782930_141.jpg",
+        "blessing": "สุขภาพดีคือสมบัติที่ดีที่สุด ขอให้มีไว้ตลอดไป",
+        "src": {
+          "name": "green smoothie healthy",
+          "by": "Piyapong Sayduang",
+          "link": "https://www.pexels.com/photo/top-view-of-colorful-chili-peppers-on-dark-background-4541339/"
+        },
+        "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845143044_162.jpg",
+        "blessing": "ขอให้พลังงานเต็มเปี่ยม พร้อมทำทุกอย่างที่ต้องการ",
+        "src": {
+          "name": "fresh fruits bowl",
+          "by": "Jane  T D.",
+          "link": "https://www.pexels.com/photo/assorted-foods-892649/"
+        },
+        "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872874250_147.jpg",
+        "blessing": "ดูแลสุขภาพด้วยนะคะ เพราะคุณสำคัญมาก",
+        "src": {
+          "name": "green smoothie healthy",
+          "by": "Suzy Hazelwood",
+          "link": "https://www.pexels.com/photo/strawberries-1788912/"
+        },
+        "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782850174585_111.jpg",
+        "blessing": "ขอให้สุขภาพแข็งแรง ห่างไกลโรคภัยทุกอย่าง",
+        "src": {
+          "name": "fresh vegetables healthy",
+          "by": "Channabo Yos",
+          "link": "https://www.pexels.com/photo/close-up-of-green-leaves-15934124/"
+        },
+        "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872374455_106.jpg",
+        "blessing": "กินอาหารดี นอนหลับพักผ่อนดี ใจก็ดีตามมา",
+        "src": {
+          "name": "fresh vegetables healthy",
+          "by": "Mario K",
+          "link": "https://www.pexels.com/photo/food-on-blue-ceramic-bowl-12756070/"
+        },
+        "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844898500_137.jpg",
+        "blessing": "ขอให้สุขภาพแข็งแรง ปราศจากโรคภัย กายใจเป็นสุข อายุมั่นขวัญยืน อยู่กับลูกหลานไปนานๆ",
+        "src": {
+          "name": "fresh vegetables healthy",
+          "by": "Kei Scampa",
+          "link": "https://www.pexels.com/photo/mix-of-healthy-fresh-vegetables-and-shrimps-in-bowl-5514819/"
+        },
+        "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872259774_80.jpg",
+        "blessing": "ขอให้สุขภาพแข็งแรง ห่างไกลโรคภัยทุกอย่าง",
+        "src": {
+          "name": "fresh green tea cup",
+          "by": "Dmitriy Steinke",
+          "link": "https://www.pexels.com/photo/cup-on-straw-stand-in-home-interior-16805280/"
+        },
+        "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872487390_111.jpg",
+        "blessing": "กินอาหารดี นอนหลับพักผ่อนดี ใจก็ดีตามมา",
+        "src": {
+          "name": "fresh vegetables healthy",
+          "by": "Emmanuel Zua",
+          "link": "https://www.pexels.com/photo/close-up-shot-of-a-delicious-sushi-on-a-black-plate-7243416/"
+        },
+        "headline": "ดูแลสุขภาพดี\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782845048425_148.jpg",
+        "blessing": "สุขภาพกายดี สุขภาพใจดี ชีวิตก็ดีตามมา",
+        "src": {
+          "name": "fresh green tea cup",
+          "by": "Dina Nasyrova",
+          "link": "https://www.pexels.com/photo/notebook-with-herbal-tea-and-tulip-on-greeting-card-7070912/"
+        },
+        "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872650420_124.jpg",
+        "blessing": "ดูแลตัวเองด้วยนะคะ เพราะทุกคนรักและห่วงใยคุณ",
+        "src": {
+          "name": "fresh vegetables healthy",
+          "by": "Justin Doherty",
+          "link": "https://www.pexels.com/photo/meals-on-table-4929676/"
+        },
+        "headline": "ใส่ใจสุขภาพใจ\nสวัสดีวันพุธ"
+      }
+    ],
+    "coffee": [
+      {
+        "file": "card_1782843974914_30.jpg",
+        "blessing": "เช้าวันใหม่ กาแฟใหม่ ความสุขใหม่",
+        "src": null,
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844012785_31.jpg",
+        "blessing": "ขอให้วันนี้ไหลลื่นสบายๆ เหมือนดื่มกาแฟอุ่นๆ",
+        "src": null,
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782857789116_1.jpg",
+        "blessing": "กาแฟหนึ่งแก้ว เติมรอยยิ้มให้วันได้เลย",
+        "src": {
+          "name": "roasted coffee beans",
+          "by": "Fatih Arslan",
+          "link": "https://www.pexels.com/photo/coffee-beans-in-brown-box-5926957/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854401842_16.jpg",
+        "blessing": "ขอให้เช้าวันนี้สดชื่น เหมือนกาแฟหอมๆ",
+        "src": null,
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863470593_43.jpg",
+        "blessing": "เช้าวันใหม่ กาแฟใหม่ ความสุขใหม่",
+        "src": {
+          "name": "hot coffee steam cup",
+          "by": "Studio Naae",
+          "link": "https://www.pexels.com/photo/mug-with-coffee-beans-and-foam-with-pink-flowers-on-fluffy-blanket-24743540/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871767914_35.jpg",
+        "blessing": "ขอให้เช้าวันนี้สดชื่น เหมือนกาแฟหอมๆ",
+        "src": {
+          "name": "coffee cup on table morning",
+          "by": "Luthvika Arkaputra",
+          "link": "https://www.pexels.com/photo/cold-drink-to-accompany-the-afternoon-18635173/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872113052_64.jpg",
+        "blessing": "ขอให้เช้าวันนี้สดชื่น เหมือนกาแฟหอมๆ",
+        "src": {
+          "name": "coffee cup on table morning",
+          "by": "Thông Nguyễn",
+          "link": "https://www.pexels.com/photo/iced-coffee-in-plastic-cup-by-sunny-window-37028601/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782857843351_6.jpg",
+        "blessing": "กาแฟหนึ่งแก้ว เติมรอยยิ้มให้วันได้เลย",
+        "src": {
+          "name": "roasted coffee beans",
+          "by": "Jimmy Ramírez",
+          "link": "https://www.pexels.com/photo/coffee-beans-in-close-up-photography-6007665/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782857900572_15.jpg",
+        "blessing": "ขอให้วันนี้สดใสตั้งแต่ต้น เหมือนกาแฟยามเช้า",
+        "src": {
+          "name": "roasted coffee beans",
+          "by": "Yunus  Kılıç",
+          "link": "https://www.pexels.com/photo/close-up-of-a-heap-of-coffee-beans-25547393/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871924007_44.jpg",
+        "blessing": "กาแฟหนึ่งแก้ว เติมรอยยิ้มให้วันได้เลย",
+        "src": {
+          "name": "roasted coffee beans",
+          "by": "Din Aziz",
+          "link": "https://www.pexels.com/photo/coffee-table-with-coffee-cup-beans-and-magazine-20736684/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      }
+    ],
+    "family": [
+      {
+        "file": "card_1782839959380_44.jpg",
+        "blessing": "ขอให้ครอบครัวอยู่พร้อมหน้ากัน สุขสันต์ตลอดไป",
+        "src": {
+          "name": "family silhouette sunset beach",
+          "by": "Traveler stories photos  旅人故事相片集",
+          "link": "https://www.pexels.com/photo/back-view-of-people-sitting-by-the-table-near-the-window-in-a-cafe-18625039/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782863126410_10.jpg",
+        "blessing": "ครอบครัวที่รักกัน คือสมบัติล้ำค่าที่สุดในโลก",
+        "src": null,
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782885963558_9.jpg",
+        "blessing": "ขอให้ทุกคนในครอบครัวแข็งแรงและมีความสุข",
+        "src": {
+          "name": "family walking silhouette sunrise",
+          "by": "lhthoai",
+          "link": "https://www.pexels.com/photo/sunset-beach-volleyball-game-with-friends-37973777/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854338803_9.jpg",
+        "blessing": "ขอให้ครอบครัวอยู่พร้อมหน้ากัน สุขสันต์ตลอดไป",
+        "src": {
+          "name": "family walking silhouette sunrise",
+          "by": "i.am.anatolia",
+          "link": "https://www.pexels.com/photo/sunset-silhouette-by-tranquil-waters-28750113/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854497944_26.jpg",
+        "blessing": "ขอให้ครอบครัวร่มเย็นเป็นสุข ลูกหลานเจริญก้าวหน้า กิจการงานรุ่งเรือง เงินทองไม่ขาดมือ",
+        "src": {
+          "name": "family walking silhouette sunrise",
+          "by": "Valentine Kulikov",
+          "link": "https://www.pexels.com/photo/toddler-on-a-stroller-10840740/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854653895_39.jpg",
+        "blessing": "ความรักในครอบครัวคือพลังที่แข็งแกร่งที่สุด",
+        "src": {
+          "name": "family silhouette sunset beach",
+          "by": "Rahul Sapra",
+          "link": "https://www.pexels.com/photo/grayscale-photo-of-people-on-the-beach-13140170/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844369234_70.jpg",
+        "blessing": "วันนี้คิดถึงครอบครัว ขอส่งความรักถึงทุกคน",
+        "src": {
+          "name": "warm home window light evening",
+          "by": "Yaroslava Borz",
+          "link": "https://www.pexels.com/photo/brown-leaf-on-car-windshield-10012630/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      }
+    ],
+    "pets": [
+      {
+        "file": "card_1782855241623_111.jpg",
+        "blessing": "ขอให้คุณและน้องสี่ขาแข็งแรง อยู่ด้วยกันไปนานๆ มีความสุขอบอุ่นใจทุกวัน",
+        "src": {
+          "name": "cute dog puppy",
+          "by": "Alexas Fotos",
+          "link": "https://www.pexels.com/photo/close-up-photo-of-a-brown-pomeranian-dog-11060036/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782858373927_99.jpg",
+        "blessing": "รักน้องหมาน้องแมว ขอให้สุขภาพแข็งแรงทั้งคนและสัตว์",
+        "src": {
+          "name": "golden retriever puppy",
+          "by": "Maksudur Rahman",
+          "link": "https://www.pexels.com/photo/grayscale-photo-of-short-coated-dog-11053689/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849393210_18.jpg",
+        "blessing": "รักน้องหมาน้องแมว ขอให้สุขภาพแข็งแรงทั้งคนและสัตว์",
+        "src": {
+          "name": "fluffy kitten closeup",
+          "by": "Neil Yonamine",
+          "link": "https://www.pexels.com/photo/close-up-shot-of-a-cat-face-8310631/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782855085655_97.jpg",
+        "blessing": "ความรักจากน้องสี่ขา ทำให้ชีวิตอบอุ่นและมีความหมาย",
+        "src": {
+          "name": "fluffy kitten closeup",
+          "by": "Q. Hưng Phạm",
+          "link": "https://www.pexels.com/photo/adorable-cat-scratching-itself-outdoors-28998600/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782843939117_26.jpg",
+        "blessing": "ความรักจากน้องสี่ขา ทำให้ชีวิตอบอุ่นและมีความหมาย",
+        "src": {
+          "name": "golden retriever puppy",
+          "by": "Jorge Zaldívar Marroquín",
+          "link": "https://www.pexels.com/photo/close-up-shot-of-labrador-retriever-lying-on-white-surface-13085125/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854865940_72.jpg",
+        "blessing": "ความรักจากน้องสี่ขา ทำให้ชีวิตอบอุ่นและมีความหมาย",
+        "src": {
+          "name": "cute dog puppy",
+          "by": "Nishant Aneja",
+          "link": "https://www.pexels.com/photo/three-children-smiling-2385657/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849662746_60.jpg",
+        "blessing": "น้องสัตว์เลี้ยงคือยาวิเศษ ขอให้อยู่เคียงข้างนานๆ",
+        "src": {
+          "name": "fluffy kitten closeup",
+          "by": "Can Ceylan",
+          "link": "https://www.pexels.com/photo/relaxed-ginger-cat-sleeping-on-wooden-surface-30389394/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782850001675_83.jpg",
+        "blessing": "น้องขน ๆ ทำให้วันนี้อบอุ่นขึ้นมากเลย",
+        "src": {
+          "name": "cute cat kitten",
+          "by": "Tường Chopper",
+          "link": "https://www.pexels.com/photo/a-cat-looking-at-a-duckling-8935989/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849537188_37.jpg",
+        "blessing": "น้องสัตว์เลี้ยงคือยาวิเศษ ขอให้อยู่เคียงข้างนานๆ",
+        "src": {
+          "name": "cute cat kitten",
+          "by": "Thomas Svensson",
+          "link": "https://www.pexels.com/photo/a-cat-with-blue-eyes-5681903/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854981214_90.jpg",
+        "blessing": "น้องสัตว์เลี้ยงคือยาวิเศษ ขอให้อยู่เคียงข้างนานๆ",
+        "src": {
+          "name": "fluffy kitten closeup",
+          "by": "Sherry",
+          "link": "https://www.pexels.com/photo/close-up-shot-of-calico-cat-sitting-on-wooden-surface-11497291/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      }
+    ],
+    "inspire": [
+      {
+        "file": "card_1782843680090_3.jpg",
+        "blessing": "ขอให้วันนี้เป็นวันที่ดีที่สุดในชีวิต",
+        "src": {
+          "name": "morning golden light sky clouds",
+          "by": "Zetong Li",
+          "link": "https://www.pexels.com/photo/aerial-view-of-foggy-valley-with-houses-and-trees-18780418/"
+        },
+        "headline": "ให้กำลังใจ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782839654517_10.jpg",
+        "blessing": "อย่าท้อ เพราะรุ้งงามเสมอหลังสายฝน",
+        "src": null,
+        "headline": "ให้กำลังใจ\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844184992_45.jpg",
+        "blessing": "ขอให้ร่ำรวยเงินทอง ค้าขายรุ่งเรือง กิจการก้าวหน้า เงินทองไหลมาเทมา ครอบครัวเป็นสุข",
+        "src": {
+          "name": "rainbow after rain sky",
+          "by": "Sena",
+          "link": "https://www.pexels.com/photo/colorful-hot-air-balloon-against-moody-sky-32571762/"
+        },
+        "headline": "ทำได้แน่นอน\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844468204_94.jpg",
+        "blessing": "ขอให้ร่ำรวยเงินทอง ค้าขายรุ่งเรือง กิจการก้าวหน้า เงินทองไหลมาเทมา ครอบครัวเป็นสุข",
+        "src": {
+          "name": "sunrise rays through clouds",
+          "by": "Niklas Jeromin",
+          "link": "https://www.pexels.com/photo/brown-wooden-post-on-green-grass-field-near-snow-covered-mountain-under-white-clouds-and-blue-12801806/"
+        },
+        "headline": "ทำได้แน่นอน\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871434304_5.jpg",
+        "blessing": "รวยสุข รวยทรัพย์ รวยความดี มั่งคั่ง มั่งมี สุขภาพแข็งแรง คิดสิ่งใดสมความปรารถนา",
+        "src": {
+          "name": "hot air balloon sunrise sky",
+          "by": "Wolfgang Weiser",
+          "link": "https://www.pexels.com/photo/yellow-hot-air-balloon-flying-20783357/"
+        },
+        "headline": "ทำได้แน่นอน\nสวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871527741_10.jpg",
+        "blessing": "ขอให้ทุกความฝันกลายเป็นความจริง",
+        "src": {
+          "name": "hot air balloon sunrise sky",
+          "by": "Eren Sever",
+          "link": "https://www.pexels.com/photo/cappadocia-hot-air-balloons-at-sunrise-33704657/"
+        },
+        "headline": "ให้กำลังใจ\nสวัสดีวันพุธ"
+      }
+    ],
+    "nature": [
+      {
+        "file": "card_1782857963467_19.jpg",
+        "blessing": "ขอให้ชีวิตสดใสเขียวขจีดั่งป่าเขาที่สวยงาม",
+        "src": {
+          "name": "sea beach sunrise",
+          "by": "coline petrault",
+          "link": "https://www.pexels.com/photo/breathtaking-sunset-over-sarzeau-beach-31071489/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854447714_22.jpg",
+        "blessing": "ขอให้ชีวิตสงบเย็นดั่งสายน้ำ มั่นคงดั่งขุนเขา สดใสดั่งตะวันยามเช้า มีความสุขตลอดวัน",
+        "src": {
+          "name": "sea beach sunrise",
+          "by": "Flickr",
+          "link": "https://www.pexels.com/photo/sea-near-rock-formation-155309/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871795996_37.jpg",
+        "blessing": "ธรรมชาติสอนเราว่าทุกวันคือวันใหม่ที่สวยงาม",
+        "src": {
+          "name": "green forest morning mist",
+          "by": "Thomas P",
+          "link": "https://www.pexels.com/photo/tree-in-a-foggy-field-19544769/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782872144565_66.jpg",
+        "blessing": "วิวสวยยามเช้า เหมือนวันใหม่ที่เต็มไปด้วยความหวัง",
+        "src": {
+          "name": "lake reflection morning",
+          "by": "Tomas Anunziata",
+          "link": "https://www.pexels.com/photo/person-standing-on-brown-rock-formation-near-body-of-water-3876394/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871946578_45.jpg",
+        "blessing": "ขอให้จิตใจสงบเย็นดั่งธรรมชาติที่งดงาม",
+        "src": {
+          "name": "waterfall nature",
+          "by": "Evi",
+          "link": "https://www.pexels.com/photo/brown-wheat-grass-in-the-field-11288849/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871564042_11.jpg",
+        "blessing": "ความงามของธรรมชาติ เตือนใจให้ขอบคุณทุกวัน",
+        "src": {
+          "name": "waterfall nature",
+          "by": "Seamlesstextures",
+          "link": "https://www.pexels.com/photo/green-speckles-on-a-gray-surface-11255415/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782854535769_27.jpg",
+        "blessing": "ธรรมชาติงดงาม ขอให้ชีวิตงดงามเช่นนั้น",
+        "src": {
+          "name": "lake reflection morning",
+          "by": "Guerrero De la Luz",
+          "link": "https://www.pexels.com/photo/elegant-tern-reflected-on-calm-waters-33498475/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782844037455_34.jpg",
+        "blessing": "ธรรมชาติสอนเราว่าทุกวันคือวันใหม่ที่สวยงาม",
+        "src": {
+          "name": "lake reflection morning",
+          "by": "Alperen  Erfidan",
+          "link": "https://www.pexels.com/photo/boat-in-lake-19480651/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782849451959_26.jpg",
+        "blessing": "ธรรมชาติงดงาม ขอให้ชีวิตงดงามเช่นนั้น",
+        "src": {
+          "name": "sea beach sunrise",
+          "by": "Rhiannon Stone",
+          "link": "https://www.pexels.com/photo/man-in-blue-shirt-near-blue-sea-and-white-boat-under-blue-sky-515158/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782886607725_55.jpg",
+        "blessing": "วันนี้ขอให้รับพลังงานดีๆ จากธรรมชาติ",
+        "src": {
+          "name": "green rice field",
+          "by": "Son Hoa Nguyen",
+          "link": "https://www.pexels.com/photo/scenic-rice-terraces-in-ha-giang-vietnam-34199085/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      },
+      {
+        "file": "card_1782871646852_26.jpg",
+        "blessing": "ธรรมชาติมอบความสงบ ขอให้คุณพบความสงบเช่นนั้น",
+        "src": {
+          "name": "green forest morning mist",
+          "by": "Snapwire",
+          "link": "https://www.pexels.com/photo/sea-shore-view-during-afternoon-116149/"
+        },
+        "headline": "สวัสดีวันพุธ"
+      }
+    ]
+  },
+  "count": 165
+}
